@@ -84,7 +84,7 @@ public class MapaPantalla extends JPanel {
                                     Nodo.pantalla("cat-protocolos", "Cat\u00e1logo de Protocolos"),
                                     Nodo.pantalla("cat-reglas", "Cat\u00e1logo de Reglas"),
                                     Nodo.pantalla("cat-politicas", "Cat\u00e1logo de Pol\u00edticas"),
-                                    Nodo.pantalla("cat-atencion", "Cat\u00e1logo de Atenci\u00f3n")),
+                                    Nodo.pantalla("param-atencion", "Par\u00e1metros de Atenci\u00f3n")),
                             Nodo.submodulo("CONSULTA",
                                     Nodo.pantalla("tickets", "Consulta de Tickets"),
                                     Nodo.pantalla("indicadores", "Consulta de Indicadores"))),

@@ -58,7 +58,7 @@ public class BatchPantalla extends Pantalla {
 
             new String[]{"BAT-06", "Alerta de tickets por vencer",
                     "Notifica al area los tickets cuyo plazo vence dentro del dia, "
-                            + "segun el SLA del Catalogo de Atencion.",
+                            + "segun el SLA de Parametros de Atencion.",
                     "Barre toda la cola y emite avisos en lote; corre antes de que "
                             + "empiece la atencion.",
                     "Diaria", "07:00 - 07:15"}

@@ -38,7 +38,7 @@ public class VentanaPrincipal extends JFrame {
         fabricas.put("cat-protocolos",     ProtocolosPantalla::new);
         fabricas.put("cat-reglas",         ReglasPantalla::new);
         fabricas.put("cat-politicas",      PoliticasPantalla::new);
-        fabricas.put("cat-atencion",       AtencionParamPantalla::new);
+        fabricas.put("param-atencion",     AtencionParamPantalla::new);
 
         // Gerencial - Consulta
         fabricas.put("tickets",            TicketPantalla::new);

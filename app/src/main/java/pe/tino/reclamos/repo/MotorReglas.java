@@ -36,7 +36,7 @@ public final class MotorReglas {
             new Variable("Tiempo_Transcurrido", TipoDato.ENTERO,
                     "Ticket: dias entre la compra y la apertura del ticket", "Dias"),
             new Variable("Tiempo_Atencion", TipoDato.ENTERO,
-                    "Catalogo de Atencion: plazo comprometido segun el SLA", "Horas"),
+                    "Parametros de Atencion: plazo comprometido segun el SLA", "Horas"),
             new Variable("Reparable", TipoDato.LOGICO,
                     "Inspeccion del area: si el bien admite reparacion", ""),
             new Variable("Stock", TipoDato.ENTERO,

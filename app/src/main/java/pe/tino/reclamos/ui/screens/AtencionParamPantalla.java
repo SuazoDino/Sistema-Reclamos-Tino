@@ -12,8 +12,11 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * Catalogo de Atencion: los parametros que gobiernan el ciclo de vida del
+ * Parametros de Atencion: los parametros que gobiernan el ciclo de vida del
  * ticket y que antes se decidian dentro del codigo o no existian.
+ *
+ * No es un catalogo: no enumera cosas del negocio, fija las variables que
+ * definen su escenario. Es lo que el libro llama MANT-PARAM.
  *
  * Reune canales, instancias con su plazo de impugnacion, tiempos de atencion
  * (el SLA), la regla de prioridad y la maquina de estados.
@@ -21,7 +24,7 @@ import java.awt.*;
 public class AtencionParamPantalla extends Pantalla {
 
     public AtencionParamPantalla() {
-        super("Catalogo de Atencion",
+        super("Parametros de Atencion",
                 "Canales, instancias, plazos, prioridad y estados del ticket.");
 
         JTabbedPane pestanias = new JTabbedPane();

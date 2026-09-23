@@ -145,7 +145,7 @@ class CoherenciaTest {
         List<String> pantallas = List.of("Parametro General", "Catalogo de Reclamo",
                 "Catalogo de Producto", "Catalogo de Servicios", "Catalogo de Problemas",
                 "Catalogo de Cliente", "Catalogo de Protocolos", "Catalogo de Reglas",
-                "Catalogo de Politicas", "Catalogo de Atencion", "Consulta de Tickets",
+                "Catalogo de Politicas", "Parametros de Atencion", "Consulta de Tickets",
                 "Consulta de Indicadores", "Area - Data Entry", "Area - Reportes",
                 "Cliente - Data Entry", "Cliente - Reportes", "Seguridad", "Modulo BATCH");
         assertEquals(pantallas.size(), Datos.ACCESOS.size());

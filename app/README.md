@@ -92,7 +92,7 @@ que mide su rótulo, así el diagrama entero entra sin scroll.
 | Catálogo de Protocolos | Búsqueda, evento y la lista de acciones con tiempo y operario | p. 9 |
 | Catalogo de reglas | Pestañas Regla, Condiciones y Asignar Regla, con la ventana Agregar/Modificar | p. 10 |
 | Catálogo de Políticas | Una política cruza dos catálogos; debajo se habilitan sus tipos | p. 11–12 |
-| Consulta de Indicadores | Lista de los 11 indicadores con Detalle y Salir | p. 13 |
+| Consulta de Indicadores | Lista de los 11 indicadores con Detalle y Salir; Detalle grafica el indicador (barras, o tendencia mensual con proyeccion) | p. 13 |
 | Atender Reclamo | Pide el ID de empleado, lista sus reclamos y abre Inspeccionar Producto | p. 13–15 |
 | Reporte de Atención | Avances del usuario sobre los reclamos registrados | p. 13 |
 | Formulario Reclamo | Datos personales con Validar, luego compras y reclamos a registrar | p. 15–17 |
