@@ -3,139 +3,248 @@ package pe.tino.reclamos.ui.screens;
 import pe.tino.reclamos.model.Modelo.Regla;
 import pe.tino.reclamos.repo.Datos;
 import pe.tino.reclamos.repo.Estado;
+import pe.tino.reclamos.repo.Prototipo;
 import pe.tino.reclamos.ui.components.*;
 import pe.tino.reclamos.ui.theme.Tema;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Catalogo de Reglas.
- *
- * Entrada : datos y parametros de las reglas de negocio.
- * Funcion : establecer reglas y registrar sus datos y parametros.
- * Salida  : reglas registradas.
+ * Catalogo de reglas, como en la captura: tres pestanias, Regla, Condiciones
+ * y Asignar Regla. Las condiciones se dan de alta en una ventana aparte,
+ * "Agregar/Modificar Regla".
  */
 public class ReglasPantalla extends Pantalla {
 
-    private final Tabla tabla = new Tabla(new String[]{
-            "Condicion", "Parametro", "Operador", "Variable",
-            "Si es verdadero", "Si es falso", "Descripcion"});
+    private static final List<String> NOMBRES_REGLA =
+            List.of("Regla de Garantia", "Regla de Reembolso", "Regla de Intercambio");
 
-    private final JTextField condicion = Ui.texto();
-    private final JTextField parametro = Ui.texto();
-    private final JComboBox<String> operador = Ui.combo(Datos.OPERADORES);
-    private final JComboBox<String> variable = Ui.combo(Datos.TIPOS_VARIABLE);
-    private final JComboBox<String> accionV = Ui.combo(Datos.ACCIONES);
-    private final JTextField accionF = Ui.texto();
-    private final JTextField descripcion = Ui.texto();
+    private final Tabla condiciones = new Tabla(new String[]{
+            "Condicion", "Parametro", "Operador", "Variable", "AccionV", "AccionF", "Descripcion"});
+    private final JComboBox<String> reglaElegida = Ui.combo(NOMBRES_REGLA);
 
     public ReglasPantalla() {
-        super("Catalogo de Reglas",
-                "Condiciones encadenadas: cada salida apunta a la siguiente condicion o a una accion.");
+        super("Catalogo de reglas",
+                "Reglas de negocio y las condiciones encadenadas de cada una.");
 
-        tabla.anchos(95, 165, 85, 100, 140, 115, 230).centrar(2);
-        tabla.getSelectionModel().addListSelectionListener(e -> {
-            if (!e.getValueIsAdjusting()) cargarSeleccion();
-        });
+        JTabbedPane pestanias = new JTabbedPane();
+        pestanias.setFont(Tema.cuerpo());
+        pestanias.addTab("Regla", panelRegla());
+        pestanias.addTab("Condiciones", panelCondiciones());
+        pestanias.addTab("Asignar Regla", panelAsignar());
 
-        Grupo listado = Grupo.ajustado("Reglas registradas");
-        listado.add(tabla.enScroll(), BorderLayout.CENTER);
-
-        contenido().add(listado, BorderLayout.CENTER);
-        contenido().add(editor(), BorderLayout.SOUTH);
-        refrescar();
+        contenido().add(pestanias, BorderLayout.CENTER);
     }
 
-    private JComponent editor() {
-        Grupo g = new Grupo("Definicion de la condicion");
+    /* ---------------- pestania Regla ---------------- */
+
+    private JComponent panelRegla() {
+        DefaultListModel<String> existentes = new DefaultListModel<>();
+        DefaultListModel<String> habilitadas = new DefaultListModel<>();
+        NOMBRES_REGLA.forEach(existentes::addElement);
+
+        JList<String> listaExist = new JList<>(existentes);
+        JList<String> listaHab = new JList<>(habilitadas);
+        listaExist.setFont(Tema.cuerpo());
+        listaHab.setFont(Tema.cuerpo());
+
+        JTextField nombre = Ui.texto(16);
+        JButton agregar = Ui.boton("Agregar");
+        agregar.addActionListener(e -> {
+            String v = nombre.getText().trim();
+            if (v.isEmpty()) { avisar("Escriba el nombre de la regla."); return; }
+            if (existentes.contains(v)) { avisar("Esa regla ya existe."); return; }
+            existentes.addElement(v);
+            nombre.setText("");
+        });
+
+        Grupo grupoAgregar = new Grupo("Agregar");
+        Formulario f = new Formulario();
+        f.campo("Nombre de regla", nombre);
+        JPanel pie = Ui.panel(new FlowLayout(FlowLayout.CENTER, 0, Tema.ESP_SM));
+        pie.add(agregar);
+        grupoAgregar.add(f, BorderLayout.CENTER);
+        grupoAgregar.add(pie, BorderLayout.SOUTH);
+
+        JButton pasar = Ui.boton(">");
+        pasar.addActionListener(e -> {
+            String v = listaExist.getSelectedValue();
+            if (v == null) { avisar("Seleccione una regla existente."); return; }
+            if (habilitadas.contains(v)) { avisar("Esa regla ya esta habilitada."); return; }
+            habilitadas.addElement(v);
+        });
+        JButton quitar = Ui.boton("<");
+        quitar.addActionListener(e -> {
+            String v = listaHab.getSelectedValue();
+            if (v == null) { avisar("Seleccione una regla habilitada."); return; }
+            habilitadas.removeElement(v);
+        });
+
+        JPanel botones = Ui.panel(new GridBagLayout());
+        JPanel columna = Ui.panel(new GridLayout(2, 1, 0, Tema.ESP_SM));
+        columna.add(pasar);
+        columna.add(quitar);
+        botones.add(columna);
+        botones.setBorder(Ui.relleno(0, Tema.ESP_SM, 0, Tema.ESP_SM));
+
+        JPanel izq = Ui.panel(new BorderLayout(0, Tema.ESP_XS));
+        izq.add(Ui.etiqueta("Reglas Existentes"), BorderLayout.NORTH);
+        izq.add(Ui.scroll(listaExist), BorderLayout.CENTER);
+        JPanel der = Ui.panel(new BorderLayout(0, Tema.ESP_XS));
+        der.add(Ui.etiqueta("Reglas Habilitadas"), BorderLayout.NORTH);
+        der.add(Ui.scroll(listaHab), BorderLayout.CENTER);
+
+        Grupo grupoHabilitar = new Grupo("Habilitar", new GridBagLayout());
+        GridBagConstraints gc = new GridBagConstraints();
+        gc.fill = GridBagConstraints.BOTH;
+        gc.weighty = 1; gc.gridy = 0;
+        gc.gridx = 0; gc.weightx = 1; grupoHabilitar.add(izq, gc);
+        gc.gridx = 1; gc.weightx = 0; grupoHabilitar.add(botones, gc);
+        gc.gridx = 2; gc.weightx = 1; grupoHabilitar.add(der, gc);
+
+        JPanel p = Ui.panel(new GridLayout(1, 2, Tema.ESP_MD, 0));
+        p.setBorder(Ui.relleno(Tema.ESP_MD));
+        p.add(grupoAgregar);
+        p.add(grupoHabilitar);
+        return p;
+    }
+
+    /* ---------------- pestania Condiciones ---------------- */
+
+    private JComponent panelCondiciones() {
+        condiciones.anchos(110, 150, 100, 110, 140, 110, 220);
+        refrescar();
+
+        JButton formula = Ui.boton("Formula");
+        formula.addActionListener(e -> avisar("La formula se define en el catalogo de clientes."));
+
+        JPanel arriba = Ui.panel(new BorderLayout(Tema.ESP_MD, 0));
+        JPanel izq = Ui.panel(new FlowLayout(FlowLayout.LEFT, Tema.ESP_SM, 0));
+        izq.add(Ui.etiqueta("Seleccionar Regla"));
+        izq.add(reglaElegida);
+        arriba.add(izq, BorderLayout.WEST);
+        arriba.add(Ui.filaDerecha(formula), BorderLayout.EAST);
+        arriba.setBorder(Ui.relleno(0, 0, Tema.ESP_MD, 0));
+
+        JButton modificar = Ui.boton("Modificar");
+        modificar.addActionListener(e -> {
+            int i = condiciones.filaModelo();
+            if (i < 0) { avisar("Seleccione la condicion que desea modificar."); return; }
+            abrirDialogo(Estado.reglas().get(i), i);
+        });
+        JButton agregar = Ui.boton("Agregar");
+        agregar.addActionListener(e -> abrirDialogo(null, -1));
+        JButton cancelar = Ui.boton("Cancelar");
+        cancelar.addActionListener(e -> condiciones.clearSelection());
+
+        JPanel pie = Ui.panel(new FlowLayout(FlowLayout.CENTER, Tema.ESP_LG, Tema.ESP_SM));
+        pie.add(modificar);
+        pie.add(agregar);
+        pie.add(cancelar);
+
+        JPanel p = Ui.panel(new BorderLayout(0, Tema.ESP_MD));
+        p.setBorder(Ui.relleno(Tema.ESP_MD));
+        p.add(arriba, BorderLayout.NORTH);
+        p.add(condiciones.enScroll(), BorderLayout.CENTER);
+        p.add(pie, BorderLayout.SOUTH);
+        return p;
+    }
+
+    /** La ventana "Agregar/Modificar Regla" de la captura. */
+    private void abrirDialogo(Regla regla, int indice) {
+        JComboBox<String> condicion = Ui.combo(codigos());
+        condicion.setEditable(true);
+        JComboBox<String> parametro = Ui.combo(parametros());
+        parametro.setEditable(true);
+        JComboBox<String> operador = Ui.combo(Datos.OPERADORES);
+        JComboBox<String> variable = Ui.combo(Datos.TIPOS_VARIABLE);
+        JComboBox<String> accionV = Ui.combo(Datos.ACCIONES);
+        JComboBox<String> accionF = Ui.combo(codigos());
+        accionF.setEditable(true);
+
+        if (regla != null) {
+            condicion.setSelectedItem(regla.condicion());
+            parametro.setSelectedItem(regla.parametro());
+            operador.setSelectedItem(regla.operador());
+            variable.setSelectedItem(regla.variable());
+            accionV.setSelectedItem(regla.accionVerdadero());
+            accionF.setSelectedItem(regla.accionFalso());
+        }
 
         Formulario f = new Formulario();
         f.campo("Condicion", condicion)
          .campo("Parametro", parametro)
          .campo("Operador", operador)
-         .campo("Tipo de variable", variable)
-         .campo("Si es verdadero", accionV)
-         .campo("Si es falso", accionF)
-         .campo("Descripcion", descripcion);
+         .campo("Variable", variable)
+         .campo("Accion V", accionV)
+         .campo("Accion F", accionF);
+        f.setBorder(Ui.relleno(Tema.ESP_MD));
 
-        JLabel leyenda = Ui.suave("EQ igual   NE distinto   GT mayor   "
-                + "GE mayor o igual   LT menor   LE menor o igual");
-        leyenda.setFont(Tema.mono());
+        int r = JOptionPane.showConfirmDialog(this, f, "Agregar/Modificar Regla",
+                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        if (r != JOptionPane.OK_OPTION) return;
 
-        JButton nuevo = Ui.boton("Nueva");
-        nuevo.addActionListener(e -> limpiar());
-        JButton guardar = Ui.boton("Guardar");
-        guardar.addActionListener(e -> guardar());
-        JButton eliminar = Ui.boton("Eliminar");
-        eliminar.addActionListener(e -> eliminar());
-
-        JPanel pie = Ui.panel(new BorderLayout());
-        pie.setBorder(Ui.relleno(Tema.ESP_SM, 0, 0, 0));
-        pie.add(leyenda, BorderLayout.WEST);
-        pie.add(Ui.filaDerecha(nuevo, eliminar, guardar), BorderLayout.EAST);
-
-        g.add(f, BorderLayout.CENTER);
-        g.add(pie, BorderLayout.SOUTH);
-        return g;
-    }
-
-    private void refrescar() {
-        tabla.limpiar();
-        for (Regla r : Estado.reglas()) {
-            tabla.agregar(r.condicion(), r.parametro(), r.operador(), r.variable(),
-                    r.accionVerdadero(), r.accionFalso(), r.descripcion());
-        }
-    }
-
-    private void cargarSeleccion() {
-        int i = tabla.filaModelo();
-        if (i < 0) return;
-        Regla r = Estado.reglas().get(i);
-        condicion.setText(r.condicion());
-        parametro.setText(r.parametro());
-        operador.setSelectedItem(r.operador());
-        variable.setSelectedItem(r.variable());
-        accionV.setSelectedItem(r.accionVerdadero());
-        accionF.setText(r.accionFalso());
-        descripcion.setText(r.descripcion());
-    }
-
-    private void guardar() {
-        if (condicion.getText().isBlank() || parametro.getText().isBlank()) {
-            avisar("La condicion y el parametro son obligatorios.");
-            return;
-        }
-        Regla r = new Regla(condicion.getText().trim(), parametro.getText().trim(),
+        Regla nueva = new Regla(String.valueOf(condicion.getSelectedItem()),
+                String.valueOf(parametro.getSelectedItem()),
                 String.valueOf(operador.getSelectedItem()),
                 String.valueOf(variable.getSelectedItem()),
                 String.valueOf(accionV.getSelectedItem()),
-                accionF.getText().trim(), descripcion.getText().trim());
+                String.valueOf(accionF.getSelectedItem()),
+                regla == null ? "" : regla.descripcion());
 
-        int i = tabla.filaModelo();
-        if (i < 0) Estado.reglas().add(r); else Estado.reglas().set(i, r);
+        if (indice < 0) Estado.reglas().add(nueva); else Estado.reglas().set(indice, nueva);
         refrescar();
-        avisar(i < 0 ? "Regla agregada." : "Regla actualizada.");
     }
 
-    private void eliminar() {
-        int i = tabla.filaModelo();
-        if (i < 0) { avisar("Seleccione la regla que desea eliminar."); return; }
-        if (!confirmar("Eliminar la regla seleccionada?")) return;
-        Estado.reglas().remove(i);
-        refrescar();
-        limpiar();
+    private static List<String> codigos() {
+        List<String> l = new ArrayList<>();
+        Estado.reglas().forEach(r -> l.add(r.condicion()));
+        return l;
     }
 
-    private void limpiar() {
-        tabla.clearSelection();
-        condicion.setText("");
-        parametro.setText("");
-        operador.setSelectedIndex(0);
-        variable.setSelectedIndex(0);
-        accionV.setSelectedIndex(0);
-        accionF.setText("");
-        descripcion.setText("");
-        condicion.requestFocusInWindow();
+    private static List<String> parametros() {
+        List<String> l = new ArrayList<>();
+        Estado.reglas().forEach(r -> l.add(r.parametro()));
+        return l;
+    }
+
+    /* ---------------- pestania Asignar Regla ---------------- */
+
+    private JComponent panelAsignar() {
+        JPanel fila = Ui.panel(new GridLayout(2, 2, Tema.ESP_MD, Tema.ESP_SM));
+        fila.add(Ui.etiqueta("Tipo de Reclamo:"));
+        fila.add(Ui.combo(Prototipo.TIPO_PROBLEMA));
+        fila.add(Ui.etiqueta("Regla:"));
+        fila.add(Ui.combo(NOMBRES_REGLA));
+
+        Tabla asignadas = new Tabla(new String[]{"Tipo de Reclamo", "Regla"});
+        asignadas.anchos(280, 280);
+
+        JButton asignar = Ui.boton("Asignar");
+        asignar.addActionListener(e -> avisar("Regla asignada al tipo de reclamo."));
+
+        JPanel pie = Ui.panel(new FlowLayout(FlowLayout.CENTER, 0, Tema.ESP_SM));
+        pie.add(asignar);
+
+        Grupo g = new Grupo("Asignar Regla");
+        g.add(fila, BorderLayout.NORTH);
+        g.add(asignadas.enScroll(), BorderLayout.CENTER);
+        g.add(pie, BorderLayout.SOUTH);
+
+        JPanel p = Ui.panel(new BorderLayout());
+        p.setBorder(Ui.relleno(Tema.ESP_MD));
+        p.add(g, BorderLayout.CENTER);
+        return p;
+    }
+
+    private void refrescar() {
+        condiciones.limpiar();
+        for (Regla r : Estado.reglas()) {
+            condiciones.agregar(r.condicion(), r.parametro(), r.operador(), r.variable(),
+                    r.accionVerdadero(), r.accionFalso(), r.descripcion());
+        }
     }
 }

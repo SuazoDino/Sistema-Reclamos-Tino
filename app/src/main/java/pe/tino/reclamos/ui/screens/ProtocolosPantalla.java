@@ -1,140 +1,168 @@
 package pe.tino.reclamos.ui.screens;
 
-import pe.tino.reclamos.model.Modelo.Protocolo;
 import pe.tino.reclamos.repo.Datos;
-import pe.tino.reclamos.repo.Estado;
+import pe.tino.reclamos.repo.Prototipo;
 import pe.tino.reclamos.ui.components.*;
 import pe.tino.reclamos.ui.theme.Tema;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 /**
- * Catalogo de Protocolos.
- *
- * Entrada : datos de cada paso que se realiza en determinado tipo de protocolo.
- * Funcion : registrar y sincronizar los parametros del protocolo de solucion.
- * Salida  : protocolos registrados.
+ * Catalogo de Protocolos, como en la captura: se busca el producto y su
+ * problema, se elige el evento y abajo se define el protocolo, que es la
+ * lista de acciones con su tiempo maximo, operario y criticidad.
  */
 public class ProtocolosPantalla extends Pantalla {
 
-    private final Tabla tabla = new Tabla(new String[]{
-            "Tipo de reclamo", "Inspeccion", "Solucion", "Reasignacion",
-            "Entrega", "Seguimiento", "Estado"});
+    private final JComboBox<String> tipoProblema = Ui.combo(Prototipo.tiposDeProblema());
+    private final JComboBox<String> instancia = Ui.combo(Prototipo.INSTANCIA);
+    private final JComboBox<String> criticidad = Ui.combo(Prototipo.CRITICIDAD);
+    private final JComboBox<String> familia = Ui.combo(familias());
+    private final JComboBox<String> evento = Ui.combo(Prototipo.EVENTOS_EXISTENTES);
 
-    private final JTextField tipoReclamo = Ui.texto();
-    private final JComboBox<String> inspeccion   = Ui.combo(Datos.INSPECCION);
-    private final JComboBox<String> solucion     = Ui.combo(Datos.SOLUCION);
-    private final JComboBox<String> reasignacion = Ui.combo(Datos.REASIGNACION);
-    private final JComboBox<String> entrega      = Ui.combo(Datos.ENTREGA);
-    private final JComboBox<String> seguimiento  = Ui.combo(Datos.SEGUIMIENTO);
-    private final JCheckBox habilitado = new JCheckBox("Habilitado", true);
+    private final Tabla resultados = new Tabla(new String[]{"Producto", "Problema"});
+    private final Tabla acciones = new Tabla(new String[]{
+            "Accion", "Tiempo Maximo(s)", "Tipo Operario", "Criticidad"});
+
+    private final JTextField accion = Ui.texto();
+    private final JTextField tiempoMaximo = Ui.texto();
+    private final JComboBox<String> tipoOperario = Ui.combo(Prototipo.TIPO_OPERARIO);
+    private final JComboBox<String> criticidadAccion = Ui.combo(Prototipo.CRITICIDAD_ACCION);
+
+    private final List<String[]> filas = Prototipo.accionesProtocolo();
 
     public ProtocolosPantalla() {
         super("Catalogo de Protocolos",
-                "Parametros de cada evento del protocolo, segun el tipo de reclamo.");
+                "Acciones que componen el protocolo de cada evento.");
 
-        tabla.anchos(300, 105, 105, 120, 105, 115, 115);
-        tabla.getSelectionModel().addListSelectionListener(e -> {
-            if (!e.getValueIsAdjusting()) cargarSeleccion();
-        });
+        resultados.anchos(300, 380);
+        Prototipo.PROBLEMAS_EXISTENTES.forEach(p -> resultados.agregar("Celular", p));
 
-        Grupo listado = Grupo.ajustado("Protocolos definidos");
-        listado.add(tabla.enScroll(), BorderLayout.CENTER);
-
-        contenido().add(listado, BorderLayout.CENTER);
-        contenido().add(editor(), BorderLayout.SOUTH);
+        acciones.anchos(240, 150, 160, 150);
         refrescar();
+
+        contenido().add(cabecera(), BorderLayout.NORTH);
+        contenido().add(grupoProtocolo(), BorderLayout.CENTER);
     }
 
-    private JComponent editor() {
-        Grupo g = new Grupo("Definicion del protocolo");
-        habilitado.setFont(Tema.cuerpo());
-        habilitado.setOpaque(false);
+    private static List<String> familias() {
+        return new ArrayList<>(new LinkedHashSet<>(
+                Datos.JERARQUIA_PRODUCTO.stream().map(r -> r[1]).toList()));
+    }
 
-        Formulario f = new Formulario();
-        f.campo("Tipo de reclamo", tipoReclamo)
-         .campo("Inspeccion del problema", inspeccion)
-         .campo("Solucion del problema", solucion)
-         .campo("Reasignacion de area", reasignacion)
-         .campo("Entrega del producto", entrega)
-         .campo("Seguimiento de solucion", seguimiento)
-         .campo("Estado", habilitado);
+    /** Grupos "Busqueda" y "Resultados de Busqueda", con el evento debajo. */
+    private JComponent cabecera() {
+        Grupo busqueda = new Grupo("Busqueda", new GridLayout(2, 4, Tema.ESP_MD, Tema.ESP_XS));
+        busqueda.add(Ui.etiqueta("Tipo Problema:"));
+        busqueda.add(tipoProblema);
+        busqueda.add(Ui.etiqueta("Criticidad"));
+        busqueda.add(criticidad);
+        busqueda.add(Ui.etiqueta("Instancia"));
+        busqueda.add(instancia);
+        busqueda.add(Ui.etiqueta("Familia"));
+        busqueda.add(familia);
 
-        JButton nuevo = Ui.boton("Nuevo");
-        nuevo.addActionListener(e -> limpiar());
-        JButton guardar = Ui.boton("Guardar");
-        guardar.addActionListener(e -> guardar());
+        JButton verProtocolo = Ui.boton("Protocolo");
+        verProtocolo.addActionListener(e -> {
+            if (resultados.filaModelo() < 0) { avisar("Seleccione un problema."); return; }
+            refrescar();
+        });
+
+        JPanel filaEvento = Ui.panel(new BorderLayout(Tema.ESP_MD, 0));
+        JPanel izq = Ui.panel(new FlowLayout(FlowLayout.LEFT, Tema.ESP_MD, 0));
+        izq.add(Ui.etiqueta("Evento"));
+        izq.add(evento);
+        filaEvento.add(izq, BorderLayout.WEST);
+        filaEvento.add(Ui.filaDerecha(verProtocolo), BorderLayout.EAST);
+        filaEvento.setBorder(Ui.relleno(Tema.ESP_SM, 0, 0, 0));
+
+        Grupo grupoResultados = new Grupo("Resultados de Busqueda");
+        grupoResultados.add(resultados.enScroll(), BorderLayout.CENTER);
+        grupoResultados.add(filaEvento, BorderLayout.SOUTH);
+
+        JPanel p = Ui.panel(new BorderLayout(0, Tema.ESP_MD));
+        p.add(busqueda, BorderLayout.NORTH);
+        p.add(grupoResultados, BorderLayout.CENTER);
+        p.setPreferredSize(new Dimension(100, 290));
+        return p;
+    }
+
+    private JComponent grupoProtocolo() {
+        Grupo g = new Grupo("Protocolo");
+
+        JPanel campos = Ui.panel(new GridLayout(2, 4, Tema.ESP_MD, Tema.ESP_SM));
+        campos.add(Ui.etiqueta("Accion:"));
+        campos.add(accion);
+        campos.add(Ui.etiqueta("Tipo Operario:"));
+        campos.add(tipoOperario);
+        campos.add(Ui.etiqueta("Tiempo Maximo:"));
+        campos.add(tiempoMaximo);
+        campos.add(Ui.etiqueta("Criticidad de Accion:"));
+        campos.add(criticidadAccion);
+        campos.setBorder(Ui.relleno(0, 0, Tema.ESP_MD, 0));
+
+        JButton agregar = Ui.boton("Agregar");
+        agregar.addActionListener(e -> agregar());
+        JButton modificar = Ui.boton("Modificar");
+        modificar.addActionListener(e -> modificar());
         JButton eliminar = Ui.boton("Eliminar");
         eliminar.addActionListener(e -> eliminar());
 
-        JPanel pie = Ui.panel(new BorderLayout());
-        pie.setBorder(Ui.relleno(Tema.ESP_SM, 0, 0, 0));
-        pie.add(Ui.filaDerecha(nuevo, eliminar, guardar), BorderLayout.EAST);
+        JPanel columna = Ui.panel(new GridLayout(3, 1, 0, Tema.ESP_SM));
+        columna.add(agregar);
+        columna.add(modificar);
+        columna.add(eliminar);
+        JPanel botones = Ui.panel(new GridBagLayout());
+        botones.add(columna);
+        botones.setBorder(Ui.relleno(0, 0, 0, Tema.ESP_MD));
 
-        g.add(f, BorderLayout.CENTER);
-        g.add(pie, BorderLayout.SOUTH);
+        JPanel centro = Ui.panel(new BorderLayout(Tema.ESP_MD, 0));
+        centro.add(acciones.enScroll(), BorderLayout.CENTER);
+        centro.add(botones, BorderLayout.EAST);
+
+        g.add(campos, BorderLayout.NORTH);
+        g.add(centro, BorderLayout.CENTER);
         return g;
     }
 
-    private void refrescar() {
-        tabla.limpiar();
-        for (Protocolo p : Estado.protocolos()) {
-            tabla.agregar(p.tipoReclamo(), p.inspeccionProblema(), p.solucionProblema(),
-                    p.reasignacionArea(), p.entregaProducto(), p.seguimientoSolucion(),
-                    p.habilitado() ? "Habilitado" : "Deshabilitado");
-        }
-    }
-
-    private void cargarSeleccion() {
-        int i = tabla.filaModelo();
-        if (i < 0) return;
-        Protocolo p = Estado.protocolos().get(i);
-        tipoReclamo.setText(p.tipoReclamo());
-        inspeccion.setSelectedItem(p.inspeccionProblema());
-        solucion.setSelectedItem(p.solucionProblema());
-        reasignacion.setSelectedItem(p.reasignacionArea());
-        entrega.setSelectedItem(p.entregaProducto());
-        seguimiento.setSelectedItem(p.seguimientoSolucion());
-        habilitado.setSelected(p.habilitado());
-    }
-
-    private void guardar() {
-        if (tipoReclamo.getText().isBlank()) {
-            avisar("Indique a que tipo de reclamo aplica el protocolo.");
-            tipoReclamo.requestFocusInWindow();
-            return;
-        }
-        Protocolo p = new Protocolo(tipoReclamo.getText().trim(),
-                String.valueOf(inspeccion.getSelectedItem()),
-                String.valueOf(solucion.getSelectedItem()),
-                String.valueOf(reasignacion.getSelectedItem()),
-                String.valueOf(entrega.getSelectedItem()),
-                String.valueOf(seguimiento.getSelectedItem()),
-                habilitado.isSelected());
-
-        int i = tabla.filaModelo();
-        if (i < 0) Estado.protocolos().add(p); else Estado.protocolos().set(i, p);
-        refrescar();
-        avisar(i < 0 ? "Protocolo agregado." : "Protocolo actualizado.");
-    }
-
-    private void eliminar() {
-        int i = tabla.filaModelo();
-        if (i < 0) { avisar("Seleccione el protocolo que desea eliminar."); return; }
-        if (!confirmar("Eliminar el protocolo seleccionado?")) return;
-        Estado.protocolos().remove(i);
+    private void agregar() {
+        if (accion.getText().isBlank()) { avisar("Indique la accion."); return; }
+        filas.add(new String[]{accion.getText().trim(), tiempoMaximo.getText().trim(),
+                String.valueOf(tipoOperario.getSelectedItem()),
+                String.valueOf(criticidadAccion.getSelectedItem())});
         refrescar();
         limpiar();
     }
 
+    private void modificar() {
+        int i = acciones.filaModelo();
+        if (i < 0) { avisar("Seleccione la accion que desea modificar."); return; }
+        filas.set(i, new String[]{accion.getText().trim(), tiempoMaximo.getText().trim(),
+                String.valueOf(tipoOperario.getSelectedItem()),
+                String.valueOf(criticidadAccion.getSelectedItem())});
+        refrescar();
+    }
+
+    private void eliminar() {
+        int i = acciones.filaModelo();
+        if (i < 0) { avisar("Seleccione la accion que desea eliminar."); return; }
+        if (!confirmar("Eliminar la accion seleccionada?")) return;
+        filas.remove(i);
+        refrescar();
+        limpiar();
+    }
+
+    private void refrescar() {
+        acciones.limpiar();
+        filas.forEach(f -> acciones.agregar((Object[]) f));
+    }
+
     private void limpiar() {
-        tabla.clearSelection();
-        tipoReclamo.setText("");
-        List.of(inspeccion, solucion, reasignacion, entrega, seguimiento)
-                .forEach(c -> c.setSelectedIndex(0));
-        habilitado.setSelected(true);
-        tipoReclamo.requestFocusInWindow();
+        accion.setText("");
+        tiempoMaximo.setText("");
     }
 }

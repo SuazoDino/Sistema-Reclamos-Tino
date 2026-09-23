@@ -1,122 +1,104 @@
 package pe.tino.reclamos.ui.screens;
 
 import pe.tino.reclamos.repo.Datos;
-import pe.tino.reclamos.ui.components.Grupo;
-import pe.tino.reclamos.ui.components.Tabla;
-import pe.tino.reclamos.ui.components.Ui;
+import pe.tino.reclamos.ui.components.*;
 import pe.tino.reclamos.ui.theme.Tema;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.List;
 
 /**
- * Catalogo de Clientes.
- *
- * Entrada : tipos de cliente.
- * Funcion : sincronizar las condiciones con los tipos de cliente.
- * Salida  : tipos de cliente registrados y sincronizados con las condiciones.
+ * Catalogo Clientes, como en la captura: dos pestanias, "Agregar Tipo Cliente"
+ * y "Asignar Condiciones".
  */
 public class ClientesPantalla extends Pantalla {
 
-    private final DefaultListModel<String> tipos = new DefaultListModel<>();
-    private final JList<String> listaTipos = new JList<>(tipos);
-    private final DefaultListModel<String> consideraciones = new DefaultListModel<>();
-    private final JList<String> listaConsideraciones = new JList<>(consideraciones);
-
     public ClientesPantalla() {
-        super("Catalogo de Cliente",
-                "Tipos de cliente que considera la empresa y las consideraciones asignadas a cada uno.");
+        super("Catalogo Clientes",
+                "Tipos de cliente y las consideraciones asignadas a cada uno.");
 
-        Datos.catalogo("clientes").habilitados().forEach(tipos::addElement);
-        listaTipos.setFont(Tema.cuerpo());
-        listaTipos.setSelectedIndex(0);
+        var clientes = Datos.catalogo("clientes");
+        var consideraciones = Datos.catalogo("consideraciones");
 
-        Datos.catalogo("consideraciones").existentes().forEach(consideraciones::addElement);
-        listaConsideraciones.setFont(Tema.cuerpo());
-        listaConsideraciones.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-        seleccionarHabilitadas();
+        JTabbedPane pestanias = new JTabbedPane();
+        pestanias.setFont(Tema.cuerpo());
 
-        Grupo gTipos = Grupo.ajustado("Tipos de cliente");
-        gTipos.add(Ui.scroll(listaTipos), BorderLayout.CENTER);
-        gTipos.add(pieTipos(), BorderLayout.SOUTH);
-        gTipos.setPreferredSize(new Dimension(240, 100));
+        JPanel tipos = Ui.panel(new BorderLayout());
+        tipos.setBorder(Ui.relleno(Tema.ESP_MD));
+        tipos.add(new PanelHabilitacion(this, "Tipos de Clientes", "Tipo de Cliente:",
+                "Deshabilitar", clientes.existentes(), clientes.habilitados(), "", false),
+                BorderLayout.CENTER);
+        pestanias.addTab("Agregar Tipo Cliente", tipos);
 
-        Grupo gCons = Grupo.ajustado("Consideraciones asignadas");
-        gCons.add(Ui.scroll(listaConsideraciones), BorderLayout.CENTER);
-        JPanel ayuda = Ui.panel(new BorderLayout());
-        ayuda.setBorder(Ui.relleno(Tema.ESP_SM));
-        ayuda.add(Ui.suave("Marque las consideraciones que intervienen en el tipo seleccionado."),
-                BorderLayout.WEST);
-        gCons.add(ayuda, BorderLayout.SOUTH);
+        pestanias.addTab("Asignar Condiciones", asignarCondiciones(
+                clientes.habilitados(), consideraciones.existentes(),
+                consideraciones.habilitados()));
 
-        JPanel cuerpo = Ui.panel(new BorderLayout(Tema.ESP_MD, 0));
-        cuerpo.add(gTipos, BorderLayout.WEST);
-        cuerpo.add(gCons, BorderLayout.CENTER);
-        cuerpo.setPreferredSize(new Dimension(100, 190));
-
-        contenido().add(cuerpo, BorderLayout.NORTH);
-        contenido().add(categorizacion(), BorderLayout.CENTER);
+        contenido().add(pestanias, BorderLayout.CENTER);
     }
 
-    private JComponent pieTipos() {
-        JTextField nuevo = Ui.texto(10);
-        JButton agregar = Ui.boton("Agregar");
-        agregar.addActionListener(e -> {
-            String v = nuevo.getText().trim();
-            if (v.isEmpty()) { avisar("Escriba el tipo de cliente."); return; }
-            if (tipos.contains(v)) { avisar("Ese tipo ya existe."); return; }
-            tipos.addElement(v);
-            nuevo.setText("");
+    /**
+     * Las consideraciones no se dan de alta aqui: solo se habilitan o quitan
+     * para el tipo de cliente elegido, como en la captura.
+     */
+    private JComponent asignarCondiciones(List<String> tiposCliente,
+                                          List<String> existentes, List<String> habilitadas) {
+        JPanel fila = Ui.panel(new BorderLayout(Tema.ESP_SM, 0));
+        fila.add(Ui.etiqueta("Tipo Cliente"), BorderLayout.WEST);
+        fila.add(Ui.combo(tiposCliente), BorderLayout.CENTER);
+
+        JPanel encabezado = Ui.panel(new BorderLayout());
+        encabezado.add(fila, BorderLayout.WEST);
+        encabezado.setBorder(Ui.relleno(0, 0, Tema.ESP_MD, 0));
+
+        DefaultListModel<String> mExist = new DefaultListModel<>();
+        DefaultListModel<String> mHab = new DefaultListModel<>();
+        existentes.forEach(mExist::addElement);
+        habilitadas.forEach(mHab::addElement);
+
+        JList<String> listaExist = new JList<>(mExist);
+        JList<String> listaHab = new JList<>(mHab);
+        listaExist.setFont(Tema.cuerpo());
+        listaHab.setFont(Tema.cuerpo());
+
+        JButton habilitar = Ui.boton("Habilitar");
+        habilitar.addActionListener(e -> {
+            String v = listaExist.getSelectedValue();
+            if (v == null) { avisar("Seleccione una consideracion existente."); return; }
+            if (mHab.contains(v)) { avisar("\"" + v + "\" ya esta habilitada."); return; }
+            mHab.addElement(v);
+        });
+        JButton deshabilitar = Ui.boton("Deshabilitar");
+        deshabilitar.addActionListener(e -> {
+            String v = listaHab.getSelectedValue();
+            if (v == null) { avisar("Seleccione una consideracion habilitada."); return; }
+            mHab.removeElement(v);
         });
 
-        JPanel p = Ui.panel(new BorderLayout(Tema.ESP_SM, 0));
-        p.setBorder(Ui.relleno(Tema.ESP_SM));
-        p.add(nuevo, BorderLayout.CENTER);
-        p.add(agregar, BorderLayout.EAST);
+        Grupo izq = new Grupo("Lista de Consideraciones Existentes");
+        izq.add(Ui.scroll(listaExist), BorderLayout.CENTER);
+        izq.add(centrado(habilitar), BorderLayout.EAST);
+
+        Grupo der = new Grupo("Consideraciones habilitados");
+        der.add(Ui.scroll(listaHab), BorderLayout.CENTER);
+        der.add(centrado(deshabilitar), BorderLayout.EAST);
+
+        JPanel listas = Ui.panel(new GridLayout(1, 2, Tema.ESP_MD, 0));
+        listas.add(izq);
+        listas.add(der);
+
+        JPanel p = Ui.panel(new BorderLayout());
+        p.setBorder(Ui.relleno(Tema.ESP_MD));
+        p.add(encabezado, BorderLayout.NORTH);
+        p.add(listas, BorderLayout.CENTER);
         return p;
     }
 
-    /** Categorizacion del cliente: condiciones, metodos y formulas (hoja MANT-PARAM). */
-    private JComponent categorizacion() {
-        Tabla condiciones = new Tabla(new String[]{
-                "Condicion", "Parametro", "Operador", "Variable", "Si es verdadero", "Si es falso"});
-        Datos.condicionesCliente().forEach(f -> condiciones.agregar((Object[]) f));
-        condiciones.anchos(100, 130, 90, 110, 130, 110).centrar(2);
-
-        Tabla metodos = new Tabla(new String[]{"Metodo", "Formula"});
-        Datos.metodosCliente().forEach(f -> metodos.agregar((Object[]) f));
-        metodos.anchos(80, 380);
-
-        Tabla formulas = new Tabla(new String[]{"Metodo", "Variable", "Secuencia", "Operador"});
-        Datos.formulasCliente().forEach(f -> formulas.agregar((Object[]) f));
-        formulas.anchos(80, 170, 90, 120).centrar(2);
-
-        Grupo gCond = Grupo.ajustado("Condiciones de categorizacion");
-        gCond.add(condiciones.enScroll(), BorderLayout.CENTER);
-        gCond.setPreferredSize(new Dimension(100, 140));
-
-        Grupo gMet = Grupo.ajustado("Metodos de calculo");
-        gMet.add(metodos.enScroll(), BorderLayout.CENTER);
-
-        Grupo gFor = Grupo.ajustado("Secuencia de cada metodo");
-        gFor.add(formulas.enScroll(), BorderLayout.CENTER);
-
-        JPanel abajo = Ui.panel(new GridLayout(1, 2, Tema.ESP_MD, 0));
-        abajo.add(gMet);
-        abajo.add(gFor);
-
-        JPanel p = Ui.panel(new BorderLayout(0, Tema.ESP_MD));
-        p.add(gCond, BorderLayout.NORTH);
-        p.add(abajo, BorderLayout.CENTER);
+    private static JComponent centrado(JComponent boton) {
+        JPanel p = Ui.panel(new GridBagLayout());
+        p.add(boton);
+        p.setBorder(Ui.relleno(0, 0, 0, Tema.ESP_MD));
         return p;
-    }
-
-    private void seleccionarHabilitadas() {
-        var habilitadas = Datos.catalogo("consideraciones").habilitados();
-        java.util.List<Integer> indices = new java.util.ArrayList<>();
-        for (int i = 0; i < consideraciones.size(); i++) {
-            if (habilitadas.contains(consideraciones.get(i))) indices.add(i);
-        }
-        listaConsideraciones.setSelectedIndices(indices.stream().mapToInt(Integer::intValue).toArray());
     }
 }

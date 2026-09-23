@@ -1,155 +1,167 @@
 package pe.tino.reclamos.ui.screens;
 
-import pe.tino.reclamos.model.Modelo.*;
-import pe.tino.reclamos.repo.Datos;
-import pe.tino.reclamos.repo.Estado;
+import pe.tino.reclamos.repo.Prototipo;
+import pe.tino.reclamos.repo.Prototipo.DatosReclamo;
+import pe.tino.reclamos.repo.Prototipo.Empleado;
 import pe.tino.reclamos.ui.components.*;
 import pe.tino.reclamos.ui.theme.Tema;
 
 import javax.swing.*;
 import java.awt.*;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Area - Data Entry.
- *
- * Permite el ingreso de un usuario para atender a los reclamos en cola:
- * se identifica el especialista, se toma un reclamo de la cola, se le asigna
- * area y se hace avanzar su estado.
+ * Area - Data Entry, como en las capturas: primero se pide el ID del
+ * empleado, despues se listan sus reclamos ("Atender Reclamo") y al
+ * inspeccionar se abre la ventana de inspeccion del producto.
  */
 public class AreaDataEntryPantalla extends Pantalla {
 
     private static final DateTimeFormatter FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-    private final JComboBox<String> usuario = Ui.combo(Datos.catalogo("empleados").habilitados());
-    private final Tabla cola = new Tabla(new String[]{
-            "Reclamo", "Emision", "Cliente", "Problema", "Area", "Especialista", "Estado"});
-    private final JComboBox<String> area = Ui.combo(Datos.catalogo("areas").habilitados());
-    private final JComboBox<EstadoReclamo> estado = Ui.combo(List.of(EstadoReclamo.values()));
-    private final JTextArea observaciones = Ui.area(3);
-    private final JTextField resumen = Ui.soloLectura();
-
-    private List<Reclamo> visibles = new ArrayList<>();
+    private final JTextField idEmpleado = Ui.soloLectura();
+    private final JTextField tipoEmpleado = Ui.soloLectura();
+    private final JTextField area = Ui.soloLectura();
+    private final JTextField fecha = Ui.soloLectura();
+    private final Tabla tabla = new Tabla(new String[]{
+            "IdReclamo", "Fecha de emision", "Fecha de Atencion", "Hora de Atencion", "Estado"});
+    private final List<String[]> reclamos = Prototipo.reclamosDelArea();
 
     public AreaDataEntryPantalla() {
-        super("Area - Data Entry",
-                "Ingreso del usuario del area para atender los reclamos en cola.");
+        super("Atender Reclamo", "Reclamos registrados del usuario del area.");
 
-        cola.anchos(80, 90, 170, 160, 170, 100, 110);
-        cola.getSelectionModel().addListSelectionListener(e -> {
-            if (!e.getValueIsAdjusting()) cargarSeleccion();
-        });
+        tabla.anchos(110, 160, 160, 160, 140);
+        reclamos.forEach(f -> tabla.agregar((Object[]) f));
+        fecha.setText(LocalDate.now().format(FECHA));
 
-        Grupo gCola = Grupo.ajustado("Reclamos en cola");
-        gCola.add(cola.enScroll(), BorderLayout.CENTER);
+        JButton inspeccionar = Ui.boton("Inspeccionar");
+        inspeccionar.addActionListener(e -> inspeccionar());
+        JButton cancelar = Ui.boton("Cancelar");
+        cancelar.addActionListener(e -> tabla.clearSelection());
 
-        contenido().add(barraUsuario(), BorderLayout.NORTH);
-        contenido().add(gCola, BorderLayout.CENTER);
-        contenido().add(atencion(), BorderLayout.SOUTH);
+        JPanel pie = Ui.panel(new FlowLayout(FlowLayout.CENTER, Tema.ESP_LG * 3, Tema.ESP_MD));
+        pie.add(inspeccionar);
+        pie.add(cancelar);
 
-        refrescar();
-        Estado.alCambiarReclamos(r -> refrescar());
+        Grupo g = new Grupo("Reclamos Registrados");
+        g.add(datosEmpleado(), BorderLayout.NORTH);
+        g.add(tabla.enScroll(), BorderLayout.CENTER);
+        g.add(pie, BorderLayout.SOUTH);
+
+        contenido().add(g, BorderLayout.CENTER);
+
+        SwingUtilities.invokeLater(this::pedirEmpleado);
     }
 
-    private JComponent barraUsuario() {
-        JPanel p = Ui.panel(new BorderLayout());
-        p.setBorder(Ui.relleno(0, 0, Tema.ESP_SM, 0));
-        p.add(Ui.fila(Ui.etiqueta("Usuario del area:"), usuario), BorderLayout.WEST);
+    private JComponent datosEmpleado() {
+        JPanel p = Ui.panel(new GridLayout(2, 4, Tema.ESP_MD, Tema.ESP_SM));
+        p.add(Ui.etiqueta("ID Empleado:"));
+        p.add(idEmpleado);
+        p.add(Ui.etiqueta("Area:"));
+        p.add(area);
+        p.add(Ui.etiqueta("Tipo Empleado:"));
+        p.add(tipoEmpleado);
+        p.add(Ui.etiqueta("Fecha:"));
+        p.add(fecha);
+        p.setBorder(Ui.relleno(0, 0, Tema.ESP_MD, 0));
         return p;
     }
 
-    private JComponent atencion() {
-        Grupo g = new Grupo("Atencion del reclamo");
+    /** La ventana "Ingresar Datos" con la que arranca el prototipo. */
+    private void pedirEmpleado() {
+        JTextField campo = Ui.texto(12);
+        campo.setText("E01");
 
         Formulario f = new Formulario();
-        f.campo("Reclamo", resumen)
-         .campo("Area asignada", area)
-         .campo("Estado", estado)
-         .campo("Observaciones", Ui.scroll(observaciones));
+        f.campo("ID Empleado:", campo);
+        f.setBorder(Ui.relleno(Tema.ESP_MD));
 
-        JButton aplicar = Ui.boton("Aplicar");
-        aplicar.addActionListener(e -> aplicar());
-        JButton rechazar = Ui.boton("Rechazar");
-        rechazar.addActionListener(e -> rechazar());
+        int r = JOptionPane.showConfirmDialog(this, f, "Ingresar Datos",
+                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        if (r != JOptionPane.OK_OPTION) return;
 
-        JPanel pie = Ui.panel(new BorderLayout());
-        pie.setBorder(Ui.relleno(Tema.ESP_SM, 0, 0, 0));
-        pie.add(Ui.filaDerecha(rechazar, aplicar), BorderLayout.EAST);
-
-        g.add(f, BorderLayout.CENTER);
-        g.add(pie, BorderLayout.SOUTH);
-        return g;
-    }
-
-    private void refrescar() {
-        visibles = Estado.reclamos().stream()
-                .filter(r -> r.estado() != EstadoReclamo.ENTREGADO
-                          && r.estado() != EstadoReclamo.RECHAZADO)
-                .toList();
-        cola.limpiar();
-        for (Reclamo r : visibles) {
-            cola.agregar(r.id(), r.fechaEmision().format(FECHA), r.cliente().nombre(),
-                    r.problema().descripcion(), r.area(), r.especialista(), r.estado().etiqueta());
-        }
-        cargarSeleccion();
-    }
-
-    private Reclamo seleccionado() {
-        int i = cola.filaModelo();
-        return i < 0 || i >= visibles.size() ? null : visibles.get(i);
-    }
-
-    private void cargarSeleccion() {
-        Reclamo r = seleccionado();
-        boolean hay = r != null;
-        area.setEnabled(hay);
-        estado.setEnabled(hay);
-        observaciones.setEnabled(hay);
-
-        if (!hay) {
-            resumen.setText("");
-            observaciones.setText("");
+        Empleado e = Prototipo.EMPLEADOS.get(campo.getText().trim().toUpperCase());
+        if (e == null) {
+            avisar("El ID de empleado no existe. Pruebe con E01, E02 o E03.");
+            pedirEmpleado();
             return;
         }
-        resumen.setText(r.id() + "  -  " + r.cliente().nombre() + "  -  "
-                + r.problema().tipo() + ": " + r.problema().descripcion());
-        area.setSelectedItem(r.area());
-        estado.setSelectedItem(r.estado());
-        observaciones.setText(r.detalle());
+        idEmpleado.setText(e.id());
+        tipoEmpleado.setText(e.tipo());
+        area.setText(e.area());
     }
 
-    private void aplicar() {
-        Reclamo r = seleccionado();
-        if (r == null) { avisar("Seleccione un reclamo de la cola."); return; }
+    /** La ventana "Inspeccionar Producto": datos del reclamo y pasos del protocolo. */
+    private void inspeccionar() {
+        int i = tabla.filaModelo();
+        if (i < 0) { avisar("Seleccione un reclamo de la lista."); return; }
+        if (idEmpleado.getText().isBlank()) { avisar("Primero ingrese su ID de empleado."); return; }
 
-        EstadoReclamo nuevo = (EstadoReclamo) estado.getSelectedItem();
-        boolean cierra = nuevo == EstadoReclamo.ATENDIDO || nuevo == EstadoReclamo.ENTREGADO;
+        String id = String.valueOf(tabla.modelo().getValueAt(i, 0));
+        DatosReclamo d = Prototipo.datosDe(id);
 
-        Estado.reemplazar(r, new Reclamo(r.id(), r.fechaEmision(), r.cliente(), r.nroCompra(),
-                r.producto(), r.problema(), r.canal(), nuevo,
-                String.valueOf(area.getSelectedItem()),
-                String.valueOf(usuario.getSelectedItem()),
-                cierra ? LocalDate.now() : r.fechaAtencion(),
-                cierra ? LocalTime.now().withSecond(0).withNano(0) : r.horaAtencion(),
-                observaciones.getText().trim()));
+        JPanel datos = Ui.panel(new GridLayout(3, 4, Tema.ESP_MD, Tema.ESP_SM));
+        datos.add(Ui.etiqueta("ID Reclamo:"));
+        datos.add(Ui.fuerte(d.id()));
+        datos.add(Ui.etiqueta(""));
+        datos.add(Ui.etiqueta(""));
+        datos.add(Ui.etiqueta("Producto:"));
+        datos.add(Ui.fuerte(d.producto()));
+        datos.add(Ui.etiqueta("Marca:"));
+        datos.add(Ui.fuerte(d.marca()));
+        datos.add(Ui.etiqueta("Tipo Problema:"));
+        datos.add(Ui.fuerte(d.tipoProblema()));
+        datos.add(Ui.etiqueta("Problema:"));
+        datos.add(Ui.fuerte(d.problema()));
 
-        avisar("Reclamo " + r.id() + " actualizado a estado \"" + nuevo.etiqueta() + "\".");
-    }
+        Grupo grupoDatos = new Grupo("Datos Reclamo");
+        grupoDatos.add(datos, BorderLayout.CENTER);
 
-    private void rechazar() {
-        Reclamo r = seleccionado();
-        if (r == null) { avisar("Seleccione un reclamo de la cola."); return; }
-        if (!confirmar("Rechazar el reclamo " + r.id() + "?")) return;
+        JPanel pasos = Ui.panel(new GridLayout(0, 1, 0, Tema.ESP_XS));
+        List<JCheckBox> casillas = new java.util.ArrayList<>();
+        for (String[] accion : Prototipo.accionesProtocolo()) {
+            JCheckBox c = new JCheckBox(accion[0]);
+            c.setFont(Tema.cuerpo());
+            c.setOpaque(false);
+            casillas.add(c);
+            pasos.add(c);
+        }
 
-        Estado.reemplazar(r, new Reclamo(r.id(), r.fechaEmision(), r.cliente(), r.nroCompra(),
-                r.producto(), r.problema(), r.canal(), EstadoReclamo.RECHAZADO,
-                String.valueOf(area.getSelectedItem()),
-                String.valueOf(usuario.getSelectedItem()),
-                LocalDate.now(), LocalTime.now().withSecond(0).withNano(0),
-                observaciones.getText().trim()));
+        JPanel pregunta = Ui.panel(new BorderLayout(0, Tema.ESP_SM));
+        pregunta.setBorder(Ui.relleno(Tema.ESP_MD, 0, 0, 0));
+        pregunta.add(Ui.etiqueta("Funciona el producto?"), BorderLayout.NORTH);
+
+        JRadioButton si = new JRadioButton("Si");
+        JRadioButton no = new JRadioButton("No", true);
+        ButtonGroup grupo = new ButtonGroup();
+        grupo.add(si);
+        grupo.add(no);
+        si.setOpaque(false);
+        no.setOpaque(false);
+        si.setFont(Tema.cuerpo());
+        no.setFont(Tema.cuerpo());
+        pregunta.add(Ui.fila(si, no), BorderLayout.CENTER);
+
+        Grupo grupoInspeccion = new Grupo("Inspeccion Producto");
+        grupoInspeccion.add(pasos, BorderLayout.NORTH);
+        grupoInspeccion.add(pregunta, BorderLayout.CENTER);
+
+        JPanel cuerpo = Ui.panel(new BorderLayout(0, Tema.ESP_MD));
+        cuerpo.add(grupoDatos, BorderLayout.NORTH);
+        cuerpo.add(grupoInspeccion, BorderLayout.CENTER);
+        cuerpo.setPreferredSize(new Dimension(520, 330));
+
+        int r = JOptionPane.showConfirmDialog(this, cuerpo, "Inspeccionar Producto",
+                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        if (r != JOptionPane.OK_OPTION) return;
+        if (!confirmar("Desea finalizar inspeccion?")) return;
+
+        long hechos = casillas.stream().filter(AbstractButton::isSelected).count();
+        reclamos.get(i)[4] = si.isSelected() ? "Atendido" : "Pendiente";
+        tabla.modelo().setValueAt(reclamos.get(i)[4], i, 4);
+        avisar("Inspeccion registrada: " + hechos + " de " + casillas.size()
+                + " acciones del protocolo.");
     }
 }

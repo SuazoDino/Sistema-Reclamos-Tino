@@ -1,203 +1,168 @@
 package pe.tino.reclamos.ui.screens;
 
-import pe.tino.reclamos.model.Modelo.EstadoReclamo;
-import pe.tino.reclamos.model.Modelo.Reclamo;
-import pe.tino.reclamos.repo.Datos;
-import pe.tino.reclamos.repo.Estado;
+import pe.tino.reclamos.repo.Prototipo;
+import pe.tino.reclamos.repo.Prototipo.Detalle;
+import pe.tino.reclamos.repo.Prototipo.Persona;
 import pe.tino.reclamos.ui.components.*;
 import pe.tino.reclamos.ui.theme.Tema;
 
 import javax.swing.*;
 import java.awt.*;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 /**
- * Cliente - Reportes.
- *
- * Entrada : DNI/RUC del cliente.
- * Funcion : buscar el proceso que sigue el reclamo del cliente solicitante.
- * Salida  : datos del proceso del reclamo.
- *
- * Segun el estado del reclamo y el tiempo de impugnacion se dan los tres
- * casos que describe el prototipo: rechazado dentro del plazo (se puede
- * impugnar), rechazado fuera del plazo (advertencia) y pendiente.
+ * Estado de Reclamo (Cliente - Reportes), como en las capturas: se identifica
+ * al cliente, se elige el reclamo y al ver el detalle aparecen los tres casos
+ * del informe segun el estado y el plazo de impugnacion.
  */
 public class ClienteReportePantalla extends Pantalla {
 
-    private static final DateTimeFormatter FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-
-    private final JTextField documento = Ui.texto(16);
-    /** El plazo es un parametro del sistema, no un dato fijo del programa. */
-    private final JComboBox<String> plazoImpugnacion = Ui.combo(Datos.PLAZOS);
+    private final JTextField documento = Ui.texto(14);
+    private final JTextField nombres = Ui.soloLectura();
+    private final JTextField apellidos = Ui.soloLectura();
+    private final JComboBox<String> idReclamo = Ui.combo(List.of("R001", "R002", "R003", "R004"));
     private final Tabla tabla = new Tabla(new String[]{
-            "Reclamo", "Emision", "Producto", "Problema", "Area", "Estado", "Atencion"});
-    private final JPanel seguimiento = Ui.panel(new BorderLayout());
-
-    private List<Reclamo> reclamos = List.of();
+            "Productos", "Tipo Problema", "Fecha Limite", "Estado Reclamo"});
 
     public ClienteReportePantalla() {
-        super("Cliente - Reportes",
-                "Seguimiento del estado y del tiempo restante del reclamo del cliente.");
+        super("Estado de Reclamo", "Seguimiento del estado del reclamo del cliente.");
 
-        plazoImpugnacion.setSelectedItem("15 Dias");
-        tabla.anchos(80, 90, 150, 160, 170, 110, 100);
-        tabla.getSelectionModel().addListSelectionListener(e -> {
-            if (!e.getValueIsAdjusting()) mostrarSeguimiento();
-        });
+        tabla.anchos(230, 220, 180, 200);
+        idReclamo.addActionListener(e -> seleccionarPorId());
 
-        JButton aceptar = Ui.boton("Aceptar");
-        aceptar.addActionListener(e -> buscar());
+        JButton buscar = Ui.boton("Aceptar");
+        buscar.addActionListener(e -> buscar());
         documento.addActionListener(e -> buscar());
 
-        JPanel barra = Ui.panel(new BorderLayout());
-        barra.setBorder(Ui.relleno(0, 0, Tema.ESP_SM, 0));
-        barra.add(Ui.fila(Ui.etiqueta("DNI / RUC:"), documento, aceptar,
-                Ui.etiqueta("   Plazo de impugnacion:"), plazoImpugnacion), BorderLayout.WEST);
+        JButton detalle = Ui.boton("Detalle");
+        detalle.addActionListener(e -> mostrarDetalle());
 
-        Grupo gLista = Grupo.ajustado("Reclamos del cliente");
-        gLista.add(tabla.enScroll(), BorderLayout.CENTER);
-        gLista.setPreferredSize(new Dimension(100, 210));
+        JPanel pie = Ui.panel(new FlowLayout(FlowLayout.CENTER, 0, Tema.ESP_MD));
+        pie.add(detalle);
 
-        Grupo gSeg = new Grupo("Estado del reclamo");
-        gSeg.add(seguimiento, BorderLayout.CENTER);
+        Formulario f = new Formulario();
+        f.campo("DNI/RUC:", Ui.fila(documento, buscar))
+         .campo("Nombres:", nombres)
+         .campo("Apellidos:", apellidos)
+         .campo("ID Reclamo:", idReclamo);
 
-        JPanel arriba = Ui.panel(new BorderLayout(0, Tema.ESP_MD));
-        arriba.add(barra, BorderLayout.NORTH);
-        arriba.add(gLista, BorderLayout.CENTER);
+        Grupo g = new Grupo("Estado de Reclamo");
+        g.add(f, BorderLayout.NORTH);
+        g.add(tabla.enScroll(), BorderLayout.CENTER);
+        g.add(pie, BorderLayout.SOUTH);
 
-        contenido().add(arriba, BorderLayout.NORTH);
-        contenido().add(gSeg, BorderLayout.CENTER);
-
-        limpiarSeguimiento("Ingrese el numero de documento y presione Aceptar.");
+        contenido().add(g, BorderLayout.CENTER);
     }
 
     private void buscar() {
-        String doc = documento.getText().trim();
-        boolean existe = Datos.CLIENTES.stream().anyMatch(c -> c.documento().equals(doc));
-
+        Persona p = Prototipo.PERSONAS.get(documento.getText().trim());
         tabla.limpiar();
-        reclamos = List.of();
 
-        if (!existe) {
-            limpiarSeguimiento("");
-            avisar("El documento " + (doc.isEmpty() ? "(vacio)" : doc)
-                    + " no pertenece a un cliente de la empresa.");
+        if (p == null) {
+            nombres.setText("");
+            apellidos.setText("");
+            JOptionPane.showMessageDialog(this, "Su usuario no es valido.",
+                    "Validacion de Usuario", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        reclamos = Estado.reclamos().stream()
-                .filter(r -> r.cliente().documento().equals(doc))
-                .toList();
-
-        for (Reclamo r : reclamos) {
-            tabla.agregar(r.id(), r.fechaEmision().format(FECHA), r.producto().bien(),
-                    r.problema().descripcion(), r.area(), r.estado().etiqueta(),
-                    r.fechaAtencion() == null ? "Pendiente" : r.fechaAtencion().format(FECHA));
-        }
-        limpiarSeguimiento(reclamos.isEmpty()
-                ? "El cliente no tiene reclamos registrados."
-                : "Seleccione el reclamo cuyo estado desea visualizar.");
+        nombres.setText(p.nombres());
+        apellidos.setText(p.apellidos());
+        Prototipo.estadoDeReclamos().forEach(fila -> tabla.agregar((Object[]) fila));
     }
 
-    private void mostrarSeguimiento() {
+    /** El combo de ID selecciona la fila correspondiente, como en la captura. */
+    private void seleccionarPorId() {
+        int i = idReclamo.getSelectedIndex();
+        if (i >= 0 && i < tabla.getRowCount()) tabla.setRowSelectionInterval(i, i);
+    }
+
+    /** La ventana "Detalle del Reclamo" con sus tres casos. */
+    private void mostrarDetalle() {
         int i = tabla.filaModelo();
-        if (i < 0 || i >= reclamos.size()) return;
+        if (i < 0) { avisar("Seleccione el reclamo que desea visualizar."); return; }
 
-        Reclamo r = reclamos.get(i);
-        seguimiento.removeAll();
+        Detalle d = Prototipo.detalleDe(i);
+        JPanel datos = Ui.panel(new GridLayout(0, 1, 0, Tema.ESP_XS));
+        datos.add(Ui.etiqueta("ID Reclamo: " + d.id()));
+        datos.add(Ui.etiqueta("Producto: " + d.producto()));
+        datos.add(Ui.etiqueta("Marca : " + d.marca()));
+        datos.add(Ui.etiqueta("Tipo Problema: " + d.tipoProblema()));
+        datos.add(Ui.etiqueta("Problema: " + d.problema()));
+        datos.add(Ui.etiqueta("Fecha de Emision: " + d.emision()));
+        datos.add(Ui.etiqueta("Fecha de Respuesta: " + d.respuesta()));
+        datos.add(Ui.etiqueta("Fecha Limite de Impugnacion : " + d.limite()));
+        datos.add(new JLabel("<html><body style='width:380px'>Descripcion: "
+                + d.descripcion() + "</body></html>"));
 
-        if (r.estado() == EstadoReclamo.RECHAZADO) {
-            long transcurridos = ChronoUnit.DAYS.between(
-                    r.fechaAtencion() == null ? r.fechaEmision() : r.fechaAtencion(), LocalDate.now());
-            long plazo = diasDelPlazo();
+        JPanel p = Ui.panel(new BorderLayout(0, Tema.ESP_MD));
+        p.add(datos, BorderLayout.NORTH);
+        p.setPreferredSize(new Dimension(440, 300));
 
-            if (transcurridos <= plazo) {
-                seguimiento.add(casoImpugnable(r, plazo - transcurridos), BorderLayout.CENTER);
-            } else {
-                seguimiento.add(casoFueraDePlazo(r, transcurridos, plazo), BorderLayout.CENTER);
+        switch (d.estado()) {
+            case "Rechazado" -> casoRechazado(p, d);
+            case "Aceptado" -> {
+                p.add(Ui.fuerte("Su reclamo ha sido aceptado."), BorderLayout.CENTER);
+                JOptionPane.showMessageDialog(this, p, "Detalle del Reclamo",
+                        JOptionPane.PLAIN_MESSAGE);
             }
-        } else {
-            seguimiento.add(casoPendiente(r), BorderLayout.CENTER);
+            default -> {
+                p.add(Ui.fuerte("Su reclamo se encuentra pendiente de respuesta."),
+                        BorderLayout.CENTER);
+                JOptionPane.showMessageDialog(this, p, "Detalle del Reclamo",
+                        JOptionPane.PLAIN_MESSAGE);
+            }
         }
-        seguimiento.revalidate();
-        seguimiento.repaint();
     }
 
-    /** Caso 1: reclamo rechazado dentro del plazo de impugnacion. */
-    private JComponent casoImpugnable(Reclamo r, long diasRestantes) {
-        JTextArea motivo = Ui.area(3);
-        JComboBox<String> instancia = Ui.combo(Datos.catalogo("areas").habilitados());
+    /**
+     * Caso 1 y caso 2 del informe: si el plazo sigue vigente se ofrece
+     * impugnar; si expiro, solo la advertencia.
+     */
+    private void casoRechazado(JPanel p, Detalle d) {
+        if (!vigente(d.limite())) {
+            p.add(Ui.fuerte("El tiempo de impugnacion expiro. El reclamo no admite "
+                    + "nuevas instancias."), BorderLayout.CENTER);
+            JOptionPane.showMessageDialog(this, p, "Detalle del Reclamo",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        p.add(Ui.fuerte("Su reclamo ha sido rechazado. Desea impugnar esta respuesta?"),
+                BorderLayout.CENTER);
 
-        JButton enviar = Ui.boton("Enviar impugnacion");
-        enviar.addActionListener(e -> {
-            if (motivo.getText().isBlank()) { avisar("Indique el motivo de la impugnacion."); return; }
-            if (!confirmar("Enviar la impugnacion del reclamo " + r.id()
-                    + " a " + instancia.getSelectedItem() + "?")) return;
+        Object[] opciones = {"Impugnar", "Cancelar"};
+        int r = JOptionPane.showOptionDialog(this, p, "Detalle del Reclamo",
+                JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, opciones, opciones[0]);
+        if (r == 0) impugnar(d);
+    }
 
-            Estado.reemplazar(r, new Reclamo(r.id(), r.fechaEmision(), r.cliente(), r.nroCompra(),
-                    r.producto(), r.problema(), r.canal(), EstadoReclamo.EN_COLA,
-                    String.valueOf(instancia.getSelectedItem()), "Sin asignar", null, null,
-                    "Impugnacion del cliente: " + motivo.getText().trim()));
-            avisar("Impugnacion enviada. El reclamo " + r.id() + " vuelve a la cola de atencion.");
-            buscar();
-        });
+    /** El formulario de impugnacion que el informe describe para el caso 1. */
+    private void impugnar(Detalle d) {
+        JTextArea motivo = Ui.area(4);
+        JComboBox<String> instancia = Ui.combo(List.of("Segunda instancia", "Area especializada",
+                "Gerencia de PostVenta"));
 
         Formulario f = new Formulario();
-        f.campo("Reclamo", Ui.fuerte(r.id() + " - " + r.problema().descripcion()))
-         .campo("Estado", Ui.etiqueta("Rechazado"))
-         .campo("Plazo restante", Ui.fuerte(diasRestantes + " dias para impugnar"))
-         .campo("Instancia", instancia)
-         .campo("Motivo", Ui.scroll(motivo));
+        f.campo("Reclamo:", Ui.fuerte(d.id() + " - " + d.problema()))
+         .campo("Instancia:", instancia)
+         .campo("Motivo:", Ui.scroll(motivo));
+        f.setBorder(Ui.relleno(Tema.ESP_MD));
 
-        JPanel pie = Ui.panel(new BorderLayout());
-        pie.setBorder(Ui.relleno(Tema.ESP_SM, 0, 0, 0));
-        pie.add(Ui.filaDerecha(enviar), BorderLayout.EAST);
+        int r = JOptionPane.showConfirmDialog(this, f, "Enviar Impugnacion",
+                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        if (r != JOptionPane.OK_OPTION) return;
 
-        JPanel p = Ui.panel(new BorderLayout());
-        p.add(f, BorderLayout.CENTER);
-        p.add(pie, BorderLayout.SOUTH);
-        return p;
+        if (motivo.getText().isBlank()) { avisar("Indique el motivo de la impugnacion."); return; }
+        avisar("Impugnacion enviada a " + instancia.getSelectedItem() + ".");
     }
 
-    /** Caso 2: reclamo rechazado fuera del plazo de impugnacion. */
-    private JComponent casoFueraDePlazo(Reclamo r, long transcurridos, long plazo) {
-        Formulario f = new Formulario();
-        f.campo("Reclamo", Ui.fuerte(r.id() + " - " + r.problema().descripcion()))
-         .campo("Estado", Ui.etiqueta("Rechazado"))
-         .campo("Plazo", Ui.etiqueta(plazo + " dias; transcurrieron " + transcurridos))
-         .campo("Advertencia",
-                 Ui.fuerte("El tiempo de impugnacion expiro. El reclamo no admite nuevas instancias."));
-        return f;
-    }
-
-    /** Caso 3: reclamo pendiente. */
-    private JComponent casoPendiente(Reclamo r) {
-        Formulario f = new Formulario();
-        f.campo("Reclamo", Ui.fuerte(r.id() + " - " + r.problema().descripcion()))
-         .campo("Estado", Ui.etiqueta(r.estado().etiqueta()))
-         .campo("Area a cargo", Ui.etiqueta(r.area()))
-         .campo("Especialista", Ui.etiqueta(r.especialista()))
-         .campo("Fecha de emision", Ui.etiqueta(r.fechaEmision().format(FECHA)))
-         .campo("Fecha de atencion", Ui.etiqueta(
-                 r.fechaAtencion() == null ? "Pendiente" : r.fechaAtencion().format(FECHA)))
-         .campo("Dias transcurridos", Ui.etiqueta(
-                 ChronoUnit.DAYS.between(r.fechaEmision(), LocalDate.now()) + " dias"));
-        return f;
-    }
-
-    private long diasDelPlazo() {
-        String plazo = String.valueOf(plazoImpugnacion.getSelectedItem());
-        String[] partes = plazo.split(" ");
-        long valor = Long.parseLong(partes[0]);
-        return partes[1].startsWith("Mes") ? valor * 30 : valor;
-    }
-
-    private void limpiarSeguimiento(String mensaje) {
-        seguimiento.removeAll();
-        seguimiento.add(Ui.suave(mensaje), BorderLayout.NORTH);
-        seguimiento.revalidate();
-        seguimiento.repaint();
+    /** La fecha limite del prototipo esta en dd/MM/yyyy. */
+    private static boolean vigente(String limite) {
+        try {
+            var fecha = java.time.LocalDate.parse(limite,
+                    java.time.format.DateTimeFormatter.ofPattern("d/MM/yyyy"));
+            return !java.time.LocalDate.now().isAfter(fecha);
+        } catch (java.time.format.DateTimeParseException e) {
+            return false;
+        }
     }
 }

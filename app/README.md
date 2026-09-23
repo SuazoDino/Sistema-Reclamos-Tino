@@ -81,24 +81,30 @@ que mide su rótulo, así el diagrama entero entra sin scroll.
 
 ## De dónde sale cada pantalla
 
-| Pantalla | Qué hace | Origen |
+| Pantalla | Cómo es en el prototipo | Captura |
 |---|---|---|
-| Seguridad · Perfiles y Accesos | Conceder accesos y permisos a cada perfil | hoja `SEGURIDAD` |
-| Parámetro General | Áreas, ámbito, sectores, locales, idiomas y empleados | hojas `*Exis` / `*Hab`, `MantGeneral` |
-| Catálogo de Reclamo | Tipos de reclamo con sus eventos de protocolo | `ReclamosHab`, `ReclamosDes`, `Protocolo` |
-| Catálogo de Producto | Segmento › Familia › Clase › Bien, y los tipos de bien | `Producto`, bloque tipo de bien de `MANT-PARAM` |
-| Catálogo de Problemas | Problemas por segmento, familia y tipo | `CatProblemas1`, `CatProblemas2` |
-| Catálogo de Cliente | Tipos de cliente, consideraciones y categorización | `Clientes`, `Cons`, bloque de categorización de `MANT-PARAM` |
-| Catálogo de Protocolos | Parámetros de cada evento del protocolo | `Protocolo`, `MantProtocolo` |
-| Catálogo de Reglas | Condiciones encadenadas del motor de decisión | hoja `MantReglas` |
-| Catálogo de Políticas | Garantías legales, explícitas e implícitas | garantías de `Hoja1` |
-| Consulta de Indicadores | Resultados estadísticos del sistema | los 11 indicadores de `MANT-PARAM` |
-| Área · Data Entry | Ingreso del usuario para atender la cola | informe, 2.1.2.1.1 |
-| Área · Reportes | Avances y detalles realizados por el usuario | informe, Operativo → Área |
-| Cliente · Data Entry | Validar documento, registrar, cuadro resumen | informe, 2.1.2.2.1 |
-| Cliente · Reportes | Seguimiento del estado y del tiempo restante | informe, 2.1.2.2.2 |
+| Seguridad · Perfiles y Accesos | Perfiles, sus 11 accesos y sus 2 permisos | hoja `SEGURIDAD` |
+| General | Cuatro bloques: Áreas, Especialistas por Área, Magnitud e Idioma | p. 5 |
+| Catálogo de Reclamos y Eventos | Pestañas Reclamo y Eventos, cada una con búsqueda, resultados y bloque Agregar | p. 6 |
+| Producto | Búsqueda Segmento/Familia/Clase y pestañas Agregar Familia / Clase / Producto | p. 7 |
+| CatalogoProblemas | Búsqueda por tipo, pestañas Agregar Problemas y Agregar Producto | p. 7–8 |
+| Catalogo Clientes | Pestañas Agregar Tipo Cliente y Asignar Condiciones | p. 8 |
+| Catálogo de Protocolos | Búsqueda, evento y la lista de acciones con tiempo y operario | p. 9 |
+| Catalogo de reglas | Pestañas Regla, Condiciones y Asignar Regla, con la ventana Agregar/Modificar | p. 10 |
+| Catálogo de Políticas | Una política cruza dos catálogos; debajo se habilitan sus tipos | p. 11–12 |
+| Consulta de Indicadores | Lista de los 11 indicadores con Detalle y Salir | p. 13 |
+| Atender Reclamo | Pide el ID de empleado, lista sus reclamos y abre Inspeccionar Producto | p. 13–15 |
+| Reporte de Atención | Avances del usuario sobre los reclamos registrados | p. 13 |
+| Formulario Reclamo | Datos personales con Validar, luego compras y reclamos a registrar | p. 15–17 |
+| Estado de Reclamo | Reclamos del cliente y ventana Detalle del Reclamo | p. 17–19 |
 
-Cliente · Reportes implementa los tres casos que describe el informe: reclamo
+Las pantallas siguen las capturas del informe: mismos títulos de ventana,
+mismos grupos, mismas pestañas y mismos botones. Los formularios que en el
+prototipo son ventanas modales (Ingresar Datos, Inspeccionar Producto,
+Validación de Usuario, Agregar/Modificar Regla, Detalle del Reclamo) aquí
+también son diálogos.
+
+Estado de Reclamo implementa los tres casos que describe el informe: reclamo
 rechazado dentro del plazo de impugnación (con formulario para enviar a otra
 instancia), rechazado fuera del plazo (advertencia) y reclamo pendiente.
 
@@ -124,10 +130,12 @@ pe.tino.reclamos
 ├── app/          Main: instala el tema y abre el mapa
 ├── model/        Modelo: entidades del dominio (records inmutables)
 ├── repo/         Datos: catálogos sembrados desde el Excel y el informe
+│                 Prototipo: los datos que muestran las capturas del informe
 │                 Estado: lo que cambia durante la sesión, con oyentes
 └── ui/
     ├── theme/    Tema: colores, tipografía y espaciado
-    ├── components/  Grupo, Tabla, Formulario, PanelAncho y la fábrica Ui
+    ├── components/  Grupo, Tabla, Formulario, PanelAncho, PanelBusqueda,
+    │                PanelHabilitacion y la fábrica Ui
     ├── screens/  Una clase por pantalla; MapaPantalla dibuja el árbol y
     │              TablaCatalogo se reutiliza en los catálogos tabulares
     ├── Navegacion      pila de navegación (ir / volver / inicio)

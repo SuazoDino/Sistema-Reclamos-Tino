@@ -1,114 +1,96 @@
 package pe.tino.reclamos.ui.screens;
 
 import pe.tino.reclamos.repo.Datos;
-import pe.tino.reclamos.ui.components.Formulario;
-import pe.tino.reclamos.ui.components.Grupo;
-import pe.tino.reclamos.ui.components.Tabla;
-import pe.tino.reclamos.ui.components.Ui;
+import pe.tino.reclamos.ui.components.*;
 import pe.tino.reclamos.ui.theme.Tema;
 
 import javax.swing.*;
-import javax.swing.tree.*;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 
 /**
- * Catalogo de Productos.
- *
- * Entrada : datos de los tipos de producto.
- * Funcion : registrar los productos clasificados en segmento, familia y clase.
- * Salida  : productos clasificados.
+ * Catalogo de Productos, como en la captura: busqueda por segmento, familia y
+ * clase, la tabla de resultados y las pestanias para agregar familia, clase o
+ * producto.
  */
 public class ProductosPantalla extends Pantalla {
 
-    private final JTree arbol;
-    private final JTextField segmento = Ui.soloLectura();
-    private final JTextField familia = Ui.soloLectura();
-    private final JTextField clase = Ui.soloLectura();
-    private final JTextField bien = Ui.soloLectura();
+    private final Tabla tabla = new Tabla(new String[]{"Segmento", "Familia", "Clase", "Bien"});
+    private final PanelBusqueda busqueda;
 
     public ProductosPantalla() {
-        super("Catalogo de Producto",
-                "Clasificacion en cuatro niveles: segmento, familia, clase y bien.");
+        super("Producto", "Productos clasificados en segmento, familia y clase.");
 
-        arbol = new JTree(construirModelo());
-        arbol.setFont(Tema.cuerpo());
-        arbol.setRowHeight(20);
-        arbol.setShowsRootHandles(true);
-        arbol.addTreeSelectionListener(e -> mostrarRuta());
-        for (int i = 0; i < arbol.getRowCount(); i++) arbol.expandRow(i);
+        Map<String, List<String>> filtros = new LinkedHashMap<>();
+        filtros.put("Segmento", nivel(0));
+        filtros.put("Familia", nivel(1));
+        filtros.put("Clase", nivel(2));
+        busqueda = new PanelBusqueda(1, filtros);
+        busqueda.alBuscar(this::buscar);
 
-        Grupo gArbol = Grupo.ajustado("Jerarquia del catalogo");
-        gArbol.add(Ui.scroll(arbol), BorderLayout.CENTER);
+        tabla.anchos(230, 210, 200, 190);
+        buscar();
 
-        JPanel inferior = Ui.panel(new BorderLayout(Tema.ESP_MD, 0));
-        inferior.add(ficha(), BorderLayout.CENTER);
-        inferior.add(tiposDeBien(), BorderLayout.EAST);
+        JTabbedPane pestanias = new JTabbedPane();
+        pestanias.addTab("Agregar Familia", conContexto("Segmento", nivel(0),
+                new PanelHabilitacion(this, "Familia", "Familia", "Deshabilitar",
+                        nivel(1), nivel(1).subList(0, Math.min(3, nivel(1).size())),
+                        "Familia", false)));
+        pestanias.addTab("Agregar Clase", conContexto("Familia", nivel(1),
+                new PanelHabilitacion(this, "Clase", "Clase", "Deshabilitar",
+                        nivel(2), nivel(2).subList(0, Math.min(3, nivel(2).size())),
+                        "Clase", false)));
+        pestanias.addTab("Agregar Producto", conContexto("Clase", nivel(2),
+                new PanelHabilitacion(this, "Producto", "Producto", "Deshabilitar",
+                        nivel(3), nivel(3).subList(0, Math.min(4, nivel(3).size())),
+                        "Producto", false)));
 
-        contenido().add(gArbol, BorderLayout.CENTER);
-        contenido().add(inferior, BorderLayout.SOUTH);
+        contenido().add(FormularioCatalogo.armar(
+                FormularioCatalogo.cabecera(busqueda, "Resultado de Busqueda", tabla, 260),
+                FormularioCatalogo.agregar(pestanias), 210), BorderLayout.CENTER);
     }
 
-    private JComponent ficha() {
-        Grupo g = new Grupo("Clasificacion del nodo seleccionado");
-        Formulario f = new Formulario();
-        f.campo("Segmento", segmento)
-         .campo("Familia", familia)
-         .campo("Clase", clase)
-         .campo("Bien", bien);
-        g.add(f, BorderLayout.CENTER);
-        return g;
+    /** Valores distintos de un nivel de la jerarquia, en su orden original. */
+    private static List<String> nivel(int indice) {
+        return new ArrayList<>(new LinkedHashSet<>(
+                Datos.JERARQUIA_PRODUCTO.stream().map(r -> r[indice]).toList()));
     }
 
-    /** Tipos de bien y el problema que admiten (hoja MANT-PARAM). */
-    private JComponent tiposDeBien() {
-        Tabla tabla = new Tabla(new String[]{"Tipo de bien", "Tipo de problema", "Estado"});
-        Datos.catalogoBienes().forEach(f -> tabla.agregar((Object[]) f));
-        tabla.anchos(190, 160, 120);
+    /** El combo de contexto que el prototipo pone arriba de cada pestania. */
+    private JComponent conContexto(String etiqueta, List<String> valores, JComponent cuerpo) {
+        JPanel fila = Ui.panel(new BorderLayout(Tema.ESP_SM, 0));
+        fila.add(Ui.etiqueta(etiqueta), BorderLayout.WEST);
+        fila.add(Ui.combo(valores), BorderLayout.CENTER);
 
-        Grupo g = Grupo.ajustado("Tipos de bien");
-        g.add(tabla.enScroll(), BorderLayout.CENTER);
-        g.setPreferredSize(new Dimension(500, 100));
-        return g;
+        JPanel envoltura = Ui.panel(new BorderLayout());
+        envoltura.add(fila, BorderLayout.WEST);
+        envoltura.setBorder(Ui.relleno(Tema.ESP_SM, 0, Tema.ESP_MD, 0));
+
+        JPanel p = Ui.panel(new BorderLayout());
+        p.setBorder(Ui.relleno(Tema.ESP_SM));
+        p.add(envoltura, BorderLayout.NORTH);
+        p.add(cuerpo, BorderLayout.CENTER);
+        return p;
     }
 
-    /** Agrupa la tabla plana del prototipo por sus tres primeros niveles. */
-    private static DefaultTreeModel construirModelo() {
-        Map<String, Map<String, Map<String, java.util.List<String>>>> jerarquia = new LinkedHashMap<>();
-        for (String[] ruta : Datos.JERARQUIA_PRODUCTO) {
-            jerarquia.computeIfAbsent(ruta[0], k -> new LinkedHashMap<>())
-                     .computeIfAbsent(ruta[1], k -> new LinkedHashMap<>())
-                     .computeIfAbsent(ruta[2], k -> new java.util.ArrayList<>())
-                     .add(ruta[3]);
-        }
+    private void buscar() {
+        String segmento = busqueda.valor("Segmento");
+        String familia = busqueda.valor("Familia");
+        String clase = busqueda.valor("Clase");
 
-        DefaultMutableTreeNode raiz = new DefaultMutableTreeNode("Catalogo de productos");
-        jerarquia.forEach((seg, familias) -> {
-            DefaultMutableTreeNode nSeg = new DefaultMutableTreeNode(seg);
-            familias.forEach((fam, clases) -> {
-                DefaultMutableTreeNode nFam = new DefaultMutableTreeNode(fam);
-                clases.forEach((cla, bienes) -> {
-                    DefaultMutableTreeNode nCla = new DefaultMutableTreeNode(cla);
-                    bienes.forEach(b -> nCla.add(new DefaultMutableTreeNode(b)));
-                    nFam.add(nCla);
-                });
-                nSeg.add(nFam);
-            });
-            raiz.add(nSeg);
-        });
-        return new DefaultTreeModel(raiz);
+        tabla.limpiar();
+        Datos.JERARQUIA_PRODUCTO.stream()
+                .filter(r -> coincide(segmento, r[0]))
+                .filter(r -> coincide(familia, r[1]))
+                .filter(r -> coincide(clase, r[2]))
+                .forEach(r -> tabla.agregar((Object[]) r));
     }
 
-    private void mostrarRuta() {
-        TreePath ruta = arbol.getSelectionPath();
-        JTextField[] campos = {segmento, familia, clase, bien};
-        for (JTextField c : campos) c.setText("");
-        if (ruta == null) return;
-
-        Object[] nodos = ruta.getPath();
-        for (int i = 1; i < nodos.length && i - 1 < campos.length; i++) {
-            campos[i - 1].setText(String.valueOf(nodos[i]));
-        }
+    private static boolean coincide(String filtro, String valor) {
+        return filtro == null || filtro.isBlank() || filtro.equals(valor);
     }
 }
