@@ -42,6 +42,7 @@ public class VentanaPrincipal extends JFrame {
 
         // Gerencial - Consulta
         fabricas.put("tickets",            TicketPantalla::new);
+        fabricas.put("batch",              BatchPantalla::new);
         fabricas.put("indicadores",        IndicadoresPantalla::new);
 
         // Operativo

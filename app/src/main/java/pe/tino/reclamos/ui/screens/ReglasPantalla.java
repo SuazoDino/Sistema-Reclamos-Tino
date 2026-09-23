@@ -1,8 +1,7 @@
 package pe.tino.reclamos.ui.screens;
 
-import pe.tino.reclamos.model.Modelo.Regla;
-import pe.tino.reclamos.repo.Datos;
-import pe.tino.reclamos.repo.Estado;
+import pe.tino.reclamos.repo.MotorReglas;
+import pe.tino.reclamos.repo.MotorReglas.*;
 import pe.tino.reclamos.repo.Prototipo;
 import pe.tino.reclamos.ui.components.*;
 import pe.tino.reclamos.ui.theme.Tema;
@@ -10,221 +9,288 @@ import pe.tino.reclamos.ui.theme.Tema;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
- * Catalogo de reglas, como en la captura: tres pestanias, Regla, Condiciones
- * y Asignar Regla. Las condiciones se dan de alta en una ventana aparte,
- * "Agregar/Modificar Regla".
+ * Catalogo de reglas: las condiciones del motor, las variables que puede
+ * leer, las acciones con las que puede terminar y un simulador que corre la
+ * cadena de punta a punta.
+ *
+ * El simulador existe porque una regla que no se puede ejecutar no se puede
+ * defender: aqui se ve que condicion se evaluo, con que datos y por que se
+ * llego a esa solucion.
  */
 public class ReglasPantalla extends Pantalla {
 
-    private static final List<String> NOMBRES_REGLA =
-            List.of("Regla de Garantia", "Regla de Reembolso", "Regla de Intercambio");
-
     private final Tabla condiciones = new Tabla(new String[]{
-            "Condicion", "Parametro", "Operador", "Variable", "AccionV", "AccionF", "Descripcion"});
-    private final JComboBox<String> reglaElegida = Ui.combo(NOMBRES_REGLA);
+            "Condicion", "Variable", "Operador", "Valor", "Si es verdadero", "Si es falso",
+            "Descripcion"});
+    private final Map<String, JTextField> campos = new LinkedHashMap<>();
+    private final Tabla traza = new Tabla(new String[]{"Paso", "Comparacion", "Resultado", "Salida"});
+    private final JLabel resultado = Ui.fuerte("");
 
     public ReglasPantalla() {
         super("Catalogo de reglas",
-                "Reglas de negocio y las condiciones encadenadas de cada una.");
+                "Condiciones encadenadas que deciden la solucion que se aplica a un reclamo.");
 
         JTabbedPane pestanias = new JTabbedPane();
         pestanias.setFont(Tema.cuerpo());
-        pestanias.addTab("Regla", panelRegla());
         pestanias.addTab("Condiciones", panelCondiciones());
+        pestanias.addTab("Variables", panelVariables());
+        pestanias.addTab("Acciones", panelAcciones());
+        pestanias.addTab("Simulador", panelSimulador());
         pestanias.addTab("Asignar Regla", panelAsignar());
 
         contenido().add(pestanias, BorderLayout.CENTER);
     }
 
-    /* ---------------- pestania Regla ---------------- */
-
-    private JComponent panelRegla() {
-        DefaultListModel<String> existentes = new DefaultListModel<>();
-        DefaultListModel<String> habilitadas = new DefaultListModel<>();
-        NOMBRES_REGLA.forEach(existentes::addElement);
-
-        JList<String> listaExist = new JList<>(existentes);
-        JList<String> listaHab = new JList<>(habilitadas);
-        listaExist.setFont(Tema.cuerpo());
-        listaHab.setFont(Tema.cuerpo());
-
-        JTextField nombre = Ui.texto(16);
-        JButton agregar = Ui.boton("Agregar");
-        agregar.addActionListener(e -> {
-            String v = nombre.getText().trim();
-            if (v.isEmpty()) { avisar("Escriba el nombre de la regla."); return; }
-            if (existentes.contains(v)) { avisar("Esa regla ya existe."); return; }
-            existentes.addElement(v);
-            nombre.setText("");
-        });
-
-        Grupo grupoAgregar = new Grupo("Agregar");
-        Formulario f = new Formulario();
-        f.campo("Nombre de regla", nombre);
-        JPanel pie = Ui.panel(new FlowLayout(FlowLayout.CENTER, 0, Tema.ESP_SM));
-        pie.add(agregar);
-        grupoAgregar.add(f, BorderLayout.CENTER);
-        grupoAgregar.add(pie, BorderLayout.SOUTH);
-
-        JButton pasar = Ui.boton(">");
-        pasar.addActionListener(e -> {
-            String v = listaExist.getSelectedValue();
-            if (v == null) { avisar("Seleccione una regla existente."); return; }
-            if (habilitadas.contains(v)) { avisar("Esa regla ya esta habilitada."); return; }
-            habilitadas.addElement(v);
-        });
-        JButton quitar = Ui.boton("<");
-        quitar.addActionListener(e -> {
-            String v = listaHab.getSelectedValue();
-            if (v == null) { avisar("Seleccione una regla habilitada."); return; }
-            habilitadas.removeElement(v);
-        });
-
-        JPanel botones = Ui.panel(new GridBagLayout());
-        JPanel columna = Ui.panel(new GridLayout(2, 1, 0, Tema.ESP_SM));
-        columna.add(pasar);
-        columna.add(quitar);
-        botones.add(columna);
-        botones.setBorder(Ui.relleno(0, Tema.ESP_SM, 0, Tema.ESP_SM));
-
-        JPanel izq = Ui.panel(new BorderLayout(0, Tema.ESP_XS));
-        izq.add(Ui.etiqueta("Reglas Existentes"), BorderLayout.NORTH);
-        izq.add(Ui.scroll(listaExist), BorderLayout.CENTER);
-        JPanel der = Ui.panel(new BorderLayout(0, Tema.ESP_XS));
-        der.add(Ui.etiqueta("Reglas Habilitadas"), BorderLayout.NORTH);
-        der.add(Ui.scroll(listaHab), BorderLayout.CENTER);
-
-        Grupo grupoHabilitar = new Grupo("Habilitar", new GridBagLayout());
-        GridBagConstraints gc = new GridBagConstraints();
-        gc.fill = GridBagConstraints.BOTH;
-        gc.weighty = 1; gc.gridy = 0;
-        gc.gridx = 0; gc.weightx = 1; grupoHabilitar.add(izq, gc);
-        gc.gridx = 1; gc.weightx = 0; grupoHabilitar.add(botones, gc);
-        gc.gridx = 2; gc.weightx = 1; grupoHabilitar.add(der, gc);
-
-        JPanel p = Ui.panel(new GridLayout(1, 2, Tema.ESP_MD, 0));
-        p.setBorder(Ui.relleno(Tema.ESP_MD));
-        p.add(grupoAgregar);
-        p.add(grupoHabilitar);
-        return p;
-    }
-
-    /* ---------------- pestania Condiciones ---------------- */
+    /* ---------------- condiciones ---------------- */
 
     private JComponent panelCondiciones() {
-        condiciones.anchos(110, 150, 100, 110, 140, 110, 220);
+        condiciones.anchos(90, 170, 90, 150, 170, 170, 300);
         refrescar();
 
-        JButton formula = Ui.boton("Formula");
-        formula.addActionListener(e -> avisar("La formula se define en el catalogo de clientes."));
-
-        JPanel arriba = Ui.panel(new BorderLayout(Tema.ESP_MD, 0));
-        JPanel izq = Ui.panel(new FlowLayout(FlowLayout.LEFT, Tema.ESP_SM, 0));
-        izq.add(Ui.etiqueta("Seleccionar Regla"));
-        izq.add(reglaElegida);
-        arriba.add(izq, BorderLayout.WEST);
-        arriba.add(Ui.filaDerecha(formula), BorderLayout.EAST);
-        arriba.setBorder(Ui.relleno(0, 0, Tema.ESP_MD, 0));
-
+        JButton agregar = Ui.boton("Agregar");
+        agregar.addActionListener(e -> editar(null));
         JButton modificar = Ui.boton("Modificar");
         modificar.addActionListener(e -> {
             int i = condiciones.filaModelo();
             if (i < 0) { avisar("Seleccione la condicion que desea modificar."); return; }
-            abrirDialogo(Estado.reglas().get(i), i);
+            editar(MotorReglas.condiciones().get(i));
         });
-        JButton agregar = Ui.boton("Agregar");
-        agregar.addActionListener(e -> abrirDialogo(null, -1));
-        JButton cancelar = Ui.boton("Cancelar");
-        cancelar.addActionListener(e -> condiciones.clearSelection());
+        JButton verificar = Ui.boton("Verificar cadena");
+        verificar.addActionListener(e -> verificar());
 
-        JPanel pie = Ui.panel(new FlowLayout(FlowLayout.CENTER, Tema.ESP_LG, Tema.ESP_SM));
-        pie.add(modificar);
+        JPanel pie = Ui.panel(new FlowLayout(FlowLayout.CENTER, Tema.ESP_LG * 2, Tema.ESP_SM));
         pie.add(agregar);
-        pie.add(cancelar);
+        pie.add(modificar);
+        pie.add(verificar);
+
+        Grupo g = Grupo.ajustado("Cadena de condiciones");
+        g.add(condiciones.enScroll(), BorderLayout.CENTER);
+
+        JPanel nota = Ui.panel(new BorderLayout());
+        nota.setBorder(Ui.relleno(Tema.ESP_SM));
+        nota.add(Ui.suave("Cada salida dice si va a otra condicion (Ir a) o si termina en una "
+                + "solucion (Aplicar). Antes las dos cosas compartian la misma columna."),
+                BorderLayout.WEST);
+        g.add(nota, BorderLayout.SOUTH);
 
         JPanel p = Ui.panel(new BorderLayout(0, Tema.ESP_MD));
         p.setBorder(Ui.relleno(Tema.ESP_MD));
-        p.add(arriba, BorderLayout.NORTH);
-        p.add(condiciones.enScroll(), BorderLayout.CENTER);
+        p.add(g, BorderLayout.CENTER);
         p.add(pie, BorderLayout.SOUTH);
         return p;
     }
 
-    /** La ventana "Agregar/Modificar Regla" de la captura. */
-    private void abrirDialogo(Regla regla, int indice) {
-        JComboBox<String> condicion = Ui.combo(codigos());
-        condicion.setEditable(true);
-        JComboBox<String> parametro = Ui.combo(parametros());
-        parametro.setEditable(true);
-        JComboBox<String> operador = Ui.combo(Datos.OPERADORES);
-        JComboBox<String> variable = Ui.combo(Datos.TIPOS_VARIABLE);
-        JComboBox<String> accionV = Ui.combo(Datos.ACCIONES);
-        JComboBox<String> accionF = Ui.combo(codigos());
-        accionF.setEditable(true);
+    private void refrescar() {
+        condiciones.limpiar();
+        for (Condicion c : MotorReglas.condiciones()) {
+            condiciones.agregar(c.codigo(), c.variable(), c.operador(), c.valor(),
+                    c.siVerdadero().toString(), c.siFalso().toString(), c.descripcion());
+        }
+    }
 
-        if (regla != null) {
-            condicion.setSelectedItem(regla.condicion());
-            parametro.setSelectedItem(regla.parametro());
-            operador.setSelectedItem(regla.operador());
-            variable.setSelectedItem(regla.variable());
-            accionV.setSelectedItem(regla.accionVerdadero());
-            accionF.setSelectedItem(regla.accionFalso());
+    /** Alta o edicion de una condicion; cada salida declara su tipo. */
+    private void editar(Condicion actual) {
+        JTextField codigo = Ui.texto(10);
+        JComboBox<String> variable = Ui.combo(MotorReglas.nombresDeVariable());
+        JComboBox<String> operador = Ui.combo(MotorReglas.OPERADORES);
+        JTextField valor = Ui.texto(12);
+        JTextField descripcion = Ui.texto(24);
+
+        JComboBox<TipoSalida> tipoV = Ui.combo(List.of(TipoSalida.values()));
+        JComboBox<String> destinoV = new JComboBox<>();
+        JComboBox<TipoSalida> tipoF = Ui.combo(List.of(TipoSalida.values()));
+        JComboBox<String> destinoF = new JComboBox<>();
+
+        tipoV.addActionListener(e -> cargarDestinos(tipoV, destinoV));
+        tipoF.addActionListener(e -> cargarDestinos(tipoF, destinoF));
+        cargarDestinos(tipoV, destinoV);
+        cargarDestinos(tipoF, destinoF);
+
+        if (actual != null) {
+            codigo.setText(actual.codigo());
+            variable.setSelectedItem(actual.variable());
+            operador.setSelectedItem(actual.operador());
+            valor.setText(actual.valor());
+            descripcion.setText(actual.descripcion());
+            tipoV.setSelectedItem(actual.siVerdadero().tipo());
+            cargarDestinos(tipoV, destinoV);
+            destinoV.setSelectedItem(actual.siVerdadero().destino());
+            tipoF.setSelectedItem(actual.siFalso().tipo());
+            cargarDestinos(tipoF, destinoF);
+            destinoF.setSelectedItem(actual.siFalso().destino());
         }
 
         Formulario f = new Formulario();
-        f.campo("Condicion", condicion)
-         .campo("Parametro", parametro)
-         .campo("Operador", operador)
-         .campo("Variable", variable)
-         .campo("Accion V", accionV)
-         .campo("Accion F", accionF);
+        f.campo("Condicion:", codigo)
+         .campo("Variable:", variable)
+         .campo("Operador:", operador)
+         .campo("Valor:", valor, "Un numero, true/false, o el nombre de otra variable")
+         .grupo("Si es verdadero")
+         .campo("Salida:", tipoV)
+         .campo("Destino:", destinoV)
+         .grupo("Si es falso")
+         .campo("Salida:", tipoF)
+         .campo("Destino:", destinoF)
+         .grupo("Documentacion")
+         .campo("Descripcion:", descripcion);
         f.setBorder(Ui.relleno(Tema.ESP_MD));
 
-        int r = JOptionPane.showConfirmDialog(this, f, "Agregar/Modificar Regla",
-                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        int r = JOptionPane.showConfirmDialog(this, Ui.scrollVertical(f),
+                "Agregar/Modificar Condicion", JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.PLAIN_MESSAGE);
         if (r != JOptionPane.OK_OPTION) return;
+        if (codigo.getText().isBlank()) { avisar("Indique el codigo de la condicion."); return; }
 
-        Regla nueva = new Regla(String.valueOf(condicion.getSelectedItem()),
-                String.valueOf(parametro.getSelectedItem()),
-                String.valueOf(operador.getSelectedItem()),
+        Condicion nueva = new Condicion(codigo.getText().trim(),
                 String.valueOf(variable.getSelectedItem()),
-                String.valueOf(accionV.getSelectedItem()),
-                String.valueOf(accionF.getSelectedItem()),
-                regla == null ? "" : regla.descripcion());
+                String.valueOf(operador.getSelectedItem()),
+                valor.getText().trim(),
+                new Salida((TipoSalida) tipoV.getSelectedItem(),
+                        String.valueOf(destinoV.getSelectedItem())),
+                new Salida((TipoSalida) tipoF.getSelectedItem(),
+                        String.valueOf(destinoF.getSelectedItem())),
+                descripcion.getText().trim());
 
-        if (indice < 0) Estado.reglas().add(nueva); else Estado.reglas().set(indice, nueva);
+        List<Condicion> lista = MotorReglas.condiciones();
+        if (actual == null) lista.add(nueva);
+        else lista.set(lista.indexOf(actual), nueva);
         refrescar();
     }
 
-    private static List<String> codigos() {
-        List<String> l = new ArrayList<>();
-        Estado.reglas().forEach(r -> l.add(r.condicion()));
-        return l;
+    /** El destino depende del tipo: otra condicion o una accion del catalogo. */
+    private static void cargarDestinos(JComboBox<TipoSalida> tipo, JComboBox<String> destino) {
+        List<String> opciones = tipo.getSelectedItem() == TipoSalida.CONDICION
+                ? MotorReglas.codigos() : MotorReglas.ACCIONES;
+        destino.setModel(new DefaultComboBoxModel<>(opciones.toArray(new String[0])));
+        destino.setFont(Tema.cuerpo());
     }
 
-    private static List<String> parametros() {
-        List<String> l = new ArrayList<>();
-        Estado.reglas().forEach(r -> l.add(r.parametro()));
-        return l;
+    private void verificar() {
+        List<String> fallas = MotorReglas.problemas();
+        if (fallas.isEmpty()) {
+            avisar("La cadena esta bien armada: todas las salidas existen y "
+                    + "todas las variables estan en el catalogo.");
+            return;
+        }
+        advertir("La cadena tiene problemas:\n\n" + String.join("\n", fallas));
     }
 
-    /* ---------------- pestania Asignar Regla ---------------- */
+    /* ---------------- variables y acciones ---------------- */
+
+    private JComponent panelVariables() {
+        Tabla t = new Tabla(new String[]{"Variable", "Tipo", "De donde sale", "Unidad"});
+        MotorReglas.variables().forEach(v ->
+                t.agregar(v.nombre(), v.tipo().name(), v.origen(), v.unidad()));
+        t.anchos(180, 110, 420, 110);
+
+        Grupo g = Grupo.ajustado("Variables que el motor puede leer");
+        g.add(t.enScroll(), BorderLayout.CENTER);
+
+        JPanel nota = Ui.panel(new BorderLayout());
+        nota.setBorder(Ui.relleno(Tema.ESP_SM));
+        nota.add(Ui.suave("Una condicion solo puede comparar variables de esta lista. "
+                + "Antes el parametro era texto libre y no coincidia con nada."),
+                BorderLayout.WEST);
+        g.add(nota, BorderLayout.SOUTH);
+
+        JPanel p = Ui.panel(new BorderLayout());
+        p.setBorder(Ui.relleno(Tema.ESP_MD));
+        p.add(g, BorderLayout.CENTER);
+        return p;
+    }
+
+    private JComponent panelAcciones() {
+        DefaultListModel<String> modelo = new DefaultListModel<>();
+        MotorReglas.ACCIONES.forEach(modelo::addElement);
+        JList<String> lista = new JList<>(modelo);
+        lista.setFont(Tema.cuerpo());
+
+        Grupo g = Grupo.ajustado("Soluciones con las que puede terminar la cadena");
+        g.add(Ui.scroll(lista), BorderLayout.CENTER);
+
+        JPanel p = Ui.panel(new BorderLayout());
+        p.setBorder(Ui.relleno(Tema.ESP_MD));
+        p.add(g, BorderLayout.CENTER);
+        return p;
+    }
+
+    /* ---------------- simulador ---------------- */
+
+    private JComponent panelSimulador() {
+        Formulario f = new Formulario();
+        MotorReglas.valoresDeEjemplo().forEach((nombre, valor) -> {
+            JTextField campo = Ui.texto(12);
+            campo.setText(valor);
+            campos.put(nombre, campo);
+            Variable v = MotorReglas.variable(nombre);
+            f.campo(nombre + ":", campo, v == null ? "" : v.origen());
+        });
+
+        JButton correr = Ui.boton("Evaluar cadena");
+        correr.addActionListener(e -> evaluar());
+
+        JPanel pie = Ui.panel(new FlowLayout(FlowLayout.CENTER, 0, Tema.ESP_SM));
+        pie.add(correr);
+
+        Grupo entradas = new Grupo("Datos del caso");
+        entradas.add(Ui.scrollVertical(f), BorderLayout.CENTER);
+        entradas.add(pie, BorderLayout.SOUTH);
+        entradas.setPreferredSize(new Dimension(430, 100));
+
+        traza.anchos(90, 330, 110, 220);
+        Grupo salida = Grupo.ajustado("Como se llego a la solucion");
+        salida.add(traza.enScroll(), BorderLayout.CENTER);
+
+        JPanel cabecera = Ui.panel(new BorderLayout());
+        cabecera.setBorder(Ui.relleno(Tema.ESP_SM));
+        cabecera.add(resultado, BorderLayout.WEST);
+        salida.add(cabecera, BorderLayout.NORTH);
+
+        JPanel p = Ui.panel(new BorderLayout(Tema.ESP_MD, 0));
+        p.setBorder(Ui.relleno(Tema.ESP_MD));
+        p.add(entradas, BorderLayout.WEST);
+        p.add(salida, BorderLayout.CENTER);
+        return p;
+    }
+
+    private void evaluar() {
+        Map<String, String> valores = new LinkedHashMap<>();
+        campos.forEach((nombre, campo) -> valores.put(nombre, campo.getText().trim()));
+
+        Resultado r = MotorReglas.evaluar(valores);
+        traza.limpiar();
+        r.traza().forEach(p -> traza.agregar(p.codigo(), p.comparacion(),
+                p.resultado() ? "Verdadero" : "Falso", p.salida()));
+
+        resultado.setText(r.valido()
+                ? "Solucion que aplica el sistema: " + r.accion()
+                : "La cadena no pudo resolverse: " + r.error());
+    }
+
+    /* ---------------- asignar regla ---------------- */
 
     private JComponent panelAsignar() {
         JPanel fila = Ui.panel(new GridLayout(2, 2, Tema.ESP_MD, Tema.ESP_SM));
         fila.add(Ui.etiqueta("Tipo de Reclamo:"));
         fila.add(Ui.combo(Prototipo.TIPO_PROBLEMA));
-        fila.add(Ui.etiqueta("Regla:"));
-        fila.add(Ui.combo(NOMBRES_REGLA));
+        fila.add(Ui.etiqueta("Condicion inicial:"));
+        fila.add(Ui.combo(MotorReglas.codigos()));
 
-        Tabla asignadas = new Tabla(new String[]{"Tipo de Reclamo", "Regla"});
+        Tabla asignadas = new Tabla(new String[]{"Tipo de Reclamo", "Condicion inicial"});
         asignadas.anchos(280, 280);
+        List<String[]> asignaciones = new ArrayList<>(List.of(
+                new String[]{"Funcionamiento", "CND1"},
+                new String[]{"Entrega", "CND1"},
+                new String[]{"Cobranza", "CND2"}));
+        asignaciones.forEach(a -> asignadas.agregar((Object[]) a));
 
         JButton asignar = Ui.boton("Asignar");
-        asignar.addActionListener(e -> avisar("Regla asignada al tipo de reclamo."));
+        asignar.addActionListener(e -> avisar("La cadena asignada arranca en la condicion elegida."));
 
         JPanel pie = Ui.panel(new FlowLayout(FlowLayout.CENTER, 0, Tema.ESP_SM));
         pie.add(asignar);
@@ -238,13 +304,5 @@ public class ReglasPantalla extends Pantalla {
         p.setBorder(Ui.relleno(Tema.ESP_MD));
         p.add(g, BorderLayout.CENTER);
         return p;
-    }
-
-    private void refrescar() {
-        condiciones.limpiar();
-        for (Regla r : Estado.reglas()) {
-            condiciones.agregar(r.condicion(), r.parametro(), r.operador(), r.variable(),
-                    r.accionVerdadero(), r.accionFalso(), r.descripcion());
-        }
     }
 }

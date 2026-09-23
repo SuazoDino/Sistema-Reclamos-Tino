@@ -79,7 +79,7 @@ public class MapaPantalla extends JPanel {
                                     Nodo.submodulo("CLIENTE",
                                             Nodo.pantalla("cliente-dataentry", "DATA ENTRY"),
                                             Nodo.pantalla("cliente-reportes", "REPORTES")))),
-                    Nodo.modulo("BATCH", Disposicion.FILA,
+                    Nodo.modulo("batch", "BATCH", Disposicion.FILA,
                             Nodo.modulo("APLICATIVO", Disposicion.APILADA,
                                     Nodo.submodulo("ACT-BD"),
                                     Nodo.submodulo("ESTADISTICAS")),
