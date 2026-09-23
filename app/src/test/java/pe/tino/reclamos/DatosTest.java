@@ -2,7 +2,6 @@ package pe.tino.reclamos;
 
 import org.junit.jupiter.api.Test;
 import pe.tino.reclamos.repo.Datos;
-import pe.tino.reclamos.repo.Estado;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -32,17 +31,25 @@ class DatosTest {
     }
 
     @Test
+    void cadaIndicadorDelPrototipoEstaListado() {
+        assertEquals(11, Datos.INDICADORES.size());
+        Datos.INDICADORES.forEach(i -> assertFalse(i.isBlank()));
+    }
+
+    @Test
+    void elCatalogoDeReclamosSoloUsaEstadosConocidos() {
+        Datos.catalogoReclamos().forEach(f -> {
+            assertEquals(3, f.length);
+            assertTrue(f[2].equals("Habilitado") || f[2].equals("Deshabilitado"),
+                    "estado desconocido: " + f[2]);
+        });
+    }
+
+    @Test
     void laJerarquiaDeProductoTieneCuatroNiveles() {
         assertFalse(Datos.JERARQUIA_PRODUCTO.isEmpty());
         Datos.JERARQUIA_PRODUCTO.forEach(ruta ->
                 assertEquals(4, ruta.length, "ruta incompleta: " + String.join(" > ", ruta)));
-    }
-
-    @Test
-    void losAccesosDeCadaPerfilPertenecenAlCatalogo() {
-        Estado.perfiles().forEach(p ->
-                assertTrue(Datos.ACCESOS.containsAll(p.accesos()),
-                        "accesos desconocidos en el perfil " + p.nombre()));
     }
 
     @Test

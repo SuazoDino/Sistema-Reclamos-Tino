@@ -1,8 +1,11 @@
 # Sistema de Reclamos — prototipo de diseño externo
 
 Aplicación de escritorio en Java que lleva a pantallas reales el diseño externo
-documentado en `Teoria/TinoPrototipos_menu_con_iconos.xlsm`. No persiste datos: todo
-vive en memoria durante la sesión, igual que un prototipo navegable.
+del **1er Entregable**, tal como lo documentan `Teoria/entregable 1 sistema de
+reclamos.docx.pdf` y `Teoria/TinoPrototipos_menu_con_iconos.xlsm`.
+
+No persiste datos: todo vive en memoria durante la sesión, igual que un
+prototipo navegable.
 
 ## Requisitos
 
@@ -14,8 +17,7 @@ vive en memoria durante la sesión, igual que un prototipo navegable.
 
 ```bash
 cd app
-mvn compile exec:java          # arranca en modo claro
-mvn compile exec:java -Dexec.args="--oscuro"
+mvn compile exec:java
 ```
 
 O generando un JAR autocontenido:
@@ -38,71 +40,82 @@ configura el módulo solo. La clase de arranque es `pe.tino.reclamos.app.Main`.
 
 ## Cómo se navega
 
-La aplicación abre en el **mapa de módulos**: el mismo diagrama de *módulos
-típicos* del diseño arquitectónico, con las cajas en las posiciones que tienen
-en la hoja de Excel. Cada caja es un botón.
+La aplicación abre en el **mapa conceptual**: el árbol completo del diseño
+arquitectónico, con cada catálogo como un botón. No hay barra lateral ni menús:
+se entra por el mapa y se vuelve con **Volver** o **Mapa**.
 
 ```
-Mapa de módulos
-   └─ menú del módulo        (Aplicativo, Técnico, Operativo, Gerencial, Área,
-                              Cliente, Mant-Param, Seguridad)
-         └─ catálogo o pantalla de trabajo
+SISTEMA DE RECLAMOS
+└─ MÓDULO ONLINE
+   ├─ GERENCIAL
+   │  ├─ MANTENIMIENTO DE PARÁMETROS
+   │  │  ├─ Parámetros Generales
+   │  │  ├─ Catálogo de Reclamos y Eventos
+   │  │  ├─ Catálogo de Productos
+   │  │  ├─ Catálogo de Problemas
+   │  │  ├─ Catálogo de Clientes
+   │  │  ├─ Catálogo de Protocolos
+   │  │  ├─ Catálogo de Reglas
+   │  │  └─ Catálogo de Políticas
+   │  └─ CONSULTA
+   │     └─ Indicadores
+   └─ OPERATIVO
+      ├─ ÁREA
+      │  ├─ Data Entry
+      │  └─ Reportes
+      └─ CLIENTE
+         ├─ Data Entry
+         └─ Reportes
 ```
 
-Toda pantalla que no sea el mapa lleva arriba **Volver** (deshace un paso) y
-**Mapa de módulos** (vuelve al inicio). El menú lateral queda como atajo: hace
-lo mismo, en un solo clic.
+## De dónde sale cada pantalla
 
-## Qué hay en cada pantalla
-
-| Módulo | Pantalla | Origen en el prototipo |
+| Pantalla | Entrada / Función / Salida | Origen |
 |---|---|---|
-| — | Mapa de módulos | hoja `DISEÑO ARQUITECTONICO` (`xl/drawings/drawing2.xml`) |
-| Aplicativo · Gerencial | Tablero de control | indicadores de la hoja `MANT-PARAM` |
-| Aplicativo · Data Entry | Registro de reclamo | hoja `DATA_ENTRY_CLIENTE` |
-| Aplicativo · On-Line | Atención de reclamos | cola de trabajo y asignación de área |
-| Aplicativo · Consulta | Consulta de reclamos | seguimiento por estado y área |
-| Aplicativo · Batch | Procesos batch | procesos programados |
-| Mant-Param | Catálogo de productos | hoja `Producto` (Segmento › Familia › Clase › Bien) |
-| Mant-Param | Catálogo de bienes | hoja `MANT-PARAM`, bloque tipo de bien |
-| Mant-Param | Catálogo de problemas | hojas `CatProblemas1` / `CatProblemas2` |
-| Mant-Param | Catálogo de protocolos | hojas `Protocolo` y `MantProtocolo` |
-| Mant-Param | Catálogo de reglas | hoja `MantReglas` |
-| Mant-Param | Catálogo de políticas | garantías de la hoja `Hoja1` |
-| Mant-Param | Categorización de cliente | condiciones, métodos y fórmulas de `MANT-PARAM` |
-| Mant-Param | Catálogos generales | hojas `*Exis` / `*Hab` (existentes ↔ habilitados) |
-| Gerencial | Indicadores | los 11 indicadores del prototipo |
-| Gerencial | Reportes | se arman con los reclamos de la sesión |
-| Técnico | Act-BD, Mant-BD, Contingencia | procesos de plataforma |
-| Seguridad | Perfiles y accesos | hoja `SEGURIDAD` |
+| Parámetros Generales | Registrar generalidades de la empresa y del sistema | hojas `*Exis` / `*Hab` |
+| Cat. de Reclamos y Eventos | Registrar los reclamos con sus respectivos eventos | `ReclamosHab`, `ReclamosDes`, `Protocolo` |
+| Cat. de Productos | Registrar productos por segmento, familia y clase | hoja `Producto` |
+| Cat. de Problemas | Registrar problemas y sincronizarlos con tipo y producto | `CatProblemas1`, `CatProblemas2` |
+| Cat. de Clientes | Sincronizar las condiciones con los tipos de cliente | `Clientes`, `Cons`, `MANT-PARAM` |
+| Cat. de Protocolos | Registrar los parámetros del protocolo de solución | `Protocolo`, `MantProtocolo` |
+| Cat. de Reglas | Establecer reglas y registrar sus parámetros | hoja `MantReglas` |
+| Cat. de Políticas | Establecer políticas y sus tipos | garantías de la hoja `Hoja1` |
+| Indicadores | Resultados estadísticos del sistema de reclamos | los 11 indicadores de `MANT-PARAM` |
+| Área · Data Entry | Ingreso del usuario para atender los reclamos en cola | informe, 2.1.2.1.1 |
+| Área · Reportes | Avances y detalles realizados por el usuario | informe, Operativo → Área |
+| Cliente · Data Entry | Validar documento, registrar reclamo, cuadro resumen | informe, 2.1.2.2.1 |
+| Cliente · Reportes | Seguimiento del estado y del tiempo restante | informe, 2.1.2.2.2 |
+
+Cliente · Reportes implementa los tres casos que describe el informe: reclamo
+rechazado dentro del plazo de impugnación (con formulario para enviar a otra
+instancia), rechazado fuera del plazo (advertencia) y reclamo pendiente.
+
+## Criterios que sigue el código
+
+- **Nada inventado.** Todos los datos salen del Excel o del informe. Los
+  indicadores que el prototipo no puede calcular con los reclamos registrados
+  se marcan como *no calculables* en vez de mostrar un número inventado. El
+  plazo de impugnación es un parámetro visible en pantalla, no una constante
+  escondida.
+- **Aspecto de escritorio.** Paneles con borde y título, tablas con rejilla,
+  esquinas rectas, sin iconos ni colores de marca. Todo el aspecto está en
+  `Tema`.
+- **Sin persistencia.** `Estado` guarda lo que cambia durante la sesión y avisa
+  a las pantallas cuando un reclamo se agrega o se modifica.
 
 ## Organización del código
 
 ```
 pe.tino.reclamos
-├── app/          Main: instala el tema y abre el mapa de módulos
+├── app/          Main: instala el tema y abre el mapa
 ├── model/        Modelo: entidades del dominio (records inmutables)
-├── repo/         Datos: catálogos sembrados desde el .xlsm
+├── repo/         Datos: catálogos sembrados desde el Excel y el informe
 │                 Estado: lo que cambia durante la sesión, con oyentes
 └── ui/
-    ├── theme/    Tema (colores, tipografía, espaciado) e Iconos (vectoriales)
-    ├── components/  Piezas reutilizables: Tarjeta, Tabla, Formulario, Ficha,
-    │                GraficoBarras, PanelAncho, Ui (fábrica de controles)
-    ├── screens/  Una clase por pantalla, todas sobre la base Pantalla.
-    │              MapaPantalla dibuja el diagrama; MenuPantalla arma los
-    │              menús de módulo; CatalogoTablaPantalla y ProcesosPantalla
-    │              se reutilizan para varios catálogos
+    ├── theme/    Tema: colores, tipografía y espaciado
+    ├── components/  Grupo, Tabla, Formulario, PanelAncho y la fábrica Ui
+    ├── screens/  Una clase por pantalla; MapaPantalla dibuja el árbol y
+    │              TablaCatalogo se reutiliza en los catálogos tabulares
     ├── Navegacion      pila de navegación (ir / volver / inicio)
-    ├── BarraLateral    atajo lateral a las pantallas
-    └── VentanaPrincipal  armazón con CardLayout
+    └── VentanaPrincipal  ventana única con CardLayout
 ```
-
-Reglas que sigue el código:
-
-- **Ningún color suelto.** Todo sale de `Tema`; cambiar la paleta es tocar un
-  solo archivo. El botón de la esquina inferior derecha alterna claro/oscuro.
-- **Ningún archivo de imagen.** Los iconos son trazos Java2D sobre una grilla
-  de 24×24 (`Iconos`), así escalan y toman el color del contexto.
-- **Los gráficos usan una sola serie y un solo tono**, con el valor rotulado al
-  final de cada barra; el color nunca carga solo el significado. Los distintivos
-  de estado siempre llevan punto **y** texto.

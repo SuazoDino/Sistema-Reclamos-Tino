@@ -28,20 +28,20 @@ class NavegacionTest {
 
     @Test
     void bajarYVolverRecorreElCaminoInverso() {
-        Navegacion.ir("m-mantparam");
-        Navegacion.ir("politicas");
+        Navegacion.ir("cat-politicas");
+        Navegacion.ir("cat-reglas");
 
-        assertEquals("politicas", Navegacion.actual());
+        assertEquals("cat-reglas", Navegacion.actual());
         assertTrue(Navegacion.hayDondeVolver());
 
         Navegacion.volver();
-        assertEquals("m-mantparam", Navegacion.actual());
+        assertEquals("cat-politicas", Navegacion.actual());
 
         Navegacion.volver();
         assertEquals(Navegacion.MAPA, Navegacion.actual());
         assertFalse(Navegacion.hayDondeVolver());
 
-        assertEquals(List.of("m-mantparam", "politicas", "m-mantparam", Navegacion.MAPA), visitadas);
+        assertEquals(List.of("cat-politicas", "cat-reglas", "cat-politicas", Navegacion.MAPA), visitadas);
     }
 
     @Test
@@ -52,9 +52,9 @@ class NavegacionTest {
 
     @Test
     void inicioLimpiaElHistorialCompleto() {
-        Navegacion.ir("m-aplicativo");
-        Navegacion.ir("m-operativo");
-        Navegacion.ir("registro");
+        Navegacion.ir("cat-productos");
+        Navegacion.ir("cat-clientes");
+        Navegacion.ir("cliente-dataentry");
 
         Navegacion.inicio();
         assertEquals(Navegacion.MAPA, Navegacion.actual());
@@ -63,8 +63,8 @@ class NavegacionTest {
 
     @Test
     void repetirLaPantallaActualNoApilaHistorial() {
-        Navegacion.ir("consulta");
-        Navegacion.ir("consulta");
+        Navegacion.ir("indicadores");
+        Navegacion.ir("indicadores");
         Navegacion.volver();
         assertEquals(Navegacion.MAPA, Navegacion.actual());
     }

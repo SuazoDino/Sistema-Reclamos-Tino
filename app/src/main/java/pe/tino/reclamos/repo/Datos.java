@@ -221,48 +221,6 @@ public final class Datos {
     public static final List<String> ACCIONES = List.of("Pago Adicional", "Intercambio", "Correccion",
             "Reembolso", "Reparacion", "Volver a hacer", "Escalar a especialista");
 
-    /* ---------------- seguridad (hoja SEGURIDAD) ---------------- */
-
-    public static final List<String> ACCESOS = List.of(
-            "Catalogo de Productos", "Catalogo de Bienes", "Catalogo de Politicas",
-            "Catalogo de Problemas", "Catalogo de Protocolos", "Catalogo de Reglas",
-            "Seguridad", "Estadisticas", "Reportes", "General", "Categorizacion Cliente");
-
-    public static List<Perfil> perfiles() {
-        return new ArrayList<>(List.of(
-                new Perfil("Administrador de BD", List.of("General", "Seguridad", "Reportes",
-                        "Catalogo de Productos", "Catalogo de Bienes", "Catalogo de Problemas",
-                        "Catalogo de Protocolos", "Catalogo de Reglas", "Catalogo de Politicas",
-                        "Estadisticas", "Categorizacion Cliente")),
-                new Perfil("Administrador de Seguridad", List.of("Seguridad", "General", "Reportes")),
-                new Perfil("Gerente General", List.of("General", "Estadisticas", "Reportes",
-                        "Categorizacion Cliente")),
-                new Perfil("Especialista", List.of("General", "Catalogo de Problemas",
-                        "Catalogo de Protocolos", "Reportes")),
-                new Perfil("Cliente", List.of("General"))
-        ));
-    }
-
-    /* ---------------- catalogo de bienes (hoja MANT-PARAM) ---------------- */
-
-    /** Tipo de bien | Tipo de problema asociado | Estado. */
-    public static List<String[]> catalogoBienes() {
-        return new ArrayList<>(List.of(
-                new String[]{"Electrodomesticos", "Demora", "Habilitado"},
-                new String[]{"Servicios Tangibles", "Instancia Duplicada", "Habilitado"},
-                new String[]{"Comestibles", "Disenio Erroneo", "Habilitado"},
-                new String[]{"Textiles", "Danio", "Habilitado"},
-                new String[]{"Papel, Carton e Impresos", "Mal estado", "Habilitado"},
-                new String[]{"Quimicos y Conexos", "Danio", "Habilitado"},
-                new String[]{"Equipo Informatico", "Funcionalidad", "Habilitado"},
-                new String[]{"Muebles y Mobiliario", "Mal estado", "Deshabilitado"}
-        ));
-    }
-
-    public static final List<String> TIPOS_BIEN = List.of("Electrodomesticos", "Servicios Tangibles",
-            "Comestibles", "Textiles", "Papel, Carton e Impresos", "Quimicos y Conexos",
-            "Equipo Informatico", "Muebles y Mobiliario");
-
     /* ---------------- catalogo de problemas (hojas CatProblemas / TipoProblema) ---------------- */
 
     /** Segmento | Familia | Tipo de problema | Problema. */
@@ -306,7 +264,7 @@ public final class Datos {
 
     /* ---------------- catalogo de politicas / garantias (hoja Hoja1) ---------------- */
 
-    /** Codigo | Tipo de garantia | Descripcion de la politica | Plazo | Estado. */
+    /** Codigo | Tipo de garantia | Politica | Plazo | Estado. */
     public static List<String[]> catalogoPoliticas() {
         return new ArrayList<>(List.of(
                 new String[]{"G001", "Legal", "Identificarse al pagar con tarjeta", "12 Meses", "Habilitado"},
@@ -355,98 +313,54 @@ public final class Datos {
         ));
     }
 
-    public static final List<String> OPERADORES_FORMULA = List.of("Inicializa", "Asigna",
-            "Suma", "Resta", "Multiplica", "Divide");
-
-    /* ---------------- reportes y procesos ---------------- */
-
-    /** Codigo | Nombre | Modulo | Periodicidad. */
-    public static List<String[]> reportes() {
-        return new ArrayList<>(List.of(
-                new String[]{"REP01", "Reclamos por area", "Operativo", "Diario"},
-                new String[]{"REP02", "Reclamos por tipo de bien", "Operativo", "Semanal"},
-                new String[]{"REP03", "Reclamos fuera de plazo", "Gerencial", "Mensual"},
-                new String[]{"REP04", "Nivel de satisfaccion del cliente", "Gerencial", "Mensual"},
-                new String[]{"REP05", "Carga por especialista", "Operativo", "Semanal"},
-                new String[]{"REP06", "Costo de atencion por reclamo", "Gerencial", "Mensual"},
-                new String[]{"REP07", "Reclamos por canal de ingreso", "Operativo", "Diario"}
-        ));
-    }
-
-    /** Proceso | Descripcion | Frecuencia | Ultima ejecucion | Estado. */
-    public static List<String[]> procesosBatch() {
-        return new ArrayList<>(List.of(
-                new String[]{"BAT01", "Cierre diario de reclamos atendidos", "Diaria 23:00", "21/09/2026 23:00", "Habilitado"},
-                new String[]{"BAT02", "Vencimiento de plazos de garantia", "Diaria 00:30", "22/09/2026 00:30", "Habilitado"},
-                new String[]{"BAT03", "Recalculo de categorizacion de cliente", "Semanal lunes", "21/09/2026 02:00", "Habilitado"},
-                new String[]{"BAT04", "Notificacion de reclamos en cola", "Cada 4 horas", "22/09/2026 16:00", "Habilitado"},
-                new String[]{"BAT05", "Consolidado mensual de indicadores", "Mensual dia 1", "01/09/2026 03:00", "Deshabilitado"}
-        ));
-    }
-
-    public static List<String[]> procesosActBd() {
-        return new ArrayList<>(List.of(
-                new String[]{"ACT01", "Carga de catalogo de productos", "Bajo demanda", "20/09/2026 09:15", "Habilitado"},
-                new String[]{"ACT02", "Sincronizacion de clientes", "Diaria 01:00", "22/09/2026 01:00", "Habilitado"},
-                new String[]{"ACT03", "Actualizacion de tabla de garantias", "Bajo demanda", "15/09/2026 11:40", "Habilitado"},
-                new String[]{"ACT04", "Carga de areas y especialistas", "Bajo demanda", "18/09/2026 08:00", "Habilitado"}
-        ));
-    }
-
-    public static List<String[]> procesosMantBd() {
-        return new ArrayList<>(List.of(
-                new String[]{"MNT01", "Respaldo completo", "Diaria 02:00", "22/09/2026 02:00", "Habilitado"},
-                new String[]{"MNT02", "Respaldo incremental", "Cada 6 horas", "22/09/2026 14:00", "Habilitado"},
-                new String[]{"MNT03", "Reorganizacion de indices", "Semanal domingo", "20/09/2026 04:00", "Habilitado"},
-                new String[]{"MNT04", "Depuracion de reclamos cerrados", "Mensual dia 1", "01/09/2026 05:00", "Habilitado"},
-                new String[]{"MNT05", "Verificacion de integridad", "Semanal domingo", "20/09/2026 05:30", "Habilitado"}
-        ));
-    }
-
-    public static List<String[]> procesosContingencia() {
-        return new ArrayList<>(List.of(
-                new String[]{"CTG01", "Conmutacion a servidor alterno", "Ante caida", "No ejecutado", "Habilitado"},
-                new String[]{"CTG02", "Restauracion desde respaldo", "Bajo demanda", "12/08/2026 07:20", "Habilitado"},
-                new String[]{"CTG03", "Registro manual de reclamos", "Ante caida", "No ejecutado", "Habilitado"},
-                new String[]{"CTG04", "Simulacro de recuperacion", "Trimestral", "01/07/2026 09:00", "Habilitado"}
-        ));
-    }
-
     /* ---------------- indicadores (hoja MANT-PARAM) ---------------- */
 
-    public static List<Indicador> indicadores() {
-        return List.of(
-                new Indicador("Nivel de satisfaccion del cliente", "87.4", "%", 2.1, true),
-                new Indicador("Tiempo promedio de solucion por reclamo", "3.6", "dias", -0.4, false),
-                new Indicador("Reclamos en el mes", "142", "reclamos", 11.0, false),
-                new Indicador("Reclamos criticos", "9.2", "%", -1.3, false),
-                new Indicador("Solucionados fuera de plazo", "6.8", "%", 0.9, false),
-                new Indicador("Costo por atencion de reclamo", "S/ 42.10", "por reclamo", -3.2, false),
-                new Indicador("Rotacion de especialistas por reclamo", "1.4", "asignaciones", 0.2, false),
-                new Indicador("Eficiencia de reclamo por tipo de bien", "78.5", "%", 1.6, true)
-        );
+    /** Los indicadores que enumera el prototipo, en su mismo orden. */
+    public static final List<String> INDICADORES = List.of(
+            "Nivel de satisfaccion del cliente",
+            "Tiempo promedio de solucion por reclamo",
+            "Tipo de bienes mas reclamados",
+            "Areas con mayor demanda de reclamo",
+            "Numero de reclamos por clase de producto",
+            "Costo por atencion de reclamo",
+            "Numero de rotacion de especialistas por reclamo",
+            "Porcentaje de reclamos en un mes",
+            "Porcentaje de reclamos criticos",
+            "Porcentaje de reclamos solucionados fuera de plazo",
+            "Eficiencia de reclamo por tipo de bien");
+
+    /* ---------------- catalogo de reclamos y eventos ---------------- */
+
+    /** Segmento | Tipo de problema | Estado (hojas ReclamosHab y ReclamosDes). */
+    public static List<String[]> catalogoReclamos() {
+        return new ArrayList<>(List.of(
+                new String[]{"Equipos y suministros de Laboratorio y de Medicion", "Funcionalidad", "Habilitado"},
+                new String[]{"Equipo Medico, accesorios y suministros", "Funcionalidad", "Habilitado"},
+                new String[]{"Difusion de tecnologia de informacion y Telecomunicaciones", "Cobranza", "Habilitado"},
+                new String[]{"Difusion de tecnologia de informacion y Telecomunicaciones", "Funcionalidad", "Habilitado"},
+                new String[]{"Equipo Medico, accesorios y suministros", "Cobranza", "Deshabilitado"},
+                new String[]{"Equipos de oficina, accesorios y Suministros", "Entrega", "Deshabilitado"},
+                new String[]{"Difusion de tecnologia de informacion y Telecomunicaciones", "Atencion", "Deshabilitado"}
+        ));
     }
 
-    /** Reclamos agrupados por area, para el grafico del tablero. */
-    public static Map<String, Integer> reclamosPorArea() {
-        Map<String, Integer> m = new LinkedHashMap<>();
-        m.put("PostVenta", 46);
-        m.put("Area Tecnica", 33);
-        m.put("Logistica", 24);
-        m.put("Ventas", 19);
-        m.put("Operaciones", 12);
-        m.put("Area Especializada", 8);
-        return m;
+    /** Los eventos del protocolo, con los valores que admite cada uno (hoja Protocolo). */
+    public static List<String[]> catalogoEventos() {
+        return new ArrayList<>(List.of(
+                new String[]{"Inspeccion del problema", String.join(", ", INSPECCION)},
+                new String[]{"Solucion del problema", String.join(", ", SOLUCION)},
+                new String[]{"Reasignacion de area", String.join(", ", REASIGNACION)},
+                new String[]{"Entrega del producto", String.join(", ", ENTREGA)},
+                new String[]{"Seguimiento de la solucion", String.join(", ", SEGUIMIENTO)}
+        ));
     }
 
-    /** Reclamos por tipo de bien, para el tablero. */
-    public static Map<String, Integer> reclamosPorTipoBien() {
-        Map<String, Integer> m = new LinkedHashMap<>();
-        m.put("Equipo informatico", 51);
-        m.put("Dispositivos de comunicacion", 38);
-        m.put("Muebles y decoracion", 22);
-        m.put("Textiles", 17);
-        m.put("Componentes electronicos", 14);
-        return m;
-    }
+    public static final List<String> SEGMENTOS_RECLAMO = List.of(
+            "Equipos y suministros de Laboratorio y de Medicion",
+            "Equipo Medico, accesorios y suministros",
+            "Difusion de tecnologia de informacion y Telecomunicaciones",
+            "Equipos de oficina, accesorios y Suministros");
+
+    public static final List<String> TIPOS_PROBLEMA_RECLAMO = List.of(
+            "Atencion", "Cobranza", "Entrega", "Funcionalidad", "Instalacion");
 }

@@ -7,10 +7,7 @@ import javax.swing.table.*;
 import java.awt.*;
 import java.util.List;
 
-/**
- * JTable con el estilo del sistema: cabecera en mayusculas finas, filas
- * alternadas, seleccion con el acento y ordenamiento por columna activado.
- */
+/** Tabla con rejilla completa y cabecera gris, como cualquier grilla de escritorio. */
 public class Tabla extends JTable {
 
     private final DefaultTableModel modelo;
@@ -23,45 +20,23 @@ public class Tabla extends JTable {
         configurar();
     }
 
-    public Tabla(DefaultTableModel modelo) {
-        this.modelo = modelo;
-        setModel(modelo);
-        configurar();
-    }
-
     private void configurar() {
         setFont(Tema.cuerpo());
-        setRowHeight(30);
-        setShowVerticalLines(false);
-        setShowHorizontalLines(true);
-        setGridColor(Tema.borde());
-        setIntercellSpacing(new Dimension(0, 1));
-        setSelectionBackground(Tema.acentoSuave());
-        setSelectionForeground(Tema.texto());
+        setRowHeight(22);
+        setShowGrid(true);
+        setGridColor(Tema.BORDE_FINO);
+        setIntercellSpacing(new Dimension(1, 1));
+        setSelectionBackground(Tema.SELECCION);
+        setSelectionForeground(Tema.TEXTO);
         setAutoCreateRowSorter(true);
         setFillsViewportHeight(true);
-        putClientProperty("JTable.rowHeightMode", "custom");
 
         JTableHeader cab = getTableHeader();
         cab.setReorderingAllowed(false);
-        cab.setFont(Tema.fuente(11, Font.BOLD));
-        cab.setForeground(Tema.textoSuave());
-        cab.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Tema.borde()));
+        cab.setFont(Tema.fuerte());
+        cab.setBackground(Tema.CABECERA);
 
-        // el encabezado se alinea con el contenido de la celda, no centrado
-        TableCellRenderer base = cab.getDefaultRenderer();
-        cab.setDefaultRenderer((t, v, sel, foco, f, c) -> {
-            Component comp = base.getTableCellRendererComponent(t, v, sel, foco, f, c);
-            if (comp instanceof JLabel l) {
-                l.setHorizontalAlignment(SwingConstants.LEADING);
-                l.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 8));
-                l.setFont(Tema.fuente(11, Font.BOLD));
-                l.setForeground(Tema.textoSuave());
-            }
-            return comp;
-        });
-
-        setDefaultRenderer(Object.class, new RenderFila());
+        setDefaultRenderer(Object.class, new Render());
     }
 
     public DefaultTableModel modelo() { return modelo; }
@@ -70,31 +45,20 @@ public class Tabla extends JTable {
 
     public void agregar(Object... celdas) { modelo.addRow(celdas); }
 
-    /**
-     * Deja de repartir el ancho sobrante entre columnas: cada una conserva el
-     * ancho pedido y, si no entran todas, aparece scroll horizontal. Evita que
-     * una tabla ancha comprima los codigos hasta volverlos ilegibles.
-     */
-    public Tabla anchoFijo() {
-        setAutoResizeMode(AUTO_RESIZE_OFF);
-        return this;
-    }
-
-    /** Fija anchos preferidos por columna; -1 deja la columna elastica. */
-    public void anchos(int... px) {
+    /** Fija anchos preferidos por columna. */
+    public Tabla anchos(int... px) {
         for (int i = 0; i < px.length && i < getColumnCount(); i++) {
-            if (px[i] < 0) continue;
             TableColumn col = getColumnModel().getColumn(i);
             col.setPreferredWidth(px[i]);
             col.setMinWidth(Math.max(40, Math.round(px[i] * 0.8f)));
-            if (getAutoResizeMode() == AUTO_RESIZE_OFF) col.setWidth(px[i]);
         }
+        return this;
     }
 
     /** Centra el contenido de las columnas indicadas. */
-    public void centrar(int... indices) {
+    public Tabla centrar(int... indices) {
         for (int i : indices) {
-            getColumnModel().getColumn(i).setCellRenderer(new RenderFila() {
+            getColumnModel().getColumn(i).setCellRenderer(new Render() {
                 @Override public Component getTableCellRendererComponent(
                         JTable t, Object v, boolean sel, boolean foco, int f, int c) {
                     JLabel l = (JLabel) super.getTableCellRendererComponent(t, v, sel, foco, f, c);
@@ -103,59 +67,36 @@ public class Tabla extends JTable {
                 }
             });
         }
+        return this;
     }
 
-    /** Pinta una columna como distintivo de estado (punto de color + texto). */
-    public void columnaEstado(int indice, java.util.function.Function<String, Color> colorDe) {
-        getColumnModel().getColumn(indice).setCellRenderer(new DefaultTableCellRenderer() {
-            @Override public Component getTableCellRendererComponent(
-                    JTable t, Object v, boolean sel, boolean foco, int f, int c) {
-                String texto = String.valueOf(v);
-                JComponent chip = (JComponent) Ui.chip(texto, colorDe.apply(texto));
-                JPanel p = Ui.panel(new FlowLayout(FlowLayout.LEFT, 0, 4));
-                p.setOpaque(true);
-                p.setBackground(sel ? t.getSelectionBackground() : fondoFila(f));
-                p.add(chip);
-                return p;
-            }
-        });
-    }
-
-    private static Color fondoFila(int fila) {
-        return fila % 2 == 0 ? Tema.superficie()
-                             : Ui.mezcla(Tema.borde(), Tema.superficie(), 0.28f);
-    }
-
-    /** Renderer base con filas alternadas y elipsis en textos largos. */
-    private static class RenderFila extends DefaultTableCellRenderer {
+    /** Renderer con filas alternadas suaves y texto completo en el tooltip. */
+    private static class Render extends DefaultTableCellRenderer {
         @Override public Component getTableCellRendererComponent(
                 JTable t, Object v, boolean sel, boolean foco, int f, int c) {
             JLabel l = (JLabel) super.getTableCellRendererComponent(t, v, sel, foco, f, c);
-            l.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 8));
+            l.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
             l.setFont(Tema.cuerpo());
             if (!sel) {
-                l.setBackground(fondoFila(f));
-                l.setForeground(Tema.texto());
+                l.setBackground(f % 2 == 0 ? Tema.SUPERFICIE : Tema.FILA_ALTERNA);
+                l.setForeground(Tema.TEXTO);
             }
             l.setToolTipText(v == null ? null : String.valueOf(v));
             return l;
         }
     }
 
-    /** Envuelve la tabla en un scroll listo para meter en una {@link Tarjeta}. */
-    public JScrollPane enScroll() {
-        JScrollPane s = Ui.scroll(this);
-        s.getViewport().setBackground(Tema.superficie());
-        s.setOpaque(true);
-        s.setBackground(Tema.superficie());
-        return s;
+    public JScrollPane enScroll() { return Ui.scroll(this); }
+
+    /** Indice de la fila seleccionada en el modelo, o -1 si no hay seleccion. */
+    public int filaModelo() {
+        int f = getSelectedRow();
+        return f < 0 ? -1 : convertRowIndexToModel(f);
     }
 
-    /** Devuelve los valores de la fila seleccionada, o null si no hay seleccion. */
     public List<Object> filaSeleccionada() {
-        int f = getSelectedRow();
-        if (f < 0) return null;
-        int real = convertRowIndexToModel(f);
+        int real = filaModelo();
+        if (real < 0) return null;
         java.util.ArrayList<Object> vals = new java.util.ArrayList<>();
         for (int c = 0; c < modelo.getColumnCount(); c++) vals.add(modelo.getValueAt(real, c));
         return vals;

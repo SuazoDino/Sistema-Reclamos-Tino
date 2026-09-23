@@ -8,10 +8,14 @@ import pe.tino.reclamos.ui.theme.Tema;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.List;
 
 /**
- * Mant-Param - Protocolos. Cada fila define como se atiende un tipo de
- * reclamo: inspeccion, solucion, reasignacion, entrega y seguimiento.
+ * Catalogo de Protocolos.
+ *
+ * Entrada : datos de cada paso que se realiza en determinado tipo de protocolo.
+ * Funcion : registrar y sincronizar los parametros del protocolo de solucion.
+ * Salida  : protocolos registrados.
  */
 public class ProtocolosPantalla extends Pantalla {
 
@@ -19,72 +23,59 @@ public class ProtocolosPantalla extends Pantalla {
             "Tipo de reclamo", "Inspeccion", "Solucion", "Reasignacion",
             "Entrega", "Seguimiento", "Estado"});
 
-    private final JTextField tipoReclamo = Ui.texto("Segmento - Tipo de problema");
+    private final JTextField tipoReclamo = Ui.texto();
     private final JComboBox<String> inspeccion   = Ui.combo(Datos.INSPECCION);
     private final JComboBox<String> solucion     = Ui.combo(Datos.SOLUCION);
     private final JComboBox<String> reasignacion = Ui.combo(Datos.REASIGNACION);
     private final JComboBox<String> entrega      = Ui.combo(Datos.ENTREGA);
     private final JComboBox<String> seguimiento  = Ui.combo(Datos.SEGUIMIENTO);
-    private final JCheckBox habilitado = new JCheckBox("Protocolo habilitado", true);
+    private final JCheckBox habilitado = new JCheckBox("Habilitado", true);
 
     public ProtocolosPantalla() {
-        super("Mant-Param", "Protocolos de atencion",
-                "Secuencia de pasos que el sistema exige para cada tipo de reclamo.");
+        super("Catalogo de Protocolos",
+                "Parametros de cada evento del protocolo, segun el tipo de reclamo.");
 
-        tabla.anchos(265, 100, 100, 115, 100, 110, 145);
-        tabla.columnaEstado(6, Estados::color);
+        tabla.anchos(300, 105, 105, 120, 105, 115, 115);
         tabla.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) cargarSeleccion();
         });
 
-        Tarjeta listado = new Tarjeta("Protocolos definidos",
-                "Un protocolo deshabilitado queda documentado pero no se aplica.");
-        listado.sinRelleno();
+        Grupo listado = Grupo.ajustado("Protocolos definidos");
         listado.add(tabla.enScroll(), BorderLayout.CENTER);
 
         contenido().add(listado, BorderLayout.CENTER);
-        contenido().add(editor(), BorderLayout.EAST);
-
+        contenido().add(editor(), BorderLayout.SOUTH);
         refrescar();
     }
 
     private JComponent editor() {
-        Tarjeta t = new Tarjeta("Definicion del protocolo",
-                "Alta de un protocolo nuevo o edicion del seleccionado.");
-        t.setPreferredSize(new Dimension(370, 100));
-
+        Grupo g = new Grupo("Definicion del protocolo");
         habilitado.setFont(Tema.cuerpo());
         habilitado.setOpaque(false);
 
         Formulario f = new Formulario();
-        f.grupo("Alcance")
-         .campo("Tipo de reclamo", tipoReclamo)
-         .grupo("Pasos del protocolo")
+        f.campo("Tipo de reclamo", tipoReclamo)
          .campo("Inspeccion del problema", inspeccion)
          .campo("Solucion del problema", solucion)
          .campo("Reasignacion de area", reasignacion)
          .campo("Entrega del producto", entrega)
          .campo("Seguimiento de solucion", seguimiento)
-         .ancho(habilitado)
-         .finalizar();
+         .campo("Estado", habilitado);
 
-        JButton guardar = Ui.primario("Guardar", "guardar");
-        guardar.addActionListener(e -> guardar());
-        JButton nuevo = Ui.secundario("Nuevo", "mas");
+        JButton nuevo = Ui.boton("Nuevo");
         nuevo.addActionListener(e -> limpiar());
-        JButton eliminar = Ui.plano("Eliminar", "cruz");
+        JButton guardar = Ui.boton("Guardar");
+        guardar.addActionListener(e -> guardar());
+        JButton eliminar = Ui.boton("Eliminar");
         eliminar.addActionListener(e -> eliminar());
 
         JPanel pie = Ui.panel(new BorderLayout());
-        pie.setBorder(Ui.relleno(Tema.ESP_MD, 0, 0, 0));
-        pie.add(eliminar, BorderLayout.WEST);
-        pie.add(Ui.filaDerecha(Tema.ESP_SM, nuevo, guardar), BorderLayout.EAST);
+        pie.setBorder(Ui.relleno(Tema.ESP_SM, 0, 0, 0));
+        pie.add(Ui.filaDerecha(nuevo, eliminar, guardar), BorderLayout.EAST);
 
-        JPanel cuerpo = Ui.panel(new BorderLayout());
-        cuerpo.add(f, BorderLayout.CENTER);
-        cuerpo.add(pie, BorderLayout.SOUTH);
-        t.add(Ui.scrollVertical(cuerpo), BorderLayout.CENTER);
-        return t;
+        g.add(f, BorderLayout.CENTER);
+        g.add(pie, BorderLayout.SOUTH);
+        return g;
     }
 
     private void refrescar() {
@@ -96,13 +87,8 @@ public class ProtocolosPantalla extends Pantalla {
         }
     }
 
-    private int indiceSeleccionado() {
-        int f = tabla.getSelectedRow();
-        return f < 0 ? -1 : tabla.convertRowIndexToModel(f);
-    }
-
     private void cargarSeleccion() {
-        int i = indiceSeleccionado();
+        int i = tabla.filaModelo();
         if (i < 0) return;
         Protocolo p = Estado.protocolos().get(i);
         tipoReclamo.setText(p.tipoReclamo());
@@ -128,15 +114,14 @@ public class ProtocolosPantalla extends Pantalla {
                 String.valueOf(seguimiento.getSelectedItem()),
                 habilitado.isSelected());
 
-        int i = indiceSeleccionado();
-        if (i < 0) Estado.protocolos().add(p);
-        else Estado.protocolos().set(i, p);
+        int i = tabla.filaModelo();
+        if (i < 0) Estado.protocolos().add(p); else Estado.protocolos().set(i, p);
         refrescar();
         avisar(i < 0 ? "Protocolo agregado." : "Protocolo actualizado.");
     }
 
     private void eliminar() {
-        int i = indiceSeleccionado();
+        int i = tabla.filaModelo();
         if (i < 0) { avisar("Seleccione el protocolo que desea eliminar."); return; }
         if (!confirmar("Eliminar el protocolo seleccionado?")) return;
         Estado.protocolos().remove(i);
@@ -147,11 +132,8 @@ public class ProtocolosPantalla extends Pantalla {
     private void limpiar() {
         tabla.clearSelection();
         tipoReclamo.setText("");
-        inspeccion.setSelectedIndex(0);
-        solucion.setSelectedIndex(0);
-        reasignacion.setSelectedIndex(0);
-        entrega.setSelectedIndex(0);
-        seguimiento.setSelectedIndex(0);
+        List.of(inspeccion, solucion, reasignacion, entrega, seguimiento)
+                .forEach(c -> c.setSelectedIndex(0));
         habilitado.setSelected(true);
         tipoReclamo.requestFocusInWindow();
     }

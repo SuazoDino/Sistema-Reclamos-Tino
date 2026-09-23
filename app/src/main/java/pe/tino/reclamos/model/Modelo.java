@@ -64,17 +64,6 @@ public final class Modelo {
     public record Regla(String condicion, String parametro, String operador, String variable,
                         String accionVerdadero, String accionFalso, String descripcion) {}
 
-    /** Perfil de seguridad con sus accesos (hoja SEGURIDAD). */
-    public record Perfil(String nombre, java.util.List<String> accesos) {
-        @Override public String toString() { return nombre; }
-    }
 
-    /** Indicador del modulo de estadisticas (hoja MANT-PARAM, bloque "indicadores"). */
-    /**
-     * Indicador de gestion. {@code masEsMejor} dice en que direccion una
-     * variacion positiva es una buena noticia, para no pintar de verde una
-     * subida de reclamos criticos.
-     */
-    public record Indicador(String nombre, String valor, String unidad,
-                            double variacion, boolean masEsMejor) {}
+
 }
