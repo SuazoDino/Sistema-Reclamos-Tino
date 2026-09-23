@@ -49,26 +49,28 @@ mapa y se vuelve con **Volver** o **Mapa**.
                         SISTEMA DE RECLAMOS
           ┌──────────────────────┼──────────────────────┐
      SEGURIDAD               APLICATIVO              TECNICO
-                        ┌────────┴────────┐         ├ ACT-BD
-                     ONLINE            BATCH        ├ MANT-BD
-              ┌─────────┴─────────┐                 ├ ESTADISTICAS
-          GERENCIAL           OPERATIVO             └ CONTINGENCIA
+     └ Perfiles y        ┌────────┴────────┐         ├ ACT-BD
+       Accesos        ONLINE            BATCH        ├ MANT-BD
+              ┌─────────┴─────────┐                  ├ ESTADISTICAS
+          GERENCIAL           OPERATIVO              └ CONTINGENCIA
        ┌──────┴──────┐      ┌─────┴─────┐
   MANT-PARAM     CONSULTA  AREA      CLIENTE
-  ├ Parámetros      └ Indicadores  ├ Data Entry  ├ Data Entry
-  ├ Reclamos y Eventos            └ Reportes     └ Reportes
-  ├ Productos
-  ├ Problemas
-  ├ Clientes
-  ├ Protocolos
-  ├ Reglas
-  └ Políticas
+  ├ Catálogo General  └ Indicadores  ├ Data Entry  ├ Data Entry
+  ├ Catálogo de Reclamos             └ Reportes    └ Reportes
+  ├ Catálogo de Productos
+  ├ Catálogo de Bienes
+  ├ Catálogo de Problemas
+  ├ Catálogo de Clientes
+  ├ Catálogo de Categorización
+  ├ Catálogo de Protocolos
+  ├ Catálogo de Reglas
+  └ Catálogo de Políticas
 ```
 
-Están **todos** los módulos de la arquitectura. Los que desarrolla el 1er
-entregable son botones y llevan a su pantalla; SEGURIDAD, BATCH, ACT-BD,
-MANT-BD, ESTADISTICAS y CONTINGENCIA se dibujan con **borde punteado**, porque
-forman parte del diseño pero todavía no del prototipo.
+Están **todos** los módulos de la arquitectura. Los que tienen pantalla son
+botones; BATCH, ACT-BD, MANT-BD y CONTINGENCIA se dibujan con **borde
+punteado**, porque forman parte del diseño pero ni el Excel ni el informe traen
+contenido para ellos.
 
 El diagrama se calcula solo a partir del árbol declarado en `MapaPantalla`: una
 rama reparte a sus hijos en horizontal y se centra sobre ellos; un nodo cuyos
@@ -78,20 +80,23 @@ entre a lo ancho sin scroll.
 
 ## De dónde sale cada pantalla
 
-| Pantalla | Entrada / Función / Salida | Origen |
+| Pantalla | Qué hace | Origen |
 |---|---|---|
-| Parámetros Generales | Registrar generalidades de la empresa y del sistema | hojas `*Exis` / `*Hab` |
-| Cat. de Reclamos y Eventos | Registrar los reclamos con sus respectivos eventos | `ReclamosHab`, `ReclamosDes`, `Protocolo` |
-| Cat. de Productos | Registrar productos por segmento, familia y clase | hoja `Producto` |
-| Cat. de Problemas | Registrar problemas y sincronizarlos con tipo y producto | `CatProblemas1`, `CatProblemas2` |
-| Cat. de Clientes | Sincronizar las condiciones con los tipos de cliente | `Clientes`, `Cons`, `MANT-PARAM` |
-| Cat. de Protocolos | Registrar los parámetros del protocolo de solución | `Protocolo`, `MantProtocolo` |
-| Cat. de Reglas | Establecer reglas y registrar sus parámetros | hoja `MantReglas` |
-| Cat. de Políticas | Establecer políticas y sus tipos | garantías de la hoja `Hoja1` |
-| Indicadores | Resultados estadísticos del sistema de reclamos | los 11 indicadores de `MANT-PARAM` |
-| Área · Data Entry | Ingreso del usuario para atender los reclamos en cola | informe, 2.1.2.1.1 |
+| Seguridad · Perfiles y Accesos | Conceder accesos y permisos a cada perfil | hoja `SEGURIDAD` |
+| Catálogo General | Áreas, ámbito, sectores, locales, idiomas y empleados | hojas `*Exis` / `*Hab`, `MantGeneral` |
+| Catálogo de Reclamos | Tipos de reclamo con sus eventos de protocolo | `ReclamosHab`, `ReclamosDes`, `Protocolo` |
+| Catálogo de Productos | Segmento › Familia › Clase › Bien | hoja `Producto` |
+| Catálogo de Bienes | Tipos de bien y el problema que admiten | `MANT-PARAM`, `Bien`, `BienHab` |
+| Catálogo de Problemas | Problemas por segmento, familia y tipo | `CatProblemas1`, `CatProblemas2` |
+| Catálogo de Clientes | Tipos de cliente y sus consideraciones | `Clientes`, `Cons`, `Conshab` |
+| Catálogo de Categorización | Condiciones, métodos y fórmulas del cálculo | `MANT-PARAM` |
+| Catálogo de Protocolos | Parámetros de cada evento del protocolo | `Protocolo`, `MantProtocolo` |
+| Catálogo de Reglas | Condiciones encadenadas del motor de decisión | hoja `MantReglas` |
+| Catálogo de Políticas | Garantías legales, explícitas e implícitas | garantías de `Hoja1` |
+| Indicadores | Resultados estadísticos del sistema | los 11 indicadores de `MANT-PARAM` |
+| Área · Data Entry | Ingreso del usuario para atender la cola | informe, 2.1.2.1.1 |
 | Área · Reportes | Avances y detalles realizados por el usuario | informe, Operativo → Área |
-| Cliente · Data Entry | Validar documento, registrar reclamo, cuadro resumen | informe, 2.1.2.2.1 |
+| Cliente · Data Entry | Validar documento, registrar, cuadro resumen | informe, 2.1.2.2.1 |
 | Cliente · Reportes | Seguimiento del estado y del tiempo restante | informe, 2.1.2.2.2 |
 
 Cliente · Reportes implementa los tres casos que describe el informe: reclamo
@@ -100,7 +105,9 @@ instancia), rechazado fuera del plazo (advertencia) y reclamo pendiente.
 
 ## Criterios que sigue el código
 
-- **Nada inventado.** Todos los datos salen del Excel o del informe. Los
+- **Nada inventado.** Todos los datos salen del Excel o del informe. En
+  Seguridad solo viene sembrada la asignación del perfil gerencial, que es la
+  única que la hoja documenta; el resto se asigna desde la pantalla. Los
   indicadores que el prototipo no puede calcular con los reclamos registrados
   se marcan como *no calculables* en vez de mostrar un número inventado. El
   plazo de impugnación es un parámetro visible en pantalla, no una constante

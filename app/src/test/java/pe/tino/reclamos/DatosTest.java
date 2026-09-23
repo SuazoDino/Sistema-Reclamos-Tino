@@ -31,6 +31,23 @@ class DatosTest {
     }
 
     @Test
+    void losAccesosSembradosDeCadaPerfilPertenecenAlCatalogo() {
+        Datos.perfiles().forEach(perfil ->
+                assertTrue(Datos.ACCESOS.containsAll(perfil.accesos()),
+                        "accesos desconocidos en el perfil " + perfil.nombre()));
+    }
+
+    @Test
+    void elCatalogoDeBienesUsaTiposConocidos() {
+        Datos.catalogoBienes().forEach(f -> {
+            assertEquals(3, f.length);
+            assertTrue(Datos.TIPOS_BIEN.contains(f[0]), "tipo de bien desconocido: " + f[0]);
+            assertTrue(Datos.TIPOS_PROBLEMA_BIEN.contains(f[1]),
+                    "tipo de problema desconocido: " + f[1]);
+        });
+    }
+
+    @Test
     void cadaIndicadorDelPrototipoEstaListado() {
         assertEquals(11, Datos.INDICADORES.size());
         Datos.INDICADORES.forEach(i -> assertFalse(i.isBlank()));

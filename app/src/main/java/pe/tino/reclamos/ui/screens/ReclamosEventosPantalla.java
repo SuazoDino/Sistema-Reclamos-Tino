@@ -21,7 +21,7 @@ import java.util.List;
 public class ReclamosEventosPantalla extends Pantalla {
 
     public ReclamosEventosPantalla() {
-        super("Catalogo de Reclamos y Eventos",
+        super("Catalogo de Reclamos",
                 "Un tipo de reclamo es un segmento mas un tipo de problema; cada evento es un paso del protocolo.");
 
         Tabla eventos = new Tabla(new String[]{"Evento del protocolo", "Valores que admite"});

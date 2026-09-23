@@ -31,8 +31,8 @@ public class ParametrosPantalla extends Pantalla {
     private final JLabel conteo = Ui.suave("");
 
     public ParametrosPantalla() {
-        super("Parametros Generales",
-                "Generalidades de la empresa y del sistema: areas, magnitud, sectores, locales e idiomas.");
+        super("Catalogo General",
+                "Parametros generales de la empresa y del sistema: areas, magnitud, sectores, locales e idiomas.");
 
         List<String> claves = List.copyOf(Datos.clavesCatalogo());
         selector = Ui.combo(claves.stream().map(c -> Datos.catalogo(c).titulo()).toList());

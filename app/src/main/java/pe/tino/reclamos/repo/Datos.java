@@ -262,6 +262,56 @@ public final class Datos {
     public static final List<String> TIPOS_PROBLEMA_CAT = List.of("Danio", "Falta de Componentes",
             "Mal funcionamiento", "Cobranza", "Funcionalidad", "Decoloracion", "Demora", "Entrega");
 
+    /* ---------------- catalogo de bienes (hoja MANT-PARAM, bloque tipo de bien) ---------------- */
+
+    /** Tipo de bien | Tipo de problema que admite | Estado. */
+    public static List<String[]> catalogoBienes() {
+        return new ArrayList<>(List.of(
+                new String[]{"Electrodomesticos", "Demora", "Habilitado"},
+                new String[]{"Servicios Tangibles", "Instancia Duplicada", "Habilitado"},
+                new String[]{"Comestibles", "Disenio Erroneo", "Habilitado"},
+                new String[]{"Textiles", "Danio", "Habilitado"},
+                new String[]{"Papel, Carton e Impresos", "Mal estado", "Habilitado"},
+                new String[]{"Quimicos y Conexos", "Danio", "Habilitado"}
+        ));
+    }
+
+    public static final List<String> TIPOS_BIEN = List.of("Electrodomesticos",
+            "Servicios Tangibles", "Comestibles", "Textiles",
+            "Papel, Carton e Impresos", "Quimicos y Conexos");
+
+    public static final List<String> TIPOS_PROBLEMA_BIEN = List.of("Demora",
+            "Instancia Duplicada", "Disenio Erroneo", "Danio", "Mal estado");
+
+    /* ---------------- seguridad (hoja SEGURIDAD) ---------------- */
+
+    /** Los accesos que enumera la hoja, en su mismo orden. */
+    public static final List<String> ACCESOS = List.of(
+            "Catalogo de Productos", "Catalogo de Bienes", "Catalogo de Politicas",
+            "Catalogo de Problemas", "Catalogo de Protocolos", "Catalogo de Reglas",
+            "Seguridad", "Estadisticas", "Reportes", "General", "Categorizacion Cliente");
+
+    /** Los permisos que enumera la hoja. */
+    public static final List<String> PERMISOS = List.of(
+            "Agregar lineas para los bienes",
+            "Agregar productos a las lineas");
+
+    /**
+     * Los perfiles de la hoja. Solo el perfil gerencial trae asignacion,
+     * porque es el unico que la hoja documenta (columna MOD-PERFIL GERENCIAL);
+     * los demas se asignan desde la pantalla.
+     */
+    public static List<Perfil> perfiles() {
+        return new ArrayList<>(List.of(
+                new Perfil("Administrador de BD", List.of()),
+                new Perfil("Administrador de Seguridad", List.of()),
+                new Perfil("Cliente", List.of()),
+                new Perfil("Especialista", List.of()),
+                new Perfil("Gerente General", List.of("General", "Catalogo de Bienes",
+                        "Catalogo de Problemas", "Categorizacion Cliente"))
+        ));
+    }
+
     /* ---------------- catalogo de politicas / garantias (hoja Hoja1) ---------------- */
 
     /** Codigo | Tipo de garantia | Politica | Plazo | Estado. */

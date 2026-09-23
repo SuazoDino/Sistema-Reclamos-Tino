@@ -25,12 +25,17 @@ public class VentanaPrincipal extends JFrame {
 
         fabricas.put(Navegacion.MAPA,      MapaPantalla::new);
 
+        // Seguridad
+        fabricas.put("seguridad-perfiles", SeguridadPantalla::new);
+
         // Gerencial - Mantenimiento de Parametros
-        fabricas.put("param-generales",    ParametrosPantalla::new);
+        fabricas.put("cat-general",        ParametrosPantalla::new);
         fabricas.put("cat-reclamos",       ReclamosEventosPantalla::new);
         fabricas.put("cat-productos",      ProductosPantalla::new);
+        fabricas.put("cat-bienes",         BienesPantalla::new);
         fabricas.put("cat-problemas",      ProblemasPantalla::new);
         fabricas.put("cat-clientes",       ClientesPantalla::new);
+        fabricas.put("cat-categorizacion", CategorizacionPantalla::new);
         fabricas.put("cat-protocolos",     ProtocolosPantalla::new);
         fabricas.put("cat-reglas",         ReglasPantalla::new);
         fabricas.put("cat-politicas",      PoliticasPantalla::new);

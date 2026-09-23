@@ -2,7 +2,6 @@ package pe.tino.reclamos.ui.screens;
 
 import pe.tino.reclamos.repo.Datos;
 import pe.tino.reclamos.ui.components.Grupo;
-import pe.tino.reclamos.ui.components.Tabla;
 import pe.tino.reclamos.ui.components.Ui;
 import pe.tino.reclamos.ui.theme.Tema;
 
@@ -49,13 +48,12 @@ public class ClientesPantalla extends Pantalla {
                 BorderLayout.WEST);
         gCons.add(ayuda, BorderLayout.SOUTH);
 
-        JPanel superior = Ui.panel(new BorderLayout(Tema.ESP_MD, 0));
-        superior.add(gTipos, BorderLayout.WEST);
-        superior.add(gCons, BorderLayout.CENTER);
-        superior.setPreferredSize(new Dimension(100, 200));
+        JPanel cuerpo = Ui.panel(new BorderLayout(Tema.ESP_MD, 0));
+        cuerpo.add(gTipos, BorderLayout.WEST);
+        cuerpo.add(gCons, BorderLayout.CENTER);
 
-        contenido().add(superior, BorderLayout.NORTH);
-        contenido().add(condicionesYMetodos(), BorderLayout.CENTER);
+        contenido().add(cuerpo, BorderLayout.CENTER);
+        contenido().add(nota(), BorderLayout.SOUTH);
     }
 
     private JComponent pieTipos() {
@@ -76,38 +74,12 @@ public class ClientesPantalla extends Pantalla {
         return p;
     }
 
-    /** Los tres bloques de la hoja MANT-PARAM que definen el calculo. */
-    private JComponent condicionesYMetodos() {
-        Tabla condiciones = new Tabla(new String[]{
-                "Condicion", "Parametro", "Operador", "Variable", "Si es verdadero", "Si es falso"});
-        Datos.condicionesCliente().forEach(f -> condiciones.agregar((Object[]) f));
-        condiciones.anchos(100, 130, 90, 110, 130, 110).centrar(2);
-
-        Tabla metodos = new Tabla(new String[]{"Metodo", "Formula"});
-        Datos.metodosCliente().forEach(f -> metodos.agregar((Object[]) f));
-        metodos.anchos(90, 380);
-
-        Tabla formulas = new Tabla(new String[]{"Metodo", "Variable", "Secuencia", "Operador"});
-        Datos.formulasCliente().forEach(f -> formulas.agregar((Object[]) f));
-        formulas.anchos(90, 180, 90, 130).centrar(2);
-
-        Grupo gCond = Grupo.ajustado("Condiciones");
-        gCond.add(condiciones.enScroll(), BorderLayout.CENTER);
-        gCond.setPreferredSize(new Dimension(100, 150));
-
-        Grupo gMet = Grupo.ajustado("Metodos de calculo");
-        gMet.add(metodos.enScroll(), BorderLayout.CENTER);
-
-        Grupo gFor = Grupo.ajustado("Secuencia de cada metodo");
-        gFor.add(formulas.enScroll(), BorderLayout.CENTER);
-
-        JPanel inferior = Ui.panel(new GridLayout(1, 2, Tema.ESP_MD, 0));
-        inferior.add(gMet);
-        inferior.add(gFor);
-
-        JPanel p = Ui.panel(new BorderLayout(0, Tema.ESP_MD));
-        p.add(gCond, BorderLayout.NORTH);
-        p.add(inferior, BorderLayout.CENTER);
+    /** La formula del calculo vive en su propio catalogo. */
+    private JComponent nota() {
+        JPanel p = Ui.panel(new BorderLayout());
+        p.setBorder(Ui.relleno(Tema.ESP_SM, 0, 0, 0));
+        p.add(Ui.suave("Las condiciones, metodos y formulas del calculo se administran "
+                + "en el Catalogo de Categorizacion."), BorderLayout.WEST);
         return p;
     }
 

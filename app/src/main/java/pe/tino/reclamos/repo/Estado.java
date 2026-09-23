@@ -16,6 +16,7 @@ public final class Estado {
     private static final List<Reclamo> RECLAMOS = new ArrayList<>(Datos.reclamosDemo());
     private static final List<Protocolo> PROTOCOLOS = Datos.protocolos();
     private static final List<Regla> REGLAS = Datos.reglas();
+    private static final List<Perfil> PERFILES = Datos.perfiles();
     private static final List<Consumer<List<Reclamo>>> OYENTES = new ArrayList<>();
 
     private Estado() {}
@@ -23,6 +24,7 @@ public final class Estado {
     public static List<Reclamo> reclamos()   { return RECLAMOS; }
     public static List<Protocolo> protocolos() { return PROTOCOLOS; }
     public static List<Regla> reglas()       { return REGLAS; }
+    public static List<Perfil> perfiles()    { return PERFILES; }
 
     public static void alCambiarReclamos(Consumer<List<Reclamo>> oyente) {
         OYENTES.add(oyente);

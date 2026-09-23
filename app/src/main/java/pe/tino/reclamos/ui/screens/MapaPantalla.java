@@ -52,19 +52,22 @@ public class MapaPantalla extends JPanel {
 
     /** Los modulos tipicos del diseno arquitectonico. */
     private static final Nodo RAIZ = Nodo.grupo("SISTEMA DE RECLAMOS",
-            Nodo.pendiente("SEGURIDAD"),
+            Nodo.grupo("SEGURIDAD",
+                    Nodo.opcion("seguridad-perfiles", "Perfiles y Accesos")),
             Nodo.grupo("APLICATIVO",
                     Nodo.grupo("ONLINE",
                             Nodo.grupo("GERENCIAL",
                                     Nodo.grupo("MANT-PARAM",
-                                            Nodo.opcion("param-generales", "Parametros Generales"),
-                                            Nodo.opcion("cat-reclamos", "Reclamos y Eventos"),
-                                            Nodo.opcion("cat-productos", "Productos"),
-                                            Nodo.opcion("cat-problemas", "Problemas"),
-                                            Nodo.opcion("cat-clientes", "Clientes"),
-                                            Nodo.opcion("cat-protocolos", "Protocolos"),
-                                            Nodo.opcion("cat-reglas", "Reglas"),
-                                            Nodo.opcion("cat-politicas", "Politicas")),
+                                            Nodo.opcion("cat-general", "Catalogo General"),
+                                            Nodo.opcion("cat-reclamos", "Catalogo de Reclamos"),
+                                            Nodo.opcion("cat-productos", "Catalogo de Productos"),
+                                            Nodo.opcion("cat-bienes", "Catalogo de Bienes"),
+                                            Nodo.opcion("cat-problemas", "Catalogo de Problemas"),
+                                            Nodo.opcion("cat-clientes", "Catalogo de Clientes"),
+                                            Nodo.opcion("cat-categorizacion", "Catalogo de Categorizacion"),
+                                            Nodo.opcion("cat-protocolos", "Catalogo de Protocolos"),
+                                            Nodo.opcion("cat-reglas", "Catalogo de Reglas"),
+                                            Nodo.opcion("cat-politicas", "Catalogo de Politicas")),
                                     Nodo.grupo("CONSULTA",
                                             Nodo.opcion("indicadores", "Indicadores"))),
                             Nodo.grupo("OPERATIVO",
@@ -78,7 +81,7 @@ public class MapaPantalla extends JPanel {
             Nodo.grupo("TECNICO",
                     Nodo.pendiente("ACT-BD"),
                     Nodo.pendiente("MANT-BD"),
-                    Nodo.pendiente("ESTADISTICAS"),
+                    Nodo.opcion("indicadores", "ESTADISTICAS"),
                     Nodo.pendiente("CONTINGENCIA")));
 
     public MapaPantalla() {
@@ -93,7 +96,7 @@ public class MapaPantalla extends JPanel {
 
         JPanel leyenda = Ui.panel(new BorderLayout());
         leyenda.add(Ui.suave("Los modulos con borde punteado forman parte de la arquitectura "
-                + "pero no del 1er entregable."), BorderLayout.WEST);
+                + "pero todavia no del prototipo."), BorderLayout.WEST);
 
         add(titulo, BorderLayout.NORTH);
         add(Ui.scroll(new Diagrama()), BorderLayout.CENTER);

@@ -64,6 +64,11 @@ public final class Modelo {
     public record Regla(String condicion, String parametro, String operador, String variable,
                         String accionVerdadero, String accionFalso, String descripcion) {}
 
+    /** Perfil de seguridad con los modulos a los que accede (hoja SEGURIDAD). */
+    public record Perfil(String nombre, java.util.List<String> accesos) {
+        @Override public String toString() { return nombre; }
+    }
+
 
 
 }
