@@ -30,21 +30,43 @@ public class VentanaPrincipal extends JFrame {
     public VentanaPrincipal(String pantallaInicial) {
         super("Sistema de Reclamos — Diseno externo");
 
+        // mapa y menus: la navegacion clasica, de lo general a lo particular
+        fabricas.put(Navegacion.MAPA, MapaPantalla::new);
+        fabricas.put("m-aplicativo", MenuPantalla::aplicativo);
+        fabricas.put("m-tecnico",    MenuPantalla::tecnico);
+        fabricas.put("m-operativo",  MenuPantalla::operativo);
+        fabricas.put("m-gerencial",  MenuPantalla::gerencial);
+        fabricas.put("m-area",       MenuPantalla::area);
+        fabricas.put("m-cliente",    MenuPantalla::cliente);
+        fabricas.put("m-mantparam",  MenuPantalla::mantParam);
+        fabricas.put("seguridad",    MenuPantalla::seguridad);
+
+        // pantallas de trabajo
         fabricas.put("tablero",      TableroPantalla::new);
         fabricas.put("registro",     RegistroPantalla::new);
         fabricas.put("atencion",     AtencionPantalla::new);
         fabricas.put("consulta",     ConsultaPantalla::new);
         fabricas.put("catalogos",    CatalogoPantalla::new);
         fabricas.put("productos",    ProductosPantalla::new);
+        fabricas.put("bienes",       CatalogoTablaPantalla::bienes);
+        fabricas.put("problemas",    CatalogoTablaPantalla::problemas);
+        fabricas.put("politicas",    CatalogoTablaPantalla::politicas);
+        fabricas.put("categorizacion", CategorizacionPantalla::new);
         fabricas.put("protocolos",   ProtocolosPantalla::new);
         fabricas.put("reglas",       ReglasPantalla::new);
         fabricas.put("estadisticas", EstadisticasPantalla::new);
-        fabricas.put("seguridad",    SeguridadPantalla::new);
+        fabricas.put("reportes",     ReportesPantalla::new);
+        fabricas.put("seguridad-perfiles", SeguridadPantalla::new);
+        fabricas.put("batch",        ProcesosPantalla::batch);
+        fabricas.put("actbd",        ProcesosPantalla::actBd);
+        fabricas.put("mantbd",       ProcesosPantalla::mantBd);
+        fabricas.put("contingencia", ProcesosPantalla::contingencia);
 
         contenido.setOpaque(true);
         contenido.setBackground(Tema.fondo());
 
-        barra = new BarraLateral(this::mostrar);
+        Navegacion.instalar(this::mostrar);
+        barra = new BarraLateral(Navegacion::ir);
 
         JPanel raiz = new JPanel(new BorderLayout());
         raiz.setBackground(Tema.fondo());
@@ -58,7 +80,7 @@ public class VentanaPrincipal extends JFrame {
         setSize(new Dimension(1440, 880));
         setLocationRelativeTo(null);
 
-        barra.seleccionar(pantallaInicial);
+        mostrar(pantallaInicial);
     }
 
     private JComponent barraEstado() {
@@ -90,6 +112,7 @@ public class VentanaPrincipal extends JFrame {
 
     private void mostrar(String clave) {
         pantallaActual = clave;
+        barra.marcar(clave);
         creadas.computeIfAbsent(clave, k -> {
             JComponent pantalla = fabricas.get(k).get();
             contenido.add(pantalla, k);
@@ -109,7 +132,7 @@ public class VentanaPrincipal extends JFrame {
         Tema.instalar(!Tema.esOscuro());
         dispose();
 
-        VentanaPrincipal nueva = new VentanaPrincipal(destino);
+        VentanaPrincipal nueva = new VentanaPrincipal(destino == null ? Navegacion.MAPA : destino);
         nueva.setBounds(marco);
         nueva.setVisible(true);
     }

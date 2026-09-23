@@ -16,7 +16,7 @@ public final class Main {
 
         SwingUtilities.invokeLater(() -> {
             Tema.instalar(oscuro);
-            new VentanaPrincipal("tablero").setVisible(true);
+            new VentanaPrincipal(pe.tino.reclamos.ui.Navegacion.MAPA).setVisible(true);
         });
     }
 }

@@ -1,5 +1,6 @@
 package pe.tino.reclamos.ui.screens;
 
+import pe.tino.reclamos.ui.Navegacion;
 import pe.tino.reclamos.ui.components.Ui;
 import pe.tino.reclamos.ui.theme.Tema;
 
@@ -33,8 +34,25 @@ public abstract class Pantalla extends JPanel {
         cabecera.add(textos, BorderLayout.CENTER);
         cabecera.add(acciones, BorderLayout.EAST);
 
-        add(cabecera, BorderLayout.NORTH);
+        JPanel superior = Ui.panel(new BorderLayout(0, Tema.ESP_MD));
+        if (!(this instanceof MapaPantalla)) superior.add(navegacion(), BorderLayout.NORTH);
+        superior.add(cabecera, BorderLayout.CENTER);
+
+        add(superior, BorderLayout.NORTH);
         add(contenido, BorderLayout.CENTER);
+    }
+
+    /** Volver al paso anterior o saltar al mapa: la navegacion clasica del prototipo. */
+    private JComponent navegacion() {
+        JButton volver = Ui.plano("Volver", "flechaIzq");
+        volver.addActionListener(e -> Navegacion.volver());
+
+        JButton inicio = Ui.plano("Mapa de modulos", "tablero");
+        inicio.addActionListener(e -> Navegacion.inicio());
+
+        JPanel p = Ui.fila(Tema.ESP_XS, volver, Ui.separadorVertical(), inicio);
+        p.setBorder(Ui.relleno(0, 0, Tema.ESP_XS, 0));
+        return p;
     }
 
     /** Controles de la esquina superior derecha de la pantalla. */

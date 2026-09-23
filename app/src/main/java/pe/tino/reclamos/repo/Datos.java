@@ -243,6 +243,175 @@ public final class Datos {
         ));
     }
 
+    /* ---------------- catalogo de bienes (hoja MANT-PARAM) ---------------- */
+
+    /** Tipo de bien | Tipo de problema asociado | Estado. */
+    public static List<String[]> catalogoBienes() {
+        return new ArrayList<>(List.of(
+                new String[]{"Electrodomesticos", "Demora", "Habilitado"},
+                new String[]{"Servicios Tangibles", "Instancia Duplicada", "Habilitado"},
+                new String[]{"Comestibles", "Disenio Erroneo", "Habilitado"},
+                new String[]{"Textiles", "Danio", "Habilitado"},
+                new String[]{"Papel, Carton e Impresos", "Mal estado", "Habilitado"},
+                new String[]{"Quimicos y Conexos", "Danio", "Habilitado"},
+                new String[]{"Equipo Informatico", "Funcionalidad", "Habilitado"},
+                new String[]{"Muebles y Mobiliario", "Mal estado", "Deshabilitado"}
+        ));
+    }
+
+    public static final List<String> TIPOS_BIEN = List.of("Electrodomesticos", "Servicios Tangibles",
+            "Comestibles", "Textiles", "Papel, Carton e Impresos", "Quimicos y Conexos",
+            "Equipo Informatico", "Muebles y Mobiliario");
+
+    /* ---------------- catalogo de problemas (hojas CatProblemas / TipoProblema) ---------------- */
+
+    /** Segmento | Familia | Tipo de problema | Problema. */
+    public static List<String[]> catalogoProblemas() {
+        return new ArrayList<>(List.of(
+                new String[]{"Difusion De Tecnologias De Informacion Y Telecomunicaciones", "Dispositivos De Comunicaciones Y Accesorios", "Danio", "Abolladura"},
+                new String[]{"Difusion De Tecnologias De Informacion Y Telecomunicaciones", "Dispositivos De Comunicaciones Y Accesorios", "Danio", "Rayadura"},
+                new String[]{"Difusion De Tecnologias De Informacion Y Telecomunicaciones", "Dispositivos De Comunicaciones Y Accesorios", "Falta de Componentes", "Falta cables"},
+                new String[]{"Difusion De Tecnologias De Informacion Y Telecomunicaciones", "Dispositivos De Comunicaciones Y Accesorios", "Falta de Componentes", "Falta Control"},
+                new String[]{"Difusion De Tecnologias De Informacion Y Telecomunicaciones", "Dispositivos De Comunicaciones Y Accesorios", "Mal funcionamiento", "No detecta senial digital"},
+                new String[]{"Difusion De Tecnologias De Informacion Y Telecomunicaciones", "Equipo Informatico Y Accesorios", "Danio", "Golpe"},
+                new String[]{"Difusion De Tecnologias De Informacion Y Telecomunicaciones", "Equipo Informatico Y Accesorios", "Danio", "Rotura"},
+                new String[]{"Difusion De Tecnologias De Informacion Y Telecomunicaciones", "Equipo Informatico Y Accesorios", "Mal funcionamiento", "No detecta internet"},
+                new String[]{"Difusion De Tecnologias De Informacion Y Telecomunicaciones", "Equipo Informatico Y Accesorios", "Falta de Componentes", "Falta cargador"},
+                new String[]{"Difusion De Tecnologias De Informacion Y Telecomunicaciones", "Equipo Informatico Y Accesorios", "Cobranza", "Facturacion Doble"},
+                new String[]{"Difusion De Tecnologias De Informacion Y Telecomunicaciones", "Equipo Informatico Y Accesorios", "Cobranza", "Error de Facturacion"},
+                new String[]{"Difusion De Tecnologias De Informacion Y Telecomunicaciones", "Equipo Informatico Y Accesorios", "Cobranza", "Fraude"},
+                new String[]{"Difusion De Tecnologias De Informacion Y Telecomunicaciones", "Equipo Informatico Y Accesorios", "Funcionalidad", "No funciona Camara"},
+                new String[]{"Difusion De Tecnologias De Informacion Y Telecomunicaciones", "Equipo Informatico Y Accesorios", "Funcionalidad", "Bateria no Carga"},
+                new String[]{"Muebles, Mobiliario Y Decoracion", "Muebles De Alojamiento", "Decoloracion", "Color asimetrico"}
+        ));
+    }
+
+    public static final List<String> SEGMENTOS = List.of(
+            "Difusion De Tecnologias De Informacion Y Telecomunicaciones",
+            "Componentes Y Suministros Electronicos",
+            "Muebles, Mobiliario Y Decoracion",
+            "Equipo Medico, Accesorios Y Suministros",
+            "Equipos De Oficina, Accesorios Y Suministros",
+            "Textiles");
+
+    public static final List<String> FAMILIAS = List.of(
+            "Dispositivos De Comunicaciones Y Accesorios",
+            "Dispositivo Semiconductor Discreto",
+            "Equipo Informatico Y Accesorios",
+            "Muebles De Alojamiento",
+            "Prendas de Vestir");
+
+    public static final List<String> TIPOS_PROBLEMA_CAT = List.of("Danio", "Falta de Componentes",
+            "Mal funcionamiento", "Cobranza", "Funcionalidad", "Decoloracion", "Demora", "Entrega");
+
+    /* ---------------- catalogo de politicas / garantias (hoja Hoja1) ---------------- */
+
+    /** Codigo | Tipo de garantia | Descripcion de la politica | Plazo | Estado. */
+    public static List<String[]> catalogoPoliticas() {
+        return new ArrayList<>(List.of(
+                new String[]{"G001", "Legal", "Identificarse al pagar con tarjeta", "12 Meses", "Habilitado"},
+                new String[]{"G002", "Explicito", "Sistema hidraulico de frenos", "24 Meses", "Habilitado"},
+                new String[]{"G003", "Explicito", "Contiene modulo a eleccion", "6 Meses", "Habilitado"},
+                new String[]{"G004", "Explicito", "No posee garantia", "0 Dias", "Deshabilitado"},
+                new String[]{"G005", "Implicito", "Ante danio de producto", "30 Dias", "Habilitado"},
+                new String[]{"G006", "Implicito", "Ante fallo de funcionamiento", "90 Dias", "Habilitado"},
+                new String[]{"G007", "Implicito", "Ante fallo de componente", "60 Dias", "Habilitado"},
+                new String[]{"G008", "Explicito", "Posee reembolso", "15 Dias", "Habilitado"}
+        ));
+    }
+
+    public static final List<String> TIPOS_GARANTIA = List.of("Legal", "Explicito", "Implicito");
+    public static final List<String> PLAZOS = List.of("0 Dias", "15 Dias", "30 Dias", "60 Dias",
+            "90 Dias", "6 Meses", "12 Meses", "24 Meses");
+
+    /* ---------------- categorizacion de cliente (hoja MANT-PARAM) ---------------- */
+
+    /** Condicion | Parametro | Operador | Variable | Accion V | Accion F. */
+    public static List<String[]> condicionesCliente() {
+        return new ArrayList<>(List.of(
+                new String[]{"CND1", "RangMin", "<=", "NroVeces", "CND2", "No aplica"},
+                new String[]{"CND2", "RangMax", ">", "NroVeces", "met1", "CND3"},
+                new String[]{"CND3", "IngresoProm", ">=", "Monto", "met1", "No aplica"}
+        ));
+    }
+
+    /** Codigo | Descripcion de la formula. */
+    public static List<String[]> metodosCliente() {
+        return new ArrayList<>(List.of(
+                new String[]{"met1", "Iteraccion_compras = ValorItercCompra * PesoConsider"},
+                new String[]{"met2", "Valor_medio = SumaCompras / NroVeces"}
+        ));
+    }
+
+    /** Metodo | Variable | Secuencia | Operador. */
+    public static List<String[]> formulasCliente() {
+        return new ArrayList<>(List.of(
+                new String[]{"met1", "ValorItercCompra", "1", "Inicializa"},
+                new String[]{"met1", "PesoConsider", "2", "Multiplica"},
+                new String[]{"met1", "Iteraccion_compras", "3", "Asigna"},
+                new String[]{"met2", "SumaCompras", "1", "Inicializa"},
+                new String[]{"met2", "NroVeces", "2", "Divide"},
+                new String[]{"met2", "Valor_medio", "3", "Asigna"}
+        ));
+    }
+
+    public static final List<String> OPERADORES_FORMULA = List.of("Inicializa", "Asigna",
+            "Suma", "Resta", "Multiplica", "Divide");
+
+    /* ---------------- reportes y procesos ---------------- */
+
+    /** Codigo | Nombre | Modulo | Periodicidad. */
+    public static List<String[]> reportes() {
+        return new ArrayList<>(List.of(
+                new String[]{"REP01", "Reclamos por area", "Operativo", "Diario"},
+                new String[]{"REP02", "Reclamos por tipo de bien", "Operativo", "Semanal"},
+                new String[]{"REP03", "Reclamos fuera de plazo", "Gerencial", "Mensual"},
+                new String[]{"REP04", "Nivel de satisfaccion del cliente", "Gerencial", "Mensual"},
+                new String[]{"REP05", "Carga por especialista", "Operativo", "Semanal"},
+                new String[]{"REP06", "Costo de atencion por reclamo", "Gerencial", "Mensual"},
+                new String[]{"REP07", "Reclamos por canal de ingreso", "Operativo", "Diario"}
+        ));
+    }
+
+    /** Proceso | Descripcion | Frecuencia | Ultima ejecucion | Estado. */
+    public static List<String[]> procesosBatch() {
+        return new ArrayList<>(List.of(
+                new String[]{"BAT01", "Cierre diario de reclamos atendidos", "Diaria 23:00", "21/09/2026 23:00", "Habilitado"},
+                new String[]{"BAT02", "Vencimiento de plazos de garantia", "Diaria 00:30", "22/09/2026 00:30", "Habilitado"},
+                new String[]{"BAT03", "Recalculo de categorizacion de cliente", "Semanal lunes", "21/09/2026 02:00", "Habilitado"},
+                new String[]{"BAT04", "Notificacion de reclamos en cola", "Cada 4 horas", "22/09/2026 16:00", "Habilitado"},
+                new String[]{"BAT05", "Consolidado mensual de indicadores", "Mensual dia 1", "01/09/2026 03:00", "Deshabilitado"}
+        ));
+    }
+
+    public static List<String[]> procesosActBd() {
+        return new ArrayList<>(List.of(
+                new String[]{"ACT01", "Carga de catalogo de productos", "Bajo demanda", "20/09/2026 09:15", "Habilitado"},
+                new String[]{"ACT02", "Sincronizacion de clientes", "Diaria 01:00", "22/09/2026 01:00", "Habilitado"},
+                new String[]{"ACT03", "Actualizacion de tabla de garantias", "Bajo demanda", "15/09/2026 11:40", "Habilitado"},
+                new String[]{"ACT04", "Carga de areas y especialistas", "Bajo demanda", "18/09/2026 08:00", "Habilitado"}
+        ));
+    }
+
+    public static List<String[]> procesosMantBd() {
+        return new ArrayList<>(List.of(
+                new String[]{"MNT01", "Respaldo completo", "Diaria 02:00", "22/09/2026 02:00", "Habilitado"},
+                new String[]{"MNT02", "Respaldo incremental", "Cada 6 horas", "22/09/2026 14:00", "Habilitado"},
+                new String[]{"MNT03", "Reorganizacion de indices", "Semanal domingo", "20/09/2026 04:00", "Habilitado"},
+                new String[]{"MNT04", "Depuracion de reclamos cerrados", "Mensual dia 1", "01/09/2026 05:00", "Habilitado"},
+                new String[]{"MNT05", "Verificacion de integridad", "Semanal domingo", "20/09/2026 05:30", "Habilitado"}
+        ));
+    }
+
+    public static List<String[]> procesosContingencia() {
+        return new ArrayList<>(List.of(
+                new String[]{"CTG01", "Conmutacion a servidor alterno", "Ante caida", "No ejecutado", "Habilitado"},
+                new String[]{"CTG02", "Restauracion desde respaldo", "Bajo demanda", "12/08/2026 07:20", "Habilitado"},
+                new String[]{"CTG03", "Registro manual de reclamos", "Ante caida", "No ejecutado", "Habilitado"},
+                new String[]{"CTG04", "Simulacro de recuperacion", "Trimestral", "01/07/2026 09:00", "Habilitado"}
+        ));
+    }
+
     /* ---------------- indicadores (hoja MANT-PARAM) ---------------- */
 
     public static List<Indicador> indicadores() {

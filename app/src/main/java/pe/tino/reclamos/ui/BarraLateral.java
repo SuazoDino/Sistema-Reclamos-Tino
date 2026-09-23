@@ -34,6 +34,8 @@ public class BarraLateral extends JPanel {
         setBorder(BorderFactory.createEmptyBorder(0, 0, Tema.ESP_MD, 0));
 
         add(alinear(marca()));
+        grupo("Inicio", List.of(
+                new Item(pe.tino.reclamos.ui.Navegacion.MAPA, "Mapa de modulos", "flujo")));
         grupo("Aplicativo", List.of(
                 new Item("tablero", "Tablero de control", "tablero"),
                 new Item("registro", "Registro de reclamo", "formulario"),
@@ -47,7 +49,7 @@ public class BarraLateral extends JPanel {
         grupo("Gerencial", List.of(
                 new Item("estadisticas", "Indicadores", "grafico")));
         grupo("Seguridad", List.of(
-                new Item("seguridad", "Perfiles y accesos", "escudo")));
+                new Item("seguridad-perfiles", "Perfiles y accesos", "escudo")));
 
         add(alinear((JComponent) Box.createVerticalGlue()));
         add(alinear(pie()));
@@ -114,10 +116,10 @@ public class BarraLateral extends JPanel {
         return l;
     }
 
-    public void seleccionar(String clave) {
+    /** Marca la entrada activa sin navegar: la navegacion la decide Navegacion. */
+    public void marcar(String clave) {
         activo = clave;
         botones.forEach(Boton::repaint);
-        alElegir.accept(clave);
     }
 
     /** Entrada del menu: barra de acento a la izquierda cuando esta activa. */
@@ -149,7 +151,7 @@ public class BarraLateral extends JPanel {
             add(texto, BorderLayout.CENTER);
 
             addMouseListener(new MouseAdapter() {
-                @Override public void mouseClicked(MouseEvent e) { seleccionar(item.clave()); }
+                @Override public void mouseClicked(MouseEvent e) { alElegir.accept(item.clave()); }
                 @Override public void mouseEntered(MouseEvent e) { encima = true; repaint(); }
                 @Override public void mouseExited(MouseEvent e)  { encima = false; repaint(); }
             });

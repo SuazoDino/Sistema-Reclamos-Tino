@@ -175,6 +175,14 @@ public final class Ui {
         return s;
     }
 
+    /** Separador fino para dividir controles dentro de una fila. */
+    public static JComponent separadorVertical() {
+        JSeparator s = new JSeparator(SwingConstants.VERTICAL);
+        s.setForeground(Tema.borde());
+        s.setPreferredSize(new Dimension(1, 18));
+        return s;
+    }
+
     /** Scroll sin borde propio, para meter dentro de una tarjeta. */
     public static JScrollPane scroll(Component c) {
         JScrollPane s = new JScrollPane(c);
