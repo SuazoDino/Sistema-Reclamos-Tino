@@ -29,7 +29,7 @@ public final class FormularioCatalogo {
             resultados.add(contenedor, BorderLayout.EAST);
         }
 
-        busqueda.setPreferredSize(new Dimension(anchoBusqueda, 100));
+        busqueda.setPreferredSize(Ui.dim(anchoBusqueda, 100));
         JPanel p = Ui.panel(new BorderLayout(Tema.ESP_MD, 0));
         p.add(busqueda, BorderLayout.WEST);
         p.add(resultados, BorderLayout.CENTER);
@@ -46,7 +46,7 @@ public final class FormularioCatalogo {
 
     /** Une cabecera y grupo Agregar en el reparto que usa el prototipo. */
     public static JComponent armar(JComponent cabecera, JComponent agregar, int altoCabecera) {
-        cabecera.setPreferredSize(new Dimension(100, altoCabecera));
+        cabecera.setPreferredSize(Ui.dim(100, altoCabecera));
         JPanel p = Ui.panel(new BorderLayout(0, Tema.ESP_MD));
         p.add(cabecera, BorderLayout.NORTH);
         p.add(agregar, BorderLayout.CENTER);

@@ -42,7 +42,7 @@ public class PoliticasPantalla extends Pantalla {
         JPanel arriba = Ui.panel(new BorderLayout(Tema.ESP_MD, 0));
         arriba.add(grupoAgregar(), BorderLayout.WEST);
         arriba.add(grupoPoliticas(), BorderLayout.CENTER);
-        arriba.setPreferredSize(new Dimension(100, 200));
+        arriba.setPreferredSize(Ui.dim(100, 200));
 
         contenido().add(arriba, BorderLayout.NORTH);
         contenido().add(grupoTipos(), BorderLayout.CENTER);
@@ -50,7 +50,7 @@ public class PoliticasPantalla extends Pantalla {
 
     private JComponent grupoAgregar() {
         Grupo g = new Grupo("Agregar");
-        g.setPreferredSize(new Dimension(320, 100));
+        g.setPreferredSize(Ui.dim(320, 100));
 
         JButton agregar = Ui.boton("Agregar");
         agregar.addActionListener(e -> {

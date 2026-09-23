@@ -52,7 +52,12 @@ public class VentanaPrincipal extends JFrame {
         fabricas.put("cliente-reportes",   ClienteReportePantalla::new);
 
         contenido.setBackground(Tema.FONDO);
-        Navegacion.instalar(this::mostrar);
+        // al rearmar por un cambio de escala, el historial se conserva
+        if (Navegacion.actual().equals(pantallaInicial) && !Navegacion.MAPA.equals(pantallaInicial)) {
+            Navegacion.reenganchar(this::mostrar);
+        } else {
+            Navegacion.instalar(this::mostrar);
+        }
 
         setContentPane(contenido);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -63,6 +68,31 @@ public class VentanaPrincipal extends JFrame {
         setExtendedState(MAXIMIZED_BOTH);
 
         mostrar(pantallaInicial);
+    }
+
+    /**
+     * Cambia el tamanio del texto de toda la interfaz y rearma la ventana.
+     * Se reconstruye en vez de repintar porque muchos controles fijan su
+     * fuente al crearse; los datos viven en los repositorios, asi que no se
+     * pierde nada.
+     */
+    public static void reescalarTexto(Component origen, int direccion) {
+        double nueva = Tema.escalaVecina(direccion);
+        if (Math.abs(nueva - Tema.escalaTexto()) < 0.01) return;
+
+        Window ventana = SwingUtilities.getWindowAncestor(origen);
+        boolean maximizada = ventana instanceof JFrame f
+                && (f.getExtendedState() & MAXIMIZED_BOTH) == MAXIMIZED_BOTH;
+        Rectangle marco = ventana == null ? null : ventana.getBounds();
+
+        Tema.escalaTexto(nueva);
+        Tema.instalar();
+
+        VentanaPrincipal nueva2 = new VentanaPrincipal(Navegacion.actual());
+        if (marco != null && !maximizada) nueva2.setBounds(marco);
+        nueva2.setExtendedState(maximizada ? MAXIMIZED_BOTH : NORMAL);
+        nueva2.setVisible(true);
+        if (ventana != null) ventana.dispose();
     }
 
     private void mostrar(String clave) {

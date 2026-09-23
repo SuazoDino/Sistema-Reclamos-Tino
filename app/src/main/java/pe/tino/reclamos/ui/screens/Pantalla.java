@@ -1,6 +1,7 @@
 package pe.tino.reclamos.ui.screens;
 
 import pe.tino.reclamos.ui.Navegacion;
+import pe.tino.reclamos.ui.VentanaPrincipal;
 import pe.tino.reclamos.ui.components.Ui;
 import pe.tino.reclamos.ui.theme.Tema;
 
@@ -39,11 +40,30 @@ public abstract class Pantalla extends JPanel {
         JButton mapa = Ui.boton("Mapa");
         mapa.addActionListener(e -> Navegacion.inicio());
 
-        JPanel p = Ui.fila(volver, mapa);
+        JPanel p = Ui.panel(new BorderLayout());
+        p.add(Ui.fila(volver, mapa), BorderLayout.WEST);
+        p.add(controlesDeTexto(), BorderLayout.EAST);
         p.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createMatteBorder(0, 0, 1, 0, Tema.BORDE_FINO),
                 Ui.relleno(0, 0, Tema.ESP_SM, 0)));
         return p;
+    }
+
+    /**
+     * Tamanio del texto de toda la interfaz. Sirve para proyectar: en una
+     * sala, el tamanio de monitor no se lee desde atras.
+     */
+    private JComponent controlesDeTexto() {
+        JButton menos = Ui.boton("A\u2212");
+        menos.setToolTipText("Achicar el texto de toda la interfaz");
+        menos.addActionListener(e -> VentanaPrincipal.reescalarTexto(this, -1));
+
+        JButton mas = Ui.boton("A+");
+        mas.setToolTipText("Agrandar el texto de toda la interfaz");
+        mas.addActionListener(e -> VentanaPrincipal.reescalarTexto(this, 1));
+
+        JLabel nivel = Ui.suave((int) Math.round(Tema.escalaTexto() * 100) + " %");
+        return Ui.fila(Ui.suave("Texto:"), menos, mas, nivel);
     }
 
     protected JPanel contenido() { return contenido; }

@@ -182,7 +182,7 @@ public class AreaDataEntryPantalla extends Pantalla {
         JPanel cuerpo = Ui.panel(new BorderLayout(0, Tema.ESP_MD));
         cuerpo.add(grupoDatos, BorderLayout.NORTH);
         cuerpo.add(grupoProtocolo, BorderLayout.CENTER);
-        cuerpo.setPreferredSize(new Dimension(620, 320));
+        cuerpo.setPreferredSize(Ui.dim(620, 320));
 
         Object[] opciones = {"Resolver", "Rechazar", "Cancelar"};
         int r = JOptionPane.showOptionDialog(this, cuerpo, "Inspeccionar",

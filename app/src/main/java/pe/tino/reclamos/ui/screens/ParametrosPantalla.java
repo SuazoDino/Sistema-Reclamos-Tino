@@ -32,7 +32,7 @@ public class ParametrosPantalla extends Pantalla {
         Grupo g = new Grupo("Generalidades Empresa", new GridLayout(1, 2, Tema.ESP_MD, 0));
         g.add(areas());
         g.add(especialistas());
-        g.setPreferredSize(new Dimension(100, 250));
+        g.setPreferredSize(Ui.dim(100, 250));
         return g;
     }
 

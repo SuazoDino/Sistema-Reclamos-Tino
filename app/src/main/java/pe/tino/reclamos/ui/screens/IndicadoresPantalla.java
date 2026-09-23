@@ -56,7 +56,7 @@ public class IndicadoresPantalla extends Pantalla {
         Grupo gLista = Grupo.ajustado("Indicadores");
         gLista.add(Ui.scroll(lista), BorderLayout.CENTER);
         gLista.add(pie, BorderLayout.SOUTH);
-        gLista.setPreferredSize(new Dimension(430, 100));
+        gLista.setPreferredSize(Ui.dim(430, 100));
 
         Grupo gDetalle = Grupo.ajustado("Resultado del periodo");
         gDetalle.add(detalle.enScroll(), BorderLayout.CENTER);

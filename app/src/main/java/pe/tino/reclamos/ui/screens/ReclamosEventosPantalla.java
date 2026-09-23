@@ -39,7 +39,7 @@ public class ReclamosEventosPantalla extends Pantalla {
         Map<String, List<String>> filtros = new LinkedHashMap<>();
         filtros.put("Estado", Prototipo.ESTADO);
         PanelBusqueda busqueda = new PanelBusqueda(1, filtros);
-        busqueda.setPreferredSize(new Dimension(250, 100));
+        busqueda.setPreferredSize(Ui.dim(250, 100));
 
         reclamos.anchos(180, 120, 120, 140);
         Prototipo.reclamos().forEach(f -> reclamos.agregar((Object[]) f));
@@ -60,7 +60,7 @@ public class ReclamosEventosPantalla extends Pantalla {
         JPanel arriba = Ui.panel(new BorderLayout(Tema.ESP_MD, 0));
         arriba.add(busqueda, BorderLayout.WEST);
         arriba.add(resultados("Resultados de Busqueda", reclamos), BorderLayout.CENTER);
-        arriba.setPreferredSize(new Dimension(100, 200));
+        arriba.setPreferredSize(Ui.dim(100, 200));
 
         JPanel p = Ui.panel(new BorderLayout(0, Tema.ESP_MD));
         p.setBorder(Ui.relleno(Tema.ESP_MD));
@@ -77,7 +77,7 @@ public class ReclamosEventosPantalla extends Pantalla {
         filtros.put("Instancia", Prototipo.INSTANCIA);
         filtros.put("Criticidad", Prototipo.CRITICIDAD);
         PanelBusqueda busqueda = new PanelBusqueda(1, filtros);
-        busqueda.setPreferredSize(new Dimension(280, 100));
+        busqueda.setPreferredSize(Ui.dim(280, 100));
 
         eventos.anchos(320, 180);
         Prototipo.eventos().forEach(f -> eventos.agregar((Object[]) f));
@@ -93,7 +93,7 @@ public class ReclamosEventosPantalla extends Pantalla {
         JPanel arriba = Ui.panel(new BorderLayout(Tema.ESP_MD, 0));
         arriba.add(busqueda, BorderLayout.WEST);
         arriba.add(resultados("Resultados de Busqueda", eventos), BorderLayout.CENTER);
-        arriba.setPreferredSize(new Dimension(100, 200));
+        arriba.setPreferredSize(Ui.dim(100, 200));
 
         JPanel p = Ui.panel(new BorderLayout(0, Tema.ESP_MD));
         p.setBorder(Ui.relleno(Tema.ESP_MD));

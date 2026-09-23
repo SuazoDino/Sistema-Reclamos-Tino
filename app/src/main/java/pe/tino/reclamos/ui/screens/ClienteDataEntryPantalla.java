@@ -244,7 +244,7 @@ public class ClienteDataEntryPantalla extends Pantalla {
         JPanel p = Ui.panel(new BorderLayout(0, Tema.ESP_SM));
         p.add(Ui.fuerte("Ticket " + t.numero() + " generado."), BorderLayout.NORTH);
         p.add(resumen.enScroll(), BorderLayout.CENTER);
-        p.setPreferredSize(new Dimension(680, 330));
+        p.setPreferredSize(Ui.dim(680, 330));
 
         JOptionPane.showMessageDialog(this, p, "Ticket Generado", JOptionPane.PLAIN_MESSAGE);
     }

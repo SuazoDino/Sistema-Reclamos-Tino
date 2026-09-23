@@ -240,7 +240,7 @@ public class ReglasPantalla extends Pantalla {
         Grupo entradas = new Grupo("Datos del caso");
         entradas.add(Ui.scrollVertical(f), BorderLayout.CENTER);
         entradas.add(pie, BorderLayout.SOUTH);
-        entradas.setPreferredSize(new Dimension(430, 100));
+        entradas.setPreferredSize(Ui.dim(430, 100));
 
         traza.anchos(90, 330, 110, 220);
         Grupo salida = Grupo.ajustado("Como se llego a la solucion");

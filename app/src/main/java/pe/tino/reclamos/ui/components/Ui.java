@@ -74,7 +74,7 @@ public final class Ui {
         JComboBox<T> c = new JComboBox<>(new DefaultComboBoxModel<>(new java.util.Vector<>(valores)));
         c.setFont(Tema.cuerpo());
         Dimension d = c.getPreferredSize();
-        c.setPreferredSize(new Dimension(Math.min(d.width, 170), d.height));
+        c.setPreferredSize(new Dimension(Math.min(d.width, dim(170, 0).width), d.height));
         c.setMinimumSize(new Dimension(90, d.height));
         return c;
     }
@@ -89,6 +89,15 @@ public final class Ui {
     }
 
     /* ---------------- contenedores ---------------- */
+
+    /**
+     * Dimension fija que acompania a la escala del texto. Un alto pensado
+     * para 12 px deja la tabla sin filas cuando el texto va al 150 %.
+     */
+    public static Dimension dim(int ancho, int alto) {
+        double e = Tema.escalaTexto();
+        return new Dimension((int) Math.round(ancho * e), (int) Math.round(alto * e));
+    }
 
     public static Border relleno(int todo) {
         return BorderFactory.createEmptyBorder(todo, todo, todo, todo);

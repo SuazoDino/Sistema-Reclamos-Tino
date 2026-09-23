@@ -1,6 +1,7 @@
 package pe.tino.reclamos.ui.screens;
 
 import pe.tino.reclamos.ui.Navegacion;
+import pe.tino.reclamos.ui.VentanaPrincipal;
 import pe.tino.reclamos.ui.components.Ui;
 import pe.tino.reclamos.ui.theme.Tema;
 
@@ -134,7 +135,16 @@ public class MapaPantalla extends JPanel {
             actualizar.run();
         });
 
-        JPanel zoom = Ui.fila(Ui.suave("Zoom:"), alejar, acercar, ajustar, nivel);
+        JButton textoMenos = Ui.boton("A\u2212");
+        textoMenos.setToolTipText("Achicar el texto de toda la interfaz");
+        textoMenos.addActionListener(e -> VentanaPrincipal.reescalarTexto(this, -1));
+        JButton textoMas = Ui.boton("A+");
+        textoMas.setToolTipText("Agrandar el texto de toda la interfaz");
+        textoMas.addActionListener(e -> VentanaPrincipal.reescalarTexto(this, 1));
+        JLabel nivelTexto = Ui.suave((int) Math.round(Tema.escalaTexto() * 100) + " %");
+
+        JPanel zoom = Ui.fila(Ui.suave("Zoom:"), alejar, acercar, ajustar, nivel,
+                Ui.suave("   Texto:"), textoMenos, textoMas, nivelTexto);
 
         JPanel pie = Ui.panel(new BorderLayout(Tema.ESP_MD, 0));
         pie.add(Ui.suave("Las cajas rosadas son las pantallas del prototipo. "

@@ -111,7 +111,7 @@ public class BatchPantalla extends Pantalla {
 
         Grupo g = Grupo.ajustado("Orden de ejecucion");
         g.add(t.enScroll(), BorderLayout.CENTER);
-        g.setPreferredSize(new Dimension(100, 170));
+        g.setPreferredSize(Ui.dim(100, 170));
         return g;
     }
 }

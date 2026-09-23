@@ -43,7 +43,8 @@ public class Formulario extends JPanel {
     public Formulario campo(String etiqueta, JComponent control) {
         Dimension d = control.getPreferredSize();
         control.setMinimumSize(new Dimension(Math.min(d.width, 90), d.height));
-        if (d.width < ANCHO_CAMPO) control.setPreferredSize(new Dimension(ANCHO_CAMPO, d.height));
+        int ancho = Ui.dim(ANCHO_CAMPO, 0).width;
+        if (d.width < ancho) control.setPreferredSize(new Dimension(ancho, d.height));
         gcEtiqueta.gridy = fila;
         gcCampo.gridy = fila;
         add(Ui.etiqueta(etiqueta), gcEtiqueta);

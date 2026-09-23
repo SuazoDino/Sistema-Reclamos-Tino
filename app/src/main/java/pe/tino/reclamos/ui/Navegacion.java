@@ -24,6 +24,11 @@ public final class Navegacion {
         instalar(consumidor);
     }
 
+    /** Reengancha la ventana sin tocar el historial ni la pantalla actual. */
+    static void reenganchar(Consumer<String> consumidor) {
+        destino = consumidor;
+    }
+
     static void instalar(Consumer<String> consumidor) {
         destino = consumidor;
         HISTORIAL.clear();

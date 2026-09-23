@@ -126,7 +126,7 @@ public class ClienteReportePantalla extends Pantalla {
         p.add(datos, BorderLayout.NORTH);
         p.add(new JLabel("<html><body style='width:420px'>" + mensaje(t) + "</body></html>"),
                 BorderLayout.CENTER);
-        p.setPreferredSize(new Dimension(480, 340));
+        p.setPreferredSize(Ui.dim(480, 340));
 
         if (t.estado() != Estado.RECHAZADO) {
             JOptionPane.showMessageDialog(this, p, "Detalle del Reclamo", JOptionPane.PLAIN_MESSAGE);

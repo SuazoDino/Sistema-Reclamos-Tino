@@ -47,7 +47,7 @@ public class SeguridadPantalla extends Pantalla {
 
     private JComponent panelPerfiles() {
         Grupo g = Grupo.ajustado("Perfiles");
-        g.setPreferredSize(new Dimension(250, 100));
+        g.setPreferredSize(Ui.dim(250, 100));
         g.add(Ui.scroll(perfiles), BorderLayout.CENTER);
 
         JTextField nuevo = Ui.texto(10);

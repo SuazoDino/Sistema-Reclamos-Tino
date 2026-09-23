@@ -22,7 +22,7 @@ public class Tabla extends JTable {
 
     private void configurar() {
         setFont(Tema.cuerpo());
-        setRowHeight(22);
+        setRowHeight((int) Math.round(22 * Tema.escalaTexto()));
         setShowGrid(true);
         setGridColor(Tema.BORDE_FINO);
         setIntercellSpacing(new Dimension(1, 1));

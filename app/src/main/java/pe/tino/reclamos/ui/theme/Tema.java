@@ -42,12 +42,40 @@ public final class Tema {
     public static final Color DIAG_PANTALLA_BORDE  = new Color(0xB85450);
     public static final Color DIAG_LINEA           = new Color(0x666666);
 
-    /* ---------- tipografia ---------- */
-    public static Font fuente(int tam, int estilo) { return new Font(Font.SANS_SERIF, estilo, tam); }
+    /* ---------- tipografia ----------
+     * La escala existe para proyectar: en una sala, 12 px no se leen desde
+     * atras. Multiplica todos los tamanios a la vez, tipografia y alto de
+     * fila, para que la interfaz no se descuadre. */
+    private static double escalaTexto = 1.0;
+
+    public static final double[] ESCALAS = {1.0, 1.25, 1.5, 1.75, 2.0};
+
+    public static double escalaTexto() { return escalaTexto; }
+
+    public static void escalaTexto(double valor) {
+        escalaTexto = Math.max(ESCALAS[0], Math.min(ESCALAS[ESCALAS.length - 1], valor));
+    }
+
+    /** La escala siguiente o anterior de la lista; se queda en los extremos. */
+    public static double escalaVecina(int direccion) {
+        for (int i = 0; i < ESCALAS.length; i++) {
+            if (Math.abs(ESCALAS[i] - escalaTexto) < 0.01) {
+                int j = Math.max(0, Math.min(ESCALAS.length - 1, i + direccion));
+                return ESCALAS[j];
+            }
+        }
+        return 1.0;
+    }
+
+    private static int escalado(int tam) { return (int) Math.round(tam * escalaTexto); }
+
+    public static Font fuente(int tam, int estilo) {
+        return new Font(Font.SANS_SERIF, estilo, escalado(tam));
+    }
     public static Font cuerpo()  { return fuente(12, Font.PLAIN); }
     public static Font fuerte()  { return fuente(12, Font.BOLD); }
     public static Font titulo()  { return fuente(16, Font.BOLD); }
-    public static Font mono()    { return new Font(Font.MONOSPACED, Font.PLAIN, 12); }
+    public static Font mono()    { return new Font(Font.MONOSPACED, Font.PLAIN, escalado(12)); }
 
     /** Instala el look and feel. Se llama una sola vez, al arrancar. */
     public static void instalar() {
@@ -66,14 +94,14 @@ public final class Tema {
         UIManager.put("Component.borderColor", BORDE);
         UIManager.put("Component.disabledBorderColor", BORDE_FINO);
 
-        UIManager.put("Table.rowHeight", 22);
+        UIManager.put("Table.rowHeight", escalado(22));
         UIManager.put("Table.showHorizontalLines", true);
         UIManager.put("Table.showVerticalLines", true);
         UIManager.put("Table.gridColor", BORDE_FINO);
         UIManager.put("Table.intercellSpacing", new Dimension(1, 1));
         UIManager.put("Table.selectionBackground", SELECCION);
         UIManager.put("Table.selectionForeground", TEXTO);
-        UIManager.put("TableHeader.height", 24);
+        UIManager.put("TableHeader.height", escalado(24));
         UIManager.put("TableHeader.background", CABECERA);
         UIManager.put("TableHeader.separatorColor", BORDE_FINO);
 

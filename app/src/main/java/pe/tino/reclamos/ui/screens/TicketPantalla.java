@@ -41,14 +41,14 @@ public class TicketPantalla extends Pantalla {
 
         Grupo listado = Grupo.ajustado("Tickets registrados");
         listado.add(tabla.enScroll(), BorderLayout.CENTER);
-        listado.setPreferredSize(new Dimension(100, 220));
+        listado.setPreferredSize(Ui.dim(100, 220));
 
         Grupo detalle = new Grupo("Ficha del ticket");
         detalle.add(ficha, BorderLayout.CENTER);
 
         Grupo log = Grupo.ajustado("Bitacora");
         log.add(bitacora.enScroll(), BorderLayout.CENTER);
-        log.setPreferredSize(new Dimension(420, 100));
+        log.setPreferredSize(Ui.dim(420, 100));
 
         JPanel abajo = Ui.panel(new BorderLayout(Tema.ESP_MD, 0));
         abajo.add(detalle, BorderLayout.CENTER);

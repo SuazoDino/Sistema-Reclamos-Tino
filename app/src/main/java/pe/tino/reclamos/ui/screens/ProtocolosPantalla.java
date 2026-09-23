@@ -96,7 +96,7 @@ public class ProtocolosPantalla extends Pantalla {
         JPanel p = Ui.panel(new BorderLayout(0, Tema.ESP_MD));
         p.add(busqueda, BorderLayout.NORTH);
         p.add(grupoResultados, BorderLayout.CENTER);
-        p.setPreferredSize(new Dimension(100, 290));
+        p.setPreferredSize(Ui.dim(100, 290));
         return p;
     }
 
