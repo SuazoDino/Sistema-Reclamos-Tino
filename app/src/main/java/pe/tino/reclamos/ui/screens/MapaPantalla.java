@@ -111,13 +111,41 @@ public class MapaPantalla extends JPanel {
         titulo.add(Ui.titulo("Diseño arquitectónico"), BorderLayout.NORTH);
         titulo.add(Ui.suave("Seleccione la pantalla a la que desea entrar."), BorderLayout.CENTER);
 
-        JPanel leyenda = Ui.panel(new BorderLayout());
-        leyenda.add(Ui.suave("Las cajas rosadas son las pantallas del prototipo. "
+        Diagrama diagrama = new Diagrama();
+
+        JLabel nivel = Ui.suave("");
+        JButton alejar = Ui.boton("\u2212");
+        JButton acercar = Ui.boton("+");
+        JButton ajustar = Ui.boton("Ajustar");
+        alejar.setToolTipText("Alejar el diagrama");
+        acercar.setToolTipText("Acercar el diagrama");
+        ajustar.setToolTipText("Volver al tamanio que llena la ventana");
+
+        Runnable actualizar = () -> nivel.setText(diagrama.porcentaje() + " %");
+        alejar.addActionListener(e -> { diagrama.zoom(-0.15); actualizar.run(); });
+        acercar.addActionListener(e -> { diagrama.zoom(0.15); actualizar.run(); });
+        ajustar.addActionListener(e -> { diagrama.ajustar(); actualizar.run(); });
+
+        // la rueda del mouse con Ctrl acerca y aleja, como en cualquier visor
+        JScrollPane scroll = Ui.scroll(diagrama);
+        scroll.addMouseWheelListener(e -> {
+            if (!e.isControlDown()) { scroll.getParent().dispatchEvent(e); return; }
+            diagrama.zoom(e.getWheelRotation() < 0 ? 0.1 : -0.1);
+            actualizar.run();
+        });
+
+        JPanel zoom = Ui.fila(Ui.suave("Zoom:"), alejar, acercar, ajustar, nivel);
+
+        JPanel pie = Ui.panel(new BorderLayout(Tema.ESP_MD, 0));
+        pie.add(Ui.suave("Las cajas rosadas son las pantallas del prototipo. "
                 + "Los modulos sin pantalla no se pueden pulsar."), BorderLayout.WEST);
+        pie.add(zoom, BorderLayout.EAST);
 
         add(titulo, BorderLayout.NORTH);
-        add(Ui.scroll(new Diagrama()), BorderLayout.CENTER);
-        add(leyenda, BorderLayout.SOUTH);
+        add(scroll, BorderLayout.CENTER);
+        add(pie, BorderLayout.SOUTH);
+
+        SwingUtilities.invokeLater(actualizar);
     }
 
     /* ------------------------------------------------------------------ */
@@ -130,14 +158,30 @@ public class MapaPantalla extends JPanel {
      */
     private static class Diagrama extends JPanel {
 
-        private static final int ALTO_CAJA = 24;
-        private static final int SEP_NIVEL = 22;
-        private static final int SEP_RAMA  = 16;
-        private static final int SEP_HIJO  = 5;
-        private static final int SANGRIA   = 22;
-        private static final int MARGEN    = 16;
-        private static final int HOLGURA   = 18;
-        private static final int FLECHA    = 5;
+        /* medidas base, a escala 1; doLayout las multiplica por la escala */
+        private static final int ALTO_BASE    = 24;
+        private static final int NIVEL_BASE   = 22;
+        private static final int RAMA_BASE    = 16;
+        private static final int HIJO_BASE    = 5;
+        private static final int SANGRIA_BASE = 22;
+        private static final int MARGEN       = 16;
+        private static final int HOLGURA_BASE = 18;
+        private static final int FLECHA_BASE  = 5;
+        private static final int FUENTE_BASE  = 11;
+
+        private static final double ESCALA_MIN = 0.8;
+        private static final double ESCALA_MAX = 2.0;
+
+        private double escala = 1.0;
+        private boolean ajusteAutomatico = true;
+
+        private int ALTO_CAJA() { return (int) Math.round(ALTO_BASE * escala); }
+        private int SEP_NIVEL() { return (int) Math.round(NIVEL_BASE * escala); }
+        private int SEP_RAMA()  { return (int) Math.round(RAMA_BASE * escala); }
+        private int SEP_HIJO()  { return (int) Math.round(HIJO_BASE * escala); }
+        private int SANGRIA()   { return (int) Math.round(SANGRIA_BASE * escala); }
+        private int HOLGURA()   { return (int) Math.round(HOLGURA_BASE * escala); }
+        private int FLECHA()    { return (int) Math.round(FLECHA_BASE * escala); }
 
         private record Caja(Nodo nodo, JComponent control, Rectangle marco, List<Caja> hijos) {}
 
@@ -162,9 +206,56 @@ public class MapaPantalla extends JPanel {
 
         @Override public Dimension getPreferredSize() { return medida; }
 
+        /**
+         * La escala mas grande con la que el diagrama sigue entrando entero.
+         * Se mide a escala 1 y se compara contra el espacio disponible; el 0.97
+         * deja un respiro para que el redondeo no saque una barra de scroll.
+         */
+        private double escalaQueEntra() {
+            double previa = escala;
+            escala = 1.0;
+            aplicarFuentes();
+            anchos.clear();
+            calcularAnchos(RAIZ);
+            Dimension base = medir(RAIZ);
+            escala = previa;
+
+            int dispAncho = getWidth() - MARGEN * 2;
+            int dispAlto = getHeight() - MARGEN * 2;
+            if (dispAncho <= 0 || dispAlto <= 0 || base.width == 0 || base.height == 0) return 1.0;
+
+            double factor = Math.min(dispAncho / (double) base.width,
+                                     dispAlto / (double) base.height) * 0.97;
+            return Math.max(ESCALA_MIN, Math.min(ESCALA_MAX, factor));
+        }
+
+        /** El rotulo crece con el diagrama; si no, las cajas quedan vacias. */
+        private void aplicarFuentes() {
+            int tam = Math.max(9, (int) Math.round(FUENTE_BASE * escala));
+            controles.forEach((nodo, control) ->
+                    control.setFont(Tema.fuente(tam,
+                            nodo.estilo() == Estilo.PANTALLA ? Font.PLAIN : Font.BOLD)));
+        }
+
+        /** Zoom manual: deja de ajustarse solo y se queda donde el usuario lo puso. */
+        void zoom(double paso) {
+            ajusteAutomatico = false;
+            escala = Math.max(ESCALA_MIN, Math.min(ESCALA_MAX, escala + paso));
+            revalidate();
+            repaint();
+        }
+
+        void ajustar() {
+            ajusteAutomatico = true;
+            revalidate();
+            repaint();
+        }
+
+        int porcentaje() { return (int) Math.round(escala * 100); }
+
         /** Las hojas de un mismo grupo comparten ancho, para que la pila quede pareja. */
         private void calcularAnchos(Nodo n) {
-            anchos.put(n, controles.get(n).getPreferredSize().width + HOLGURA);
+            anchos.put(n, controles.get(n).getPreferredSize().width + HOLGURA());
             n.hijos().forEach(this::calcularAnchos);
 
             if (n.hijosHoja()) {
@@ -174,6 +265,9 @@ public class MapaPantalla extends JPanel {
         }
 
         @Override public void doLayout() {
+            if (ajusteAutomatico) escala = escalaQueEntra();
+            aplicarFuentes();
+
             anchos.clear();
             todas.clear();
             calcularAnchos(RAIZ);
@@ -190,7 +284,7 @@ public class MapaPantalla extends JPanel {
 
         private Dimension medir(Nodo n) {
             int propio = anchos.get(n);
-            if (n.esHoja()) return new Dimension(propio, ALTO_CAJA);
+            if (n.esHoja()) return new Dimension(propio, ALTO_CAJA());
 
             if (n.disposicion() == Disposicion.APILADA) {
                 int ancho = 0, alto = 0;
@@ -199,8 +293,8 @@ public class MapaPantalla extends JPanel {
                     ancho = Math.max(ancho, d.width);
                     alto += d.height;
                 }
-                alto += SEP_HIJO * (n.hijos().size() - 1);
-                return new Dimension(Math.max(propio, SANGRIA + ancho), ALTO_CAJA + SEP_NIVEL + alto);
+                alto += SEP_HIJO() * (n.hijos().size() - 1);
+                return new Dimension(Math.max(propio, SANGRIA() + ancho), ALTO_CAJA() + SEP_NIVEL() + alto);
             }
             List<Nodo> enFila = n.hijos().stream().filter(h -> !h.lateral()).toList();
             int ancho = 0, alto = 0;
@@ -209,16 +303,16 @@ public class MapaPantalla extends JPanel {
                 ancho += d.width;
                 alto = Math.max(alto, d.height);
             }
-            ancho += SEP_RAMA * Math.max(0, enFila.size() - 1);
+            ancho += SEP_RAMA() * Math.max(0, enFila.size() - 1);
             return new Dimension(Math.max(propio, ancho) + anchoLateral(n),
-                    ALTO_CAJA + SEP_NIVEL + alto);
+                    ALTO_CAJA() + SEP_NIVEL() + alto);
         }
 
         /** Lo que el nodo lateral ocupa a la izquierda del subarbol. */
         private int anchoLateral(Nodo n) {
             return n.hijos().stream()
                     .filter(Nodo::lateral)
-                    .mapToInt(h -> medir(h).width + SEP_RAMA * 2)
+                    .mapToInt(h -> medir(h).width + SEP_RAMA() * 2)
                     .sum();
         }
 
@@ -229,25 +323,25 @@ public class MapaPantalla extends JPanel {
             Rectangle marco;
 
             if (n.esHoja()) {
-                marco = new Rectangle(x, y, ancho, ALTO_CAJA);
+                marco = new Rectangle(x, y, ancho, ALTO_CAJA());
             } else if (n.disposicion() == Disposicion.APILADA) {
-                marco = new Rectangle(x, y, ancho, ALTO_CAJA);
-                int yHijo = y + ALTO_CAJA + SEP_NIVEL;
+                marco = new Rectangle(x, y, ancho, ALTO_CAJA());
+                int yHijo = y + ALTO_CAJA() + SEP_NIVEL();
                 for (Nodo h : n.hijos()) {
-                    hijos.add(ubicar(h, x + SANGRIA, yHijo));
-                    yHijo += medir(h).height + SEP_HIJO;
+                    hijos.add(ubicar(h, x + SANGRIA(), yHijo));
+                    yHijo += medir(h).height + SEP_HIJO();
                 }
             } else {
                 int margen = anchoLateral(n);
                 int anchoFila = propio.width - margen;
-                marco = new Rectangle(x + margen + (anchoFila - ancho) / 2, y, ancho, ALTO_CAJA);
+                marco = new Rectangle(x + margen + (anchoFila - ancho) / 2, y, ancho, ALTO_CAJA());
 
                 int xHijo = x + margen;
-                int yHijo = y + ALTO_CAJA + SEP_NIVEL;
+                int yHijo = y + ALTO_CAJA() + SEP_NIVEL();
                 for (Nodo h : n.hijos()) {
                     if (h.lateral()) continue;
                     hijos.add(ubicar(h, xHijo, yHijo));
-                    xHijo += medir(h).width + SEP_RAMA;
+                    xHijo += medir(h).width + SEP_RAMA();
                 }
                 // el lateral queda a la izquierda, a la altura del bus del padre
                 int xLateral = x;
@@ -255,8 +349,8 @@ public class MapaPantalla extends JPanel {
                     if (!h.lateral()) continue;
                     Dimension d = medir(h);
                     hijos.add(ubicar(h, xLateral,
-                            y + ALTO_CAJA + SEP_NIVEL / 2 - ALTO_CAJA / 2));
-                    xLateral += d.width + SEP_RAMA * 2;
+                            y + ALTO_CAJA() + SEP_NIVEL() / 2 - ALTO_CAJA() / 2));
+                    xLateral += d.width + SEP_RAMA() * 2;
                 }
             }
             Caja caja = new Caja(n, controles.get(n), marco, hijos);
@@ -279,19 +373,19 @@ public class MapaPantalla extends JPanel {
             Rectangle padre = caja.marco();
 
             if (caja.nodo().disposicion() == Disposicion.APILADA) {
-                int espina = padre.x + SANGRIA / 2;
+                int espina = padre.x + SANGRIA() / 2;
                 Rectangle ultima = caja.hijos().get(caja.hijos().size() - 1).marco();
                 g2.drawLine(espina, padre.y + padre.height, espina, ultima.y + ultima.height / 2);
                 for (Caja h : caja.hijos()) {
                     Rectangle m = h.marco();
                     int medio = m.y + m.height / 2;
-                    g2.drawLine(espina, medio, m.x - FLECHA, medio);
+                    g2.drawLine(espina, medio, m.x - FLECHA(), medio);
                     flecha(g2, m.x, medio, 0);
                 }
             } else {
                 int centro = padre.x + padre.width / 2;
                 int abajo = padre.y + padre.height;
-                int bus = abajo + SEP_NIVEL / 2;
+                int bus = abajo + SEP_NIVEL() / 2;
 
                 g2.drawLine(centro, abajo, centro, bus);
                 int min = centro, max = centro;
@@ -300,7 +394,7 @@ public class MapaPantalla extends JPanel {
                     int c = h.marco().x + h.marco().width / 2;
                     min = Math.min(min, c);
                     max = Math.max(max, c);
-                    g2.drawLine(c, bus, c, h.marco().y - FLECHA);
+                    g2.drawLine(c, bus, c, h.marco().y - FLECHA());
                     flecha(g2, c, h.marco().y, 90);
                 }
                 g2.drawLine(min, bus, max, bus);
@@ -310,7 +404,7 @@ public class MapaPantalla extends JPanel {
                     if (!h.nodo().lateral()) continue;
                     Rectangle m = h.marco();
                     int medio = m.y + m.height / 2;
-                    g2.drawLine(centro, medio, m.x + m.width + FLECHA, medio);
+                    g2.drawLine(centro, medio, m.x + m.width + FLECHA(), medio);
                     flecha(g2, m.x + m.width, medio, 180);
                 }
             }
@@ -318,11 +412,12 @@ public class MapaPantalla extends JPanel {
         }
 
         /** Punta de flecha apuntando a (x, y); el angulo 0 mira a la derecha. */
-        private static void flecha(Graphics2D g2, int x, int y, int grados) {
+        private void flecha(Graphics2D g2, int x, int y, int grados) {
+            int f = FLECHA();
             Path2D.Double p = new Path2D.Double();
             p.moveTo(0, 0);
-            p.lineTo(-FLECHA - 1, -FLECHA + 1);
-            p.lineTo(-FLECHA - 1, FLECHA - 1);
+            p.lineTo(-f - 1, -f + 1);
+            p.lineTo(-f - 1, f - 1);
             p.closePath();
 
             Graphics2D t = (Graphics2D) g2.create();

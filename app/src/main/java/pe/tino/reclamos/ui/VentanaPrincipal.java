@@ -59,6 +59,8 @@ public class VentanaPrincipal extends JFrame {
         setMinimumSize(new Dimension(1000, 680));
         setSize(new Dimension(1200, 800));
         setLocationRelativeTo(null);
+        // maximizada: el mapa se ajusta al espacio, asi que cuanto mas hay, mas grande se ve
+        setExtendedState(MAXIMIZED_BOTH);
 
         mostrar(pantallaInicial);
     }
