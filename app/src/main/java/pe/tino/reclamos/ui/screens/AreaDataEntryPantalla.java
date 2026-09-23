@@ -26,7 +26,7 @@ public class AreaDataEntryPantalla extends Pantalla {
     private static final DateTimeFormatter RELOJ = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
     private static final DateTimeFormatter FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-    private final JTextField idEmpleado = Ui.soloLectura();
+    private final JTextField idEmpleado = Ui.texto(8);
     private final JTextField tipoEmpleado = Ui.soloLectura();
     private final JTextField area = Ui.soloLectura();
     private final JTextField fecha = Ui.soloLectura();
@@ -35,6 +35,8 @@ public class AreaDataEntryPantalla extends Pantalla {
             "Nro Ticket", "Apertura", "Cliente", "Objeto", "Problema",
             "Prioridad", "Estado", "Límite", "Vencido"});
     private List<Ticket> visibles = new ArrayList<>();
+    private Empleado empleado;
+    private boolean preguntando;
 
     public AreaDataEntryPantalla() {
         super("Atender Ticket",
@@ -64,13 +66,25 @@ public class AreaDataEntryPantalla extends Pantalla {
 
         refrescar();
         Tickets.alCambiar(t -> refrescar());
-        SwingUtilities.invokeLater(this::pedirEmpleado);
+        idEmpleado.setToolTipText("Escriba su ID y pulse Enter o Ingresar");
+        idEmpleado.addActionListener(e -> ingresar(idEmpleado.getText()));
+        // la pantalla se crea una sola vez: se pregunta cada vez que se muestra
+        addHierarchyListener(e -> {
+            if ((e.getChangeFlags() & java.awt.event.HierarchyEvent.SHOWING_CHANGED) != 0 && isShowing()) {
+                SwingUtilities.invokeLater(this::pedirEmpleado);
+            }
+        });
     }
 
     private JComponent datosEmpleado() {
         JPanel p = Ui.panel(new GridLayout(2, 4, Tema.ESP_MD, Tema.ESP_SM));
         p.add(Ui.etiqueta("ID Empleado:"));
-        p.add(idEmpleado);
+        JButton ingresar = Ui.boton("Ingresar");
+        ingresar.addActionListener(e -> ingresar(idEmpleado.getText()));
+        JPanel filaId = Ui.panel(new BorderLayout(Tema.ESP_SM, 0));
+        filaId.add(idEmpleado, BorderLayout.CENTER);
+        filaId.add(ingresar, BorderLayout.EAST);
+        p.add(filaId);
         p.add(Ui.etiqueta("Área:"));
         p.add(area);
         p.add(Ui.etiqueta("Tipo Empleado:"));
@@ -81,25 +95,40 @@ public class AreaDataEntryPantalla extends Pantalla {
         return p;
     }
 
-    /** La ventana "Ingresar Datos" con la que arranca el prototipo. */
+    /**
+     * La ventana "Ingresar Datos" del prototipo. Se abre al entrar a la
+     * pantalla mientras nadie se haya identificado; si se cancela, el ID
+     * tambien se puede escribir en el campo de arriba.
+     */
     private void pedirEmpleado() {
-        JTextField campo = Ui.texto(12);
-        campo.setText("E01");
+        if (preguntando || empleado != null || !isShowing()) return;
+        preguntando = true;
+        try {
+            JTextField campo = Ui.texto(12);
+            campo.setText("E01");
+            campo.selectAll();
 
-        Formulario f = new Formulario();
-        f.campo("ID Empleado:", campo);
-        f.setBorder(Ui.relleno(Tema.ESP_MD));
+            Formulario f = new Formulario();
+            f.campo("ID Empleado:", campo);
+            f.setBorder(Ui.relleno(Tema.ESP_MD));
 
-        int r = JOptionPane.showConfirmDialog(this, f, "Ingresar Datos",
-                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-        if (r != JOptionPane.OK_OPTION) return;
+            int r = JOptionPane.showConfirmDialog(this, f, "Ingresar Datos",
+                    JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+            if (r == JOptionPane.OK_OPTION) ingresar(campo.getText());
+        } finally {
+            preguntando = false;
+        }
+    }
 
-        Empleado e = Prototipo.EMPLEADOS.get(campo.getText().trim().toUpperCase());
+    /** Identifica al empleado y carga su cola. */
+    private void ingresar(String texto) {
+        Empleado e = Prototipo.EMPLEADOS.get(texto.trim().toUpperCase());
         if (e == null) {
-            avisar("El ID de empleado no existe. Pruebe con E01, E02 o E03.");
-            pedirEmpleado();
+            avisar("El ID de empleado no existe. Pruebe con "
+                    + String.join(", ", Prototipo.EMPLEADOS.keySet()) + ".");
             return;
         }
+        empleado = e;
         idEmpleado.setText(e.id());
         tipoEmpleado.setText(e.tipo());
         area.setText(e.area());
@@ -112,9 +141,8 @@ public class AreaDataEntryPantalla extends Pantalla {
      * empleado no es suyo, asi que ninguno de los dos aparece.
      */
     private void refrescar() {
-        String id = idEmpleado.getText();
-        visibles = id.isBlank() ? List.of() : Tickets.todos().stream()
-                .filter(t -> esDeLaCola(t, id))
+        visibles = empleado == null ? List.of() : Tickets.todos().stream()
+                .filter(t -> esDeLaCola(t, empleado.id()))
                 .toList();
         tabla.limpiar();
         for (Ticket t : visibles) {
@@ -142,24 +170,24 @@ public class AreaDataEntryPantalla extends Pantalla {
     private void asignarme() {
         Ticket t = seleccionado();
         if (t == null) { avisar("Seleccione un ticket de la cola."); return; }
-        if (idEmpleado.getText().isBlank()) { avisar("Primero ingrese su ID de empleado."); return; }
+        if (empleado == null) { avisar("Primero ingrese su ID de empleado."); return; }
         if (t.estado() != Estado.REGISTRADO && t.estado() != Estado.IMPUGNADO) {
             avisar("El ticket " + t.numero() + " ya está asignado a " + t.especialista() + ".");
             return;
         }
 
-        t.asignar(area.getText(), idEmpleado.getText(),
-                Prototipo.protocoloDe(t.tipoProblema()), idEmpleado.getText());
+        t.asignar(empleado.area(), empleado.id(),
+                Prototipo.protocoloDe(t.tipoProblema()), empleado.id());
         Tickets.notificar();
         refrescar();
-        avisar("Ticket " + t.numero() + " asignado a " + idEmpleado.getText() + ".");
+        avisar("Ticket " + t.numero() + " asignado a " + empleado.id() + ".");
     }
 
     /** La ventana de inspeccion: ejecuta las acciones del protocolo. */
     private void inspeccionar() {
         Ticket t = seleccionado();
         if (t == null) { avisar("Seleccione un ticket de la cola."); return; }
-        if (idEmpleado.getText().isBlank()) { avisar("Primero ingrese su ID de empleado."); return; }
+        if (empleado == null) { avisar("Primero ingrese su ID de empleado."); return; }
         if (t.estado() == Estado.REGISTRADO || t.estado() == Estado.IMPUGNADO) {
             avisar("El ticket todavía no está asignado. Use Asignarme primero.");
             return;
@@ -222,8 +250,8 @@ public class AreaDataEntryPantalla extends Pantalla {
             }
         }
         long hechas = casillas.stream().filter(AbstractButton::isSelected).count();
-        if (t.estado() == Estado.ASIGNADO) t.cambiarEstado(Estado.EN_ATENCION, idEmpleado.getText(), "");
-        t.cambiarEstado(Estado.RESUELTO, idEmpleado.getText(),
+        if (t.estado() == Estado.ASIGNADO) t.cambiarEstado(Estado.EN_ATENCION, empleado.id(), "");
+        t.cambiarEstado(Estado.RESUELTO, empleado.id(),
                 hechas + " de " + acciones.size() + " acciones ejecutadas");
         Tickets.notificar();
         refrescar();
@@ -241,7 +269,7 @@ public class AreaDataEntryPantalla extends Pantalla {
         if (r != JOptionPane.OK_OPTION) return;
         if (motivo.getText().isBlank()) { avisar("Indique el motivo del rechazo."); return; }
 
-        t.cambiarEstado(Estado.RECHAZADO, idEmpleado.getText(), motivo.getText().trim());
+        t.cambiarEstado(Estado.RECHAZADO, empleado.id(), motivo.getText().trim());
         Tickets.notificar();
         refrescar();
         avisar("Ticket " + t.numero() + " rechazado. El cliente tiene "
