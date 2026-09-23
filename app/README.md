@@ -40,39 +40,41 @@ configura el módulo solo. La clase de arranque es `pe.tino.reclamos.app.Main`.
 
 ## Cómo se navega
 
-La aplicación abre en el **mapa conceptual**: el árbol del diseño
-arquitectónico dibujado como organigrama, con la raíz arriba y las ramas
-abriéndose hacia abajo. Cada hoja es un botón. No hay barra lateral ni menús:
-se entra por el mapa y se vuelve con **Volver** o **Mapa**.
+La aplicación abre en el **mapa conceptual**: el diagrama de módulos típicos
+del diseño arquitectónico, dibujado como organigrama con la raíz arriba y las
+ramas abriéndose hacia abajo. No hay barra lateral ni menús: se entra por el
+mapa y se vuelve con **Volver** o **Mapa**.
 
-El diagrama se arma solo a partir del árbol declarado en `MapaPantalla`: una
+```
+                        SISTEMA DE RECLAMOS
+          ┌──────────────────────┼──────────────────────┐
+     SEGURIDAD               APLICATIVO              TECNICO
+                        ┌────────┴────────┐         ├ ACT-BD
+                     ONLINE            BATCH        ├ MANT-BD
+              ┌─────────┴─────────┐                 ├ ESTADISTICAS
+          GERENCIAL           OPERATIVO             └ CONTINGENCIA
+       ┌──────┴──────┐      ┌─────┴─────┐
+  MANT-PARAM     CONSULTA  AREA      CLIENTE
+  ├ Parámetros      └ Indicadores  ├ Data Entry  ├ Data Entry
+  ├ Reclamos y Eventos            └ Reportes     └ Reportes
+  ├ Productos
+  ├ Problemas
+  ├ Clientes
+  ├ Protocolos
+  ├ Reglas
+  └ Políticas
+```
+
+Están **todos** los módulos de la arquitectura. Los que desarrolla el 1er
+entregable son botones y llevan a su pantalla; SEGURIDAD, BATCH, ACT-BD,
+MANT-BD, ESTADISTICAS y CONTINGENCIA se dibujan con **borde punteado**, porque
+forman parte del diseño pero todavía no del prototipo.
+
+El diagrama se calcula solo a partir del árbol declarado en `MapaPantalla`: una
 rama reparte a sus hijos en horizontal y se centra sobre ellos; un nodo cuyos
-hijos son todos hojas las cuelga en vertical con una espina a la izquierda. Así
-los ocho catálogos entran sin que el diagrama se desborde a lo ancho.
-
-```
-SISTEMA DE RECLAMOS
-└─ MÓDULO ONLINE
-   ├─ GERENCIAL
-   │  ├─ MANTENIMIENTO DE PARÁMETROS
-   │  │  ├─ Parámetros Generales
-   │  │  ├─ Catálogo de Reclamos y Eventos
-   │  │  ├─ Catálogo de Productos
-   │  │  ├─ Catálogo de Problemas
-   │  │  ├─ Catálogo de Clientes
-   │  │  ├─ Catálogo de Protocolos
-   │  │  ├─ Catálogo de Reglas
-   │  │  └─ Catálogo de Políticas
-   │  └─ CONSULTA
-   │     └─ Indicadores
-   └─ OPERATIVO
-      ├─ ÁREA
-      │  ├─ Data Entry
-      │  └─ Reportes
-      └─ CLIENTE
-         ├─ Data Entry
-         └─ Reportes
-```
+hijos son todos hojas las cuelga en vertical con una espina a la izquierda. Cada
+caja mide lo que mide su rótulo, que es lo que permite que el diagrama entero
+entre a lo ancho sin scroll.
 
 ## De dónde sale cada pantalla
 
