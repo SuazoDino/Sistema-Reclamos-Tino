@@ -3,6 +3,7 @@ package pe.tino.reclamos.ui.screens;
 import pe.tino.reclamos.repo.Datos;
 import pe.tino.reclamos.ui.components.Formulario;
 import pe.tino.reclamos.ui.components.Grupo;
+import pe.tino.reclamos.ui.components.Tabla;
 import pe.tino.reclamos.ui.components.Ui;
 import pe.tino.reclamos.ui.theme.Tema;
 
@@ -28,7 +29,7 @@ public class ProductosPantalla extends Pantalla {
     private final JTextField bien = Ui.soloLectura();
 
     public ProductosPantalla() {
-        super("Catalogo de Productos",
+        super("Catalogo de Producto",
                 "Clasificacion en cuatro niveles: segmento, familia, clase y bien.");
 
         arbol = new JTree(construirModelo());
@@ -41,8 +42,12 @@ public class ProductosPantalla extends Pantalla {
         Grupo gArbol = Grupo.ajustado("Jerarquia del catalogo");
         gArbol.add(Ui.scroll(arbol), BorderLayout.CENTER);
 
+        JPanel inferior = Ui.panel(new BorderLayout(Tema.ESP_MD, 0));
+        inferior.add(ficha(), BorderLayout.CENTER);
+        inferior.add(tiposDeBien(), BorderLayout.EAST);
+
         contenido().add(gArbol, BorderLayout.CENTER);
-        contenido().add(ficha(), BorderLayout.SOUTH);
+        contenido().add(inferior, BorderLayout.SOUTH);
     }
 
     private JComponent ficha() {
@@ -53,6 +58,18 @@ public class ProductosPantalla extends Pantalla {
          .campo("Clase", clase)
          .campo("Bien", bien);
         g.add(f, BorderLayout.CENTER);
+        return g;
+    }
+
+    /** Tipos de bien y el problema que admiten (hoja MANT-PARAM). */
+    private JComponent tiposDeBien() {
+        Tabla tabla = new Tabla(new String[]{"Tipo de bien", "Tipo de problema", "Estado"});
+        Datos.catalogoBienes().forEach(f -> tabla.agregar((Object[]) f));
+        tabla.anchos(190, 160, 120);
+
+        Grupo g = Grupo.ajustado("Tipos de bien");
+        g.add(tabla.enScroll(), BorderLayout.CENTER);
+        g.setPreferredSize(new Dimension(500, 100));
         return g;
     }
 

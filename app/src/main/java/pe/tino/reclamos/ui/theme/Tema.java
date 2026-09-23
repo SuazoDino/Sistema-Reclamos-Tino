@@ -31,6 +31,17 @@ public final class Tema {
     public static final Color FILA_ALTERNA = new Color(0xF5F5F5);
     public static final Color CABECERA   = new Color(0xE4E4E4);
 
+    /* ---------- colores del diagrama de arquitectura ----------
+     * Son los del diagrama del informe: azul para los modulos, amarillo para
+     * los submodulos y rosa para las pantallas. */
+    public static final Color DIAG_MODULO_FONDO    = new Color(0xDAE8FC);
+    public static final Color DIAG_MODULO_BORDE    = new Color(0x6C8EBF);
+    public static final Color DIAG_SUBMODULO_FONDO = new Color(0xFFF2CC);
+    public static final Color DIAG_SUBMODULO_BORDE = new Color(0xD6B656);
+    public static final Color DIAG_PANTALLA_FONDO  = new Color(0xF8CECC);
+    public static final Color DIAG_PANTALLA_BORDE  = new Color(0xB85450);
+    public static final Color DIAG_LINEA           = new Color(0x666666);
+
     /* ---------- tipografia ---------- */
     public static Font fuente(int tam, int estilo) { return new Font(Font.SANS_SERIF, estilo, tam); }
     public static Font cuerpo()  { return fuente(12, Font.PLAIN); }

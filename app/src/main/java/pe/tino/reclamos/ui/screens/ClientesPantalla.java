@@ -2,6 +2,7 @@ package pe.tino.reclamos.ui.screens;
 
 import pe.tino.reclamos.repo.Datos;
 import pe.tino.reclamos.ui.components.Grupo;
+import pe.tino.reclamos.ui.components.Tabla;
 import pe.tino.reclamos.ui.components.Ui;
 import pe.tino.reclamos.ui.theme.Tema;
 
@@ -23,7 +24,7 @@ public class ClientesPantalla extends Pantalla {
     private final JList<String> listaConsideraciones = new JList<>(consideraciones);
 
     public ClientesPantalla() {
-        super("Catalogo de Clientes",
+        super("Catalogo de Cliente",
                 "Tipos de cliente que considera la empresa y las consideraciones asignadas a cada uno.");
 
         Datos.catalogo("clientes").habilitados().forEach(tipos::addElement);
@@ -51,9 +52,10 @@ public class ClientesPantalla extends Pantalla {
         JPanel cuerpo = Ui.panel(new BorderLayout(Tema.ESP_MD, 0));
         cuerpo.add(gTipos, BorderLayout.WEST);
         cuerpo.add(gCons, BorderLayout.CENTER);
+        cuerpo.setPreferredSize(new Dimension(100, 190));
 
-        contenido().add(cuerpo, BorderLayout.CENTER);
-        contenido().add(nota(), BorderLayout.SOUTH);
+        contenido().add(cuerpo, BorderLayout.NORTH);
+        contenido().add(categorizacion(), BorderLayout.CENTER);
     }
 
     private JComponent pieTipos() {
@@ -74,12 +76,38 @@ public class ClientesPantalla extends Pantalla {
         return p;
     }
 
-    /** La formula del calculo vive en su propio catalogo. */
-    private JComponent nota() {
-        JPanel p = Ui.panel(new BorderLayout());
-        p.setBorder(Ui.relleno(Tema.ESP_SM, 0, 0, 0));
-        p.add(Ui.suave("Las condiciones, metodos y formulas del calculo se administran "
-                + "en el Catalogo de Categorizacion."), BorderLayout.WEST);
+    /** Categorizacion del cliente: condiciones, metodos y formulas (hoja MANT-PARAM). */
+    private JComponent categorizacion() {
+        Tabla condiciones = new Tabla(new String[]{
+                "Condicion", "Parametro", "Operador", "Variable", "Si es verdadero", "Si es falso"});
+        Datos.condicionesCliente().forEach(f -> condiciones.agregar((Object[]) f));
+        condiciones.anchos(100, 130, 90, 110, 130, 110).centrar(2);
+
+        Tabla metodos = new Tabla(new String[]{"Metodo", "Formula"});
+        Datos.metodosCliente().forEach(f -> metodos.agregar((Object[]) f));
+        metodos.anchos(80, 380);
+
+        Tabla formulas = new Tabla(new String[]{"Metodo", "Variable", "Secuencia", "Operador"});
+        Datos.formulasCliente().forEach(f -> formulas.agregar((Object[]) f));
+        formulas.anchos(80, 170, 90, 120).centrar(2);
+
+        Grupo gCond = Grupo.ajustado("Condiciones de categorizacion");
+        gCond.add(condiciones.enScroll(), BorderLayout.CENTER);
+        gCond.setPreferredSize(new Dimension(100, 140));
+
+        Grupo gMet = Grupo.ajustado("Metodos de calculo");
+        gMet.add(metodos.enScroll(), BorderLayout.CENTER);
+
+        Grupo gFor = Grupo.ajustado("Secuencia de cada metodo");
+        gFor.add(formulas.enScroll(), BorderLayout.CENTER);
+
+        JPanel abajo = Ui.panel(new GridLayout(1, 2, Tema.ESP_MD, 0));
+        abajo.add(gMet);
+        abajo.add(gFor);
+
+        JPanel p = Ui.panel(new BorderLayout(0, Tema.ESP_MD));
+        p.add(gCond, BorderLayout.NORTH);
+        p.add(abajo, BorderLayout.CENTER);
         return p;
     }
 

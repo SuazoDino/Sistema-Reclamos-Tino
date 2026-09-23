@@ -8,81 +8,81 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Path2D;
+import java.awt.geom.RoundRectangle2D;
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Mapa conceptual del sistema: el diagrama de modulos tipicos del diseno
- * arquitectonico, con la raiz arriba y las ramas abriendose hacia abajo.
- *
- * Estan todos los modulos de la arquitectura. Los que desarrolla el 1er
- * entregable son botones y llevan a su pantalla; los demas se dibujan con
- * borde punteado, porque forman parte del diseno pero todavia no del
- * prototipo.
+ * Mapa conceptual del sistema: el diagrama de diseno arquitectonico del
+ * informe, con sus mismos modulos, su misma jerarquia y sus mismos colores.
+ * Azul para los modulos, amarillo para los submodulos y rosa para las
+ * pantallas; las cajas que tienen pantalla se pulsan para entrar.
  */
 public class MapaPantalla extends JPanel {
 
-    private enum Tipo { GRUPO, OPCION, PENDIENTE }
+    /** Nivel del nodo en el diagrama; decide el color de la caja. */
+    private enum Estilo { MODULO, SUBMODULO, PANTALLA }
 
-    /** Nodo del arbol. */
-    private record Nodo(Tipo tipo, String clave, String texto, List<Nodo> hijos) {
+    /** Como se acomodan los hijos: en fila o apilados debajo. */
+    private enum Disposicion { FILA, APILADA }
 
-        static Nodo grupo(String texto, Nodo... hijos) {
-            return new Nodo(Tipo.GRUPO, null, texto, List.of(hijos));
+    private record Nodo(Estilo estilo, String clave, String texto,
+                        Disposicion disposicion, List<Nodo> hijos) {
+
+        static Nodo modulo(String texto, Disposicion d, Nodo... hijos) {
+            return new Nodo(Estilo.MODULO, null, texto, d, List.of(hijos));
         }
 
-        static Nodo opcion(String clave, String texto) {
-            return new Nodo(Tipo.OPCION, clave, texto, List.of());
+        static Nodo modulo(String clave, String texto, Disposicion d, Nodo... hijos) {
+            return new Nodo(Estilo.MODULO, clave, texto, d, List.of(hijos));
         }
 
-        /** Modulo de la arquitectura que el entregable todavia no desarrolla. */
-        static Nodo pendiente(String texto) {
-            return new Nodo(Tipo.PENDIENTE, null, texto, List.of());
+        static Nodo submodulo(String texto, Nodo... hijos) {
+            return new Nodo(Estilo.SUBMODULO, null, texto, Disposicion.APILADA, List.of(hijos));
         }
 
-        boolean esHoja() { return hijos.isEmpty(); }
-
-        /** Un nodo peine solo tiene hojas: se apilan debajo de el. */
-        boolean esPeine() {
-            return !hijos.isEmpty() && hijos.stream().allMatch(Nodo::esHoja);
+        static Nodo pantalla(String clave, String texto) {
+            return new Nodo(Estilo.PANTALLA, clave, texto, Disposicion.FILA, List.of());
         }
+
+        boolean esHoja()      { return hijos.isEmpty(); }
+        boolean navega()      { return clave != null; }
+        boolean hijosHoja()   { return !hijos.isEmpty() && hijos.stream().allMatch(Nodo::esHoja); }
     }
 
-    /** Los modulos tipicos del diseno arquitectonico. */
-    private static final Nodo RAIZ = Nodo.grupo("SISTEMA DE RECLAMOS",
-            Nodo.grupo("SEGURIDAD",
-                    Nodo.opcion("seguridad-perfiles", "Perfiles y Accesos")),
-            Nodo.grupo("APLICATIVO",
-                    Nodo.grupo("ONLINE",
-                            Nodo.grupo("GERENCIAL",
-                                    Nodo.grupo("MANT-PARAM",
-                                            Nodo.opcion("cat-general", "Catalogo General"),
-                                            Nodo.opcion("cat-reclamos", "Catalogo de Reclamos"),
-                                            Nodo.opcion("cat-productos", "Catalogo de Productos"),
-                                            Nodo.opcion("cat-bienes", "Catalogo de Bienes"),
-                                            Nodo.opcion("cat-problemas", "Catalogo de Problemas"),
-                                            Nodo.opcion("cat-clientes", "Catalogo de Clientes"),
-                                            Nodo.opcion("cat-categorizacion", "Catalogo de Categorizacion"),
-                                            Nodo.opcion("cat-protocolos", "Catalogo de Protocolos"),
-                                            Nodo.opcion("cat-reglas", "Catalogo de Reglas"),
-                                            Nodo.opcion("cat-politicas", "Catalogo de Politicas")),
-                                    Nodo.grupo("CONSULTA",
-                                            Nodo.opcion("indicadores", "Indicadores"))),
-                            Nodo.grupo("OPERATIVO",
-                                    Nodo.grupo("AREA",
-                                            Nodo.opcion("area-dataentry", "Data Entry"),
-                                            Nodo.opcion("area-reportes", "Reportes")),
-                                    Nodo.grupo("CLIENTE",
-                                            Nodo.opcion("cliente-dataentry", "Data Entry"),
-                                            Nodo.opcion("cliente-reportes", "Reportes")))),
-                    Nodo.pendiente("BATCH")),
-            Nodo.grupo("TECNICO",
-                    Nodo.pendiente("ACT-BD"),
-                    Nodo.pendiente("MANT-BD"),
-                    Nodo.opcion("indicadores", "ESTADISTICAS"),
-                    Nodo.pendiente("CONTINGENCIA")));
+    /** El arbol del diagrama de diseno arquitectonico. */
+    private static final Nodo RAIZ = Nodo.modulo("SISTEMA DE RECLAMOS", Disposicion.FILA,
+            Nodo.modulo("seguridad-perfiles", "SEGURIDAD", Disposicion.FILA,
+                    Nodo.modulo("ONLINE", Disposicion.FILA,
+                            Nodo.modulo("GERENCIAL", Disposicion.APILADA,
+                                    Nodo.submodulo("MANT-PARAM",
+                                            Nodo.pantalla("cat-general", "Parámetro General"),
+                                            Nodo.pantalla("cat-reclamos", "Catálogo de Reclamo"),
+                                            Nodo.pantalla("cat-productos", "Catálogo de Producto"),
+                                            Nodo.pantalla("cat-problemas", "Catálogo de Problemas"),
+                                            Nodo.pantalla("cat-clientes", "Catálogo de Cliente"),
+                                            Nodo.pantalla("cat-protocolos", "Catálogo de Protocolos"),
+                                            Nodo.pantalla("cat-reglas", "Catálogo de Reglas"),
+                                            Nodo.pantalla("cat-politicas", "Catálogo de Políticas")),
+                                    Nodo.submodulo("CONSULTA",
+                                            Nodo.pantalla("indicadores", "Consulta de Indicadores"))),
+                            Nodo.modulo("OPERATIVO", Disposicion.FILA,
+                                    Nodo.submodulo("ÁREA",
+                                            Nodo.pantalla("area-dataentry", "DATA ENTRY"),
+                                            Nodo.pantalla("area-reportes", "REPORTES")),
+                                    Nodo.submodulo("CLIENTE",
+                                            Nodo.pantalla("cliente-dataentry", "DATA ENTRY"),
+                                            Nodo.pantalla("cliente-reportes", "REPORTES")))),
+                    Nodo.modulo("BATCH", Disposicion.FILA,
+                            Nodo.modulo("APLICATIVO", Disposicion.APILADA,
+                                    Nodo.submodulo("ACT-BD"),
+                                    Nodo.submodulo("ESTADISTICAS")),
+                            Nodo.modulo("TECNICO", Disposicion.APILADA,
+                                    Nodo.submodulo("MANT-BD"),
+                                    Nodo.submodulo("CONTINGENCIA")))));
 
     public MapaPantalla() {
         super(new BorderLayout(0, Tema.ESP_MD));
@@ -90,13 +90,12 @@ public class MapaPantalla extends JPanel {
         setBorder(Ui.relleno(Tema.ESP_LG));
 
         JPanel titulo = Ui.panel(new BorderLayout(0, 2));
-        titulo.add(Ui.titulo("Diseno arquitectonico"), BorderLayout.NORTH);
-        titulo.add(Ui.suave("Modulos tipicos del sistema. Seleccione la opcion a la que desea entrar."),
-                BorderLayout.CENTER);
+        titulo.add(Ui.titulo("Diseño arquitectónico"), BorderLayout.NORTH);
+        titulo.add(Ui.suave("Seleccione la pantalla a la que desea entrar."), BorderLayout.CENTER);
 
         JPanel leyenda = Ui.panel(new BorderLayout());
-        leyenda.add(Ui.suave("Los modulos con borde punteado forman parte de la arquitectura "
-                + "pero todavia no del prototipo."), BorderLayout.WEST);
+        leyenda.add(Ui.suave("Las cajas rosadas son las pantallas del prototipo. "
+                + "Los modulos sin pantalla no se pueden pulsar."), BorderLayout.WEST);
 
         add(titulo, BorderLayout.NORTH);
         add(Ui.scroll(new Diagrama()), BorderLayout.CENTER);
@@ -106,20 +105,21 @@ public class MapaPantalla extends JPanel {
     /* ------------------------------------------------------------------ */
 
     /**
-     * Organigrama calculado a partir del arbol. Una rama reparte a sus hijos
-     * en horizontal y se centra sobre ellos; un nodo peine los cuelga en
-     * vertical con una espina a la izquierda. Cada caja mide lo que mide su
-     * rotulo, que es lo que permite que el diagrama entero entre a lo ancho.
+     * Organigrama calculado desde el arbol. Un nodo en fila reparte a sus
+     * hijos en horizontal y se centra sobre ellos; un nodo apilado los cuelga
+     * en vertical con una espina a la izquierda. Las lineas terminan en punta
+     * de flecha, como en el diagrama del informe.
      */
     private static class Diagrama extends JPanel {
 
-        private static final int ALTO_CAJA = 26;
-        private static final int SEP_NIVEL = 26;
-        private static final int SEP_RAMA  = 14;
-        private static final int SEP_HOJA  = 5;
-        private static final int SANGRIA   = 20;
+        private static final int ALTO_CAJA = 24;
+        private static final int SEP_NIVEL = 22;
+        private static final int SEP_RAMA  = 16;
+        private static final int SEP_HIJO  = 5;
+        private static final int SANGRIA   = 22;
         private static final int MARGEN    = 16;
-        private static final int HOLGURA   = 20;   // aire a los lados del rotulo
+        private static final int HOLGURA   = 18;
+        private static final int FLECHA    = 5;
 
         private record Caja(Nodo nodo, JComponent control, Rectangle marco, List<Caja> hijos) {}
 
@@ -127,7 +127,7 @@ public class MapaPantalla extends JPanel {
         private final Map<Nodo, Integer> anchos = new IdentityHashMap<>();
         private final List<Caja> todas = new ArrayList<>();
         private Caja raiz;
-        private Dimension medida = new Dimension(900, 520);
+        private Dimension medida = new Dimension(820, 560);
 
         Diagrama() {
             super(null);
@@ -136,11 +136,7 @@ public class MapaPantalla extends JPanel {
         }
 
         private void construir(Nodo n) {
-            JComponent c = switch (n.tipo()) {
-                case OPCION -> new CajaOpcion(n);
-                case PENDIENTE -> new CajaPendiente(n);
-                case GRUPO -> new CajaGrupo(n);
-            };
+            JComponent c = n.navega() ? new CajaBoton(n) : new CajaFija(n);
             controles.put(n, c);
             add(c);
             n.hijos().forEach(this::construir);
@@ -148,15 +144,12 @@ public class MapaPantalla extends JPanel {
 
         @Override public Dimension getPreferredSize() { return medida; }
 
-        /**
-         * Ancho de la caja de un nodo. Las hojas de un mismo peine comparten
-         * el ancho de la mas larga, para que la pila quede pareja.
-         */
+        /** Las hojas de un mismo grupo comparten ancho, para que la pila quede pareja. */
         private void calcularAnchos(Nodo n) {
             anchos.put(n, controles.get(n).getPreferredSize().width + HOLGURA);
             n.hijos().forEach(this::calcularAnchos);
 
-            if (n.esPeine()) {
+            if (n.hijosHoja()) {
                 int max = n.hijos().stream().mapToInt(anchos::get).max().orElse(0);
                 n.hijos().forEach(h -> anchos.put(h, max));
             }
@@ -177,15 +170,19 @@ public class MapaPantalla extends JPanel {
             for (Caja caja : todas) caja.control().setBounds(caja.marco());
         }
 
-        /** Tamanio que ocupa el subarbol de un nodo. */
         private Dimension medir(Nodo n) {
             int propio = anchos.get(n);
             if (n.esHoja()) return new Dimension(propio, ALTO_CAJA);
 
-            if (n.esPeine()) {
-                int hijos = n.hijos().size();
-                return new Dimension(Math.max(propio, SANGRIA + anchos.get(n.hijos().get(0))),
-                        ALTO_CAJA + SEP_NIVEL + hijos * ALTO_CAJA + (hijos - 1) * SEP_HOJA);
+            if (n.disposicion() == Disposicion.APILADA) {
+                int ancho = 0, alto = 0;
+                for (Nodo h : n.hijos()) {
+                    Dimension d = medir(h);
+                    ancho = Math.max(ancho, d.width);
+                    alto += d.height;
+                }
+                alto += SEP_HIJO * (n.hijos().size() - 1);
+                return new Dimension(Math.max(propio, SANGRIA + ancho), ALTO_CAJA + SEP_NIVEL + alto);
             }
             int ancho = 0, alto = 0;
             for (Nodo h : n.hijos()) {
@@ -197,22 +194,21 @@ public class MapaPantalla extends JPanel {
             return new Dimension(Math.max(propio, ancho), ALTO_CAJA + SEP_NIVEL + alto);
         }
 
-        /** Ubica el subarbol dentro del rectangulo que empieza en (x, y). */
         private Caja ubicar(Nodo n, int x, int y) {
             Dimension propio = medir(n);
             int ancho = anchos.get(n);
             List<Caja> hijos = new ArrayList<>();
             Rectangle marco;
 
-            if (n.esPeine()) {
+            if (n.esHoja()) {
                 marco = new Rectangle(x, y, ancho, ALTO_CAJA);
-                int yHija = y + ALTO_CAJA + SEP_NIVEL;
+            } else if (n.disposicion() == Disposicion.APILADA) {
+                marco = new Rectangle(x, y, ancho, ALTO_CAJA);
+                int yHijo = y + ALTO_CAJA + SEP_NIVEL;
                 for (Nodo h : n.hijos()) {
-                    hijos.add(ubicar(h, x + SANGRIA, yHija));
-                    yHija += ALTO_CAJA + SEP_HOJA;
+                    hijos.add(ubicar(h, x + SANGRIA, yHijo));
+                    yHijo += medir(h).height + SEP_HIJO;
                 }
-            } else if (n.esHoja()) {
-                marco = new Rectangle(x, y, ancho, ALTO_CAJA);
             } else {
                 marco = new Rectangle(x + (propio.width - ancho) / 2, y, ancho, ALTO_CAJA);
                 int xHijo = x;
@@ -231,7 +227,8 @@ public class MapaPantalla extends JPanel {
             super.paintComponent(g);
             if (raiz == null) return;
             Graphics2D g2 = (Graphics2D) g.create();
-            g2.setColor(Tema.BORDE);
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setColor(Tema.DIAG_LINEA);
             enlaces(g2, raiz);
             g2.dispose();
         }
@@ -240,13 +237,15 @@ public class MapaPantalla extends JPanel {
             if (caja.hijos().isEmpty()) return;
             Rectangle padre = caja.marco();
 
-            if (caja.nodo().esPeine()) {
+            if (caja.nodo().disposicion() == Disposicion.APILADA) {
                 int espina = padre.x + SANGRIA / 2;
                 Rectangle ultima = caja.hijos().get(caja.hijos().size() - 1).marco();
                 g2.drawLine(espina, padre.y + padre.height, espina, ultima.y + ultima.height / 2);
                 for (Caja h : caja.hijos()) {
                     Rectangle m = h.marco();
-                    g2.drawLine(espina, m.y + m.height / 2, m.x, m.y + m.height / 2);
+                    int medio = m.y + m.height / 2;
+                    g2.drawLine(espina, medio, m.x - FLECHA, medio);
+                    flecha(g2, m.x, medio, 0);
                 }
             } else {
                 int centro = padre.x + padre.width / 2;
@@ -259,52 +258,108 @@ public class MapaPantalla extends JPanel {
                     int c = h.marco().x + h.marco().width / 2;
                     min = Math.min(min, c);
                     max = Math.max(max, c);
-                    g2.drawLine(c, bus, c, h.marco().y);
+                    g2.drawLine(c, bus, c, h.marco().y - FLECHA);
+                    flecha(g2, c, h.marco().y, 90);
                 }
                 g2.drawLine(min, bus, max, bus);
             }
             caja.hijos().forEach(h -> enlaces(g2, h));
         }
+
+        /** Punta de flecha apuntando a (x, y); el angulo 0 mira a la derecha. */
+        private static void flecha(Graphics2D g2, int x, int y, int grados) {
+            Path2D.Double p = new Path2D.Double();
+            p.moveTo(0, 0);
+            p.lineTo(-FLECHA - 1, -FLECHA + 1);
+            p.lineTo(-FLECHA - 1, FLECHA - 1);
+            p.closePath();
+
+            Graphics2D t = (Graphics2D) g2.create();
+            t.translate(x, y);
+            t.rotate(Math.toRadians(grados));
+            t.fill(p);
+            t.dispose();
+        }
     }
 
     /* ------------------------------------------------------------------ */
 
-    /** Nodo que agrupa: rotulo del diagrama. */
-    private static class CajaGrupo extends JLabel {
-        CajaGrupo(Nodo n) {
+    private static Color fondo(Estilo e) {
+        return switch (e) {
+            case MODULO -> Tema.DIAG_MODULO_FONDO;
+            case SUBMODULO -> Tema.DIAG_SUBMODULO_FONDO;
+            case PANTALLA -> Tema.DIAG_PANTALLA_FONDO;
+        };
+    }
+
+    private static Color borde(Estilo e) {
+        return switch (e) {
+            case MODULO -> Tema.DIAG_MODULO_BORDE;
+            case SUBMODULO -> Tema.DIAG_SUBMODULO_BORDE;
+            case PANTALLA -> Tema.DIAG_PANTALLA_BORDE;
+        };
+    }
+
+    /** Pinta la caja del diagrama con el color de su nivel. */
+    private static void pintar(Graphics g, JComponent c, Estilo estilo, boolean resaltada) {
+        Graphics2D g2 = (Graphics2D) g.create();
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        int w = c.getWidth(), h = c.getHeight();
+        int arco = estilo == Estilo.PANTALLA ? 10 : 0;
+
+        g2.setColor(resaltada ? fondo(estilo).darker() : fondo(estilo));
+        g2.fill(new RoundRectangle2D.Float(0, 0, w - 1, h - 1, arco, arco));
+        g2.setColor(borde(estilo));
+        g2.setStroke(new BasicStroke(resaltada ? 2f : 1f));
+        g2.draw(new RoundRectangle2D.Float(0, 0, w - 1, h - 1, arco, arco));
+        g2.dispose();
+    }
+
+    /** Caja sin pantalla: solo forma parte del diagrama. */
+    private static class CajaFija extends JLabel {
+        private final Estilo estilo;
+
+        CajaFija(Nodo n) {
             super(n.texto(), SwingConstants.CENTER);
-            setFont(Tema.fuerte());
+            this.estilo = n.estilo();
+            setFont(Tema.fuente(11, estilo == Estilo.PANTALLA ? Font.PLAIN : Font.BOLD));
             setForeground(Tema.TEXTO);
-            setOpaque(true);
-            setBackground(Tema.CABECERA);
-            setBorder(BorderFactory.createLineBorder(Tema.BORDE));
-        }
-    }
-
-    /** Modulo de la arquitectura que este entregable no desarrolla. */
-    private static class CajaPendiente extends JLabel {
-        CajaPendiente(Nodo n) {
-            super(n.texto(), SwingConstants.CENTER);
-            setFont(Tema.fuerte());
-            setForeground(Tema.TEXTO_SUAVE);
             setOpaque(false);
-            setToolTipText("Modulo del diseno arquitectonico; no forma parte del 1er entregable.");
-            setBorder(BorderFactory.createDashedBorder(Tema.BORDE, 1f, 3f, 3f, false));
+        }
+
+        @Override protected void paintComponent(Graphics g) {
+            pintar(g, this, estilo, false);
+            super.paintComponent(g);
         }
     }
 
-    /** Hoja desarrollada: boton que entra a su pantalla. */
-    private static class CajaOpcion extends JButton {
-        CajaOpcion(Nodo n) {
+    /** Caja con pantalla: se pulsa para entrar. */
+    private static class CajaBoton extends JButton {
+        private final Estilo estilo;
+        private boolean encima;
+
+        CajaBoton(Nodo n) {
             super(n.texto());
-            setFont(Tema.cuerpo());
-            setMargin(new Insets(0, Tema.ESP_SM, 0, Tema.ESP_SM));
+            this.estilo = n.estilo();
+            setFont(Tema.fuente(11, estilo == Estilo.PANTALLA ? Font.PLAIN : Font.BOLD));
+            setForeground(Tema.TEXTO);
+            setContentAreaFilled(false);
+            setBorderPainted(false);
+            setFocusPainted(false);
+            setMargin(new Insets(0, 4, 0, 4));
             setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            setToolTipText("Entrar a " + n.texto());
+
             addActionListener(e -> Navegacion.ir(n.clave()));
             addMouseListener(new MouseAdapter() {
-                @Override public void mouseEntered(MouseEvent e) { setBackground(Tema.SELECCION); }
-                @Override public void mouseExited(MouseEvent e)  { setBackground(null); }
+                @Override public void mouseEntered(MouseEvent e) { encima = true; repaint(); }
+                @Override public void mouseExited(MouseEvent e)  { encima = false; repaint(); }
             });
+        }
+
+        @Override protected void paintComponent(Graphics g) {
+            pintar(g, this, estilo, encima || hasFocus());
+            super.paintComponent(g);
         }
     }
 }

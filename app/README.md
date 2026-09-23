@@ -46,54 +46,53 @@ ramas abriéndose hacia abajo. No hay barra lateral ni menús: se entra por el
 mapa y se vuelve con **Volver** o **Mapa**.
 
 ```
-                        SISTEMA DE RECLAMOS
-          ┌──────────────────────┼──────────────────────┐
-     SEGURIDAD               APLICATIVO              TECNICO
-     └ Perfiles y        ┌────────┴────────┐         ├ ACT-BD
-       Accesos        ONLINE            BATCH        ├ MANT-BD
-              ┌─────────┴─────────┐                  ├ ESTADISTICAS
-          GERENCIAL           OPERATIVO              └ CONTINGENCIA
-       ┌──────┴──────┐      ┌─────┴─────┐
-  MANT-PARAM     CONSULTA  AREA      CLIENTE
-  ├ Catálogo General  └ Indicadores  ├ Data Entry  ├ Data Entry
-  ├ Catálogo de Reclamos             └ Reportes    └ Reportes
-  ├ Catálogo de Productos
-  ├ Catálogo de Bienes
+                   SISTEMA DE RECLAMOS
+                            │
+                       SEGURIDAD
+              ┌─────────────┴─────────────┐
+           ONLINE                       BATCH
+      ┌───────┴───────┐           ┌───────┴───────┐
+  GERENCIAL       OPERATIVO   APLICATIVO       TECNICO
+      │          ┌────┴────┐      ├ ACT-BD       ├ MANT-BD
+  MANT-PARAM   ÁREA     CLIENTE   └ ESTADISTICAS └ CONTINGENCIA
+  ├ Parámetro General
+  ├ Catálogo de Reclamo        ÁREA    ├ DATA ENTRY
+  ├ Catálogo de Producto               └ REPORTES
   ├ Catálogo de Problemas
-  ├ Catálogo de Clientes
-  ├ Catálogo de Categorización
-  ├ Catálogo de Protocolos
+  ├ Catálogo de Cliente        CLIENTE ├ DATA ENTRY
+  ├ Catálogo de Protocolos             └ REPORTES
   ├ Catálogo de Reglas
   └ Catálogo de Políticas
+  CONSULTA
+  └ Consulta de Indicadores
 ```
 
-Están **todos** los módulos de la arquitectura. Los que tienen pantalla son
-botones; BATCH, ACT-BD, MANT-BD y CONTINGENCIA se dibujan con **borde
-punteado**, porque forman parte del diseño pero ni el Excel ni el informe traen
-contenido para ellos.
+El mapa reproduce el diagrama de `Teoria/image.png`: la misma jerarquía, los
+mismos rótulos y los mismos colores — azul para los módulos, amarillo para los
+submódulos y rosa para las pantallas. Las cajas rosadas se pulsan para entrar;
+SEGURIDAD también, porque la hoja `SEGURIDAD` del Excel sí tiene contenido.
+ACT-BD, ESTADISTICAS, MANT-BD y CONTINGENCIA no se pulsan: están en el diagrama
+pero ninguna de las dos fuentes trae contenido para ellos.
 
-El diagrama se calcula solo a partir del árbol declarado en `MapaPantalla`: una
-rama reparte a sus hijos en horizontal y se centra sobre ellos; un nodo cuyos
-hijos son todos hojas las cuelga en vertical con una espina a la izquierda. Cada
-caja mide lo que mide su rótulo, que es lo que permite que el diagrama entero
-entre a lo ancho sin scroll.
+El diagrama se calcula solo a partir del árbol declarado en `MapaPantalla`: un
+nodo en fila reparte a sus hijos en horizontal y se centra sobre ellos; un nodo
+apilado los cuelga en vertical con una espina a la izquierda. Cada caja mide lo
+que mide su rótulo, así el diagrama entero entra sin scroll.
 
 ## De dónde sale cada pantalla
 
 | Pantalla | Qué hace | Origen |
 |---|---|---|
 | Seguridad · Perfiles y Accesos | Conceder accesos y permisos a cada perfil | hoja `SEGURIDAD` |
-| Catálogo General | Áreas, ámbito, sectores, locales, idiomas y empleados | hojas `*Exis` / `*Hab`, `MantGeneral` |
-| Catálogo de Reclamos | Tipos de reclamo con sus eventos de protocolo | `ReclamosHab`, `ReclamosDes`, `Protocolo` |
-| Catálogo de Productos | Segmento › Familia › Clase › Bien | hoja `Producto` |
-| Catálogo de Bienes | Tipos de bien y el problema que admiten | `MANT-PARAM`, `Bien`, `BienHab` |
+| Parámetro General | Áreas, ámbito, sectores, locales, idiomas y empleados | hojas `*Exis` / `*Hab`, `MantGeneral` |
+| Catálogo de Reclamo | Tipos de reclamo con sus eventos de protocolo | `ReclamosHab`, `ReclamosDes`, `Protocolo` |
+| Catálogo de Producto | Segmento › Familia › Clase › Bien, y los tipos de bien | `Producto`, bloque tipo de bien de `MANT-PARAM` |
 | Catálogo de Problemas | Problemas por segmento, familia y tipo | `CatProblemas1`, `CatProblemas2` |
-| Catálogo de Clientes | Tipos de cliente y sus consideraciones | `Clientes`, `Cons`, `Conshab` |
-| Catálogo de Categorización | Condiciones, métodos y fórmulas del cálculo | `MANT-PARAM` |
+| Catálogo de Cliente | Tipos de cliente, consideraciones y categorización | `Clientes`, `Cons`, bloque de categorización de `MANT-PARAM` |
 | Catálogo de Protocolos | Parámetros de cada evento del protocolo | `Protocolo`, `MantProtocolo` |
 | Catálogo de Reglas | Condiciones encadenadas del motor de decisión | hoja `MantReglas` |
 | Catálogo de Políticas | Garantías legales, explícitas e implícitas | garantías de `Hoja1` |
-| Indicadores | Resultados estadísticos del sistema | los 11 indicadores de `MANT-PARAM` |
+| Consulta de Indicadores | Resultados estadísticos del sistema | los 11 indicadores de `MANT-PARAM` |
 | Área · Data Entry | Ingreso del usuario para atender la cola | informe, 2.1.2.1.1 |
 | Área · Reportes | Avances y detalles realizados por el usuario | informe, Operativo → Área |
 | Cliente · Data Entry | Validar documento, registrar, cuadro resumen | informe, 2.1.2.2.1 |
