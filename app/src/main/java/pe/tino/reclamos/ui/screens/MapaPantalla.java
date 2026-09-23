@@ -30,22 +30,31 @@ public class MapaPantalla extends JPanel {
     private enum Disposicion { FILA, APILADA }
 
     private record Nodo(Estilo estilo, String clave, String texto,
-                        Disposicion disposicion, List<Nodo> hijos) {
+                        Disposicion disposicion, boolean lateral, List<Nodo> hijos) {
 
         static Nodo modulo(String texto, Disposicion d, Nodo... hijos) {
-            return new Nodo(Estilo.MODULO, null, texto, d, List.of(hijos));
+            return new Nodo(Estilo.MODULO, null, texto, d, false, List.of(hijos));
         }
 
         static Nodo modulo(String clave, String texto, Disposicion d, Nodo... hijos) {
-            return new Nodo(Estilo.MODULO, clave, texto, d, List.of(hijos));
+            return new Nodo(Estilo.MODULO, clave, texto, d, false, List.of(hijos));
+        }
+
+        /**
+         * Modulo que cuelga al costado del padre y no de la fila de hermanos.
+         * Es como el diagrama dibuja Seguridad: atraviesa al sistema entero,
+         * no es el tronco del que salen Online y Batch.
+         */
+        static Nodo lateral(String clave, String texto, Disposicion d, Nodo... hijos) {
+            return new Nodo(Estilo.MODULO, clave, texto, d, true, List.of(hijos));
         }
 
         static Nodo submodulo(String texto, Nodo... hijos) {
-            return new Nodo(Estilo.SUBMODULO, null, texto, Disposicion.APILADA, List.of(hijos));
+            return new Nodo(Estilo.SUBMODULO, null, texto, Disposicion.APILADA, false, List.of(hijos));
         }
 
         static Nodo pantalla(String clave, String texto) {
-            return new Nodo(Estilo.PANTALLA, clave, texto, Disposicion.FILA, List.of());
+            return new Nodo(Estilo.PANTALLA, clave, texto, Disposicion.FILA, false, List.of());
         }
 
         boolean esHoja()      { return hijos.isEmpty(); }
@@ -53,39 +62,45 @@ public class MapaPantalla extends JPanel {
         boolean hijosHoja()   { return !hijos.isEmpty() && hijos.stream().allMatch(Nodo::esHoja); }
     }
 
-    /** El arbol del diagrama de diseno arquitectonico. */
+    /**
+     * El arbol del diagrama de diseno arquitectonico.
+     *
+     * Seguridad, Online y Batch cuelgan los tres del sistema. Seguridad va al
+     * costado porque atraviesa al sistema entero: no es el tronco del que
+     * salen los otros dos.
+     */
     private static final Nodo RAIZ = Nodo.modulo("SISTEMA DE RECLAMOS", Disposicion.FILA,
-            Nodo.modulo("seguridad-perfiles", "SEGURIDAD", Disposicion.FILA,
-                    Nodo.modulo("ONLINE", Disposicion.FILA,
-                            Nodo.modulo("GERENCIAL", Disposicion.APILADA,
-                                    Nodo.submodulo("MANT-PARAM",
-                                            Nodo.pantalla("cat-general", "Parámetro General"),
-                                            Nodo.pantalla("cat-reclamos", "Catálogo de Reclamo"),
-                                            Nodo.pantalla("cat-productos", "Catálogo de Producto"),
-                                            Nodo.pantalla("cat-servicios", "Catálogo de Servicios"),
-                                            Nodo.pantalla("cat-problemas", "Catálogo de Problemas"),
-                                            Nodo.pantalla("cat-clientes", "Catálogo de Cliente"),
-                                            Nodo.pantalla("cat-protocolos", "Catálogo de Protocolos"),
-                                            Nodo.pantalla("cat-reglas", "Catálogo de Reglas"),
-                                            Nodo.pantalla("cat-politicas", "Catálogo de Políticas"),
-                                            Nodo.pantalla("cat-atencion", "Catálogo de Atención")),
-                                    Nodo.submodulo("CONSULTA",
-                                            Nodo.pantalla("tickets", "Consulta de Tickets"),
-                                            Nodo.pantalla("indicadores", "Consulta de Indicadores"))),
-                            Nodo.modulo("OPERATIVO", Disposicion.FILA,
-                                    Nodo.submodulo("ÁREA",
-                                            Nodo.pantalla("area-dataentry", "DATA ENTRY"),
-                                            Nodo.pantalla("area-reportes", "REPORTES")),
-                                    Nodo.submodulo("CLIENTE",
-                                            Nodo.pantalla("cliente-dataentry", "DATA ENTRY"),
-                                            Nodo.pantalla("cliente-reportes", "REPORTES")))),
-                    Nodo.modulo("batch", "BATCH", Disposicion.FILA,
-                            Nodo.modulo("APLICATIVO", Disposicion.APILADA,
-                                    Nodo.submodulo("ACT-BD"),
-                                    Nodo.submodulo("ESTADISTICAS")),
-                            Nodo.modulo("TECNICO", Disposicion.APILADA,
-                                    Nodo.submodulo("MANT-BD"),
-                                    Nodo.submodulo("CONTINGENCIA")))));
+            Nodo.lateral("seguridad-perfiles", "SEGURIDAD", Disposicion.FILA),
+            Nodo.modulo("ONLINE", Disposicion.FILA,
+                    Nodo.modulo("GERENCIAL", Disposicion.APILADA,
+                            Nodo.submodulo("MANT-PARAM",
+                                    Nodo.pantalla("cat-general", "Par\u00e1metro General"),
+                                    Nodo.pantalla("cat-reclamos", "Cat\u00e1logo de Reclamo"),
+                                    Nodo.pantalla("cat-productos", "Cat\u00e1logo de Producto"),
+                                    Nodo.pantalla("cat-servicios", "Cat\u00e1logo de Servicios"),
+                                    Nodo.pantalla("cat-problemas", "Cat\u00e1logo de Problemas"),
+                                    Nodo.pantalla("cat-clientes", "Cat\u00e1logo de Cliente"),
+                                    Nodo.pantalla("cat-protocolos", "Cat\u00e1logo de Protocolos"),
+                                    Nodo.pantalla("cat-reglas", "Cat\u00e1logo de Reglas"),
+                                    Nodo.pantalla("cat-politicas", "Cat\u00e1logo de Pol\u00edticas"),
+                                    Nodo.pantalla("cat-atencion", "Cat\u00e1logo de Atenci\u00f3n")),
+                            Nodo.submodulo("CONSULTA",
+                                    Nodo.pantalla("tickets", "Consulta de Tickets"),
+                                    Nodo.pantalla("indicadores", "Consulta de Indicadores"))),
+                    Nodo.modulo("OPERATIVO", Disposicion.FILA,
+                            Nodo.submodulo("\u00c1REA",
+                                    Nodo.pantalla("area-dataentry", "DATA ENTRY"),
+                                    Nodo.pantalla("area-reportes", "REPORTES")),
+                            Nodo.submodulo("CLIENTE",
+                                    Nodo.pantalla("cliente-dataentry", "DATA ENTRY"),
+                                    Nodo.pantalla("cliente-reportes", "REPORTES")))),
+            Nodo.modulo("batch", "BATCH", Disposicion.FILA,
+                    Nodo.modulo("APLICATIVO", Disposicion.APILADA,
+                            Nodo.submodulo("ACT-BD"),
+                            Nodo.submodulo("ESTADISTICAS")),
+                    Nodo.modulo("TECNICO", Disposicion.APILADA,
+                            Nodo.submodulo("MANT-BD"),
+                            Nodo.submodulo("CONTINGENCIA"))));
 
     public MapaPantalla() {
         super(new BorderLayout(0, Tema.ESP_MD));
@@ -187,14 +202,24 @@ public class MapaPantalla extends JPanel {
                 alto += SEP_HIJO * (n.hijos().size() - 1);
                 return new Dimension(Math.max(propio, SANGRIA + ancho), ALTO_CAJA + SEP_NIVEL + alto);
             }
+            List<Nodo> enFila = n.hijos().stream().filter(h -> !h.lateral()).toList();
             int ancho = 0, alto = 0;
-            for (Nodo h : n.hijos()) {
+            for (Nodo h : enFila) {
                 Dimension d = medir(h);
                 ancho += d.width;
                 alto = Math.max(alto, d.height);
             }
-            ancho += SEP_RAMA * (n.hijos().size() - 1);
-            return new Dimension(Math.max(propio, ancho), ALTO_CAJA + SEP_NIVEL + alto);
+            ancho += SEP_RAMA * Math.max(0, enFila.size() - 1);
+            return new Dimension(Math.max(propio, ancho) + anchoLateral(n),
+                    ALTO_CAJA + SEP_NIVEL + alto);
+        }
+
+        /** Lo que el nodo lateral ocupa a la izquierda del subarbol. */
+        private int anchoLateral(Nodo n) {
+            return n.hijos().stream()
+                    .filter(Nodo::lateral)
+                    .mapToInt(h -> medir(h).width + SEP_RAMA * 2)
+                    .sum();
         }
 
         private Caja ubicar(Nodo n, int x, int y) {
@@ -213,12 +238,25 @@ public class MapaPantalla extends JPanel {
                     yHijo += medir(h).height + SEP_HIJO;
                 }
             } else {
-                marco = new Rectangle(x + (propio.width - ancho) / 2, y, ancho, ALTO_CAJA);
-                int xHijo = x;
+                int margen = anchoLateral(n);
+                int anchoFila = propio.width - margen;
+                marco = new Rectangle(x + margen + (anchoFila - ancho) / 2, y, ancho, ALTO_CAJA);
+
+                int xHijo = x + margen;
                 int yHijo = y + ALTO_CAJA + SEP_NIVEL;
                 for (Nodo h : n.hijos()) {
+                    if (h.lateral()) continue;
                     hijos.add(ubicar(h, xHijo, yHijo));
                     xHijo += medir(h).width + SEP_RAMA;
+                }
+                // el lateral queda a la izquierda, a la altura del bus del padre
+                int xLateral = x;
+                for (Nodo h : n.hijos()) {
+                    if (!h.lateral()) continue;
+                    Dimension d = medir(h);
+                    hijos.add(ubicar(h, xLateral,
+                            y + ALTO_CAJA + SEP_NIVEL / 2 - ALTO_CAJA / 2));
+                    xLateral += d.width + SEP_RAMA * 2;
                 }
             }
             Caja caja = new Caja(n, controles.get(n), marco, hijos);
@@ -258,6 +296,7 @@ public class MapaPantalla extends JPanel {
                 g2.drawLine(centro, abajo, centro, bus);
                 int min = centro, max = centro;
                 for (Caja h : caja.hijos()) {
+                    if (h.nodo().lateral()) continue;
                     int c = h.marco().x + h.marco().width / 2;
                     min = Math.min(min, c);
                     max = Math.max(max, c);
@@ -265,6 +304,15 @@ public class MapaPantalla extends JPanel {
                     flecha(g2, c, h.marco().y, 90);
                 }
                 g2.drawLine(min, bus, max, bus);
+
+                // el lateral se alimenta de la misma vertical, por el costado
+                for (Caja h : caja.hijos()) {
+                    if (!h.nodo().lateral()) continue;
+                    Rectangle m = h.marco();
+                    int medio = m.y + m.height / 2;
+                    g2.drawLine(centro, medio, m.x + m.width + FLECHA, medio);
+                    flecha(g2, m.x + m.width, medio, 180);
+                }
             }
             caja.hijos().forEach(h -> enlaces(g2, h));
         }
