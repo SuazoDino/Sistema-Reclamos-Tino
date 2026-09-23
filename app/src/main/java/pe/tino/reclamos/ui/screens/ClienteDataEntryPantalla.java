@@ -203,7 +203,7 @@ public class ClienteDataEntryPantalla extends Pantalla {
             avisar("Indique el número de comprobante o desmarque la casilla.");
             return;
         }
-        if (!confirmar("Confirma el registro del reclamo?")) return;
+        if (!confirmar("¿Confirma el registro del reclamo?")) return;
 
         Ticket t = Tickets.abrir(
                 (Canal) canal.getSelectedItem(),

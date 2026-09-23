@@ -167,6 +167,14 @@ public final class Datos {
             new Producto("PROD029", "Textiles", "Prendas de Vestir", "Ropa Superior", "Camisa", "Pima", "CM-102")
     );
 
+    /** Nombre legible de un producto del catalogo, o el codigo si no existe. */
+    public static String nombreProducto(String id) {
+        return PRODUCTOS.stream()
+                .filter(p -> p.id().equals(id))
+                .map(p -> p.bien() + " " + p.marca() + " " + p.modelo())
+                .findFirst().orElse(id);
+    }
+
     public static List<Reclamo> reclamosDemo() {
         List<Reclamo> l = new ArrayList<>();
         l.add(new Reclamo("R001", LocalDate.of(2026, 8, 14), CLIENTES.get(0), "COMP007", PRODUCTOS.get(0),

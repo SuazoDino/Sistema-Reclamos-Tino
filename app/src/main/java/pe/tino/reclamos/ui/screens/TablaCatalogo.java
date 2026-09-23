@@ -117,7 +117,7 @@ public class TablaCatalogo extends JPanel {
     private void eliminar() {
         int i = tabla.filaModelo();
         if (i < 0) { mensaje("Seleccione el registro que desea eliminar."); return; }
-        int r = JOptionPane.showConfirmDialog(padre, "Eliminar el registro seleccionado?",
+        int r = JOptionPane.showConfirmDialog(padre, "¿Eliminar el registro seleccionado?",
                 "Confirmar", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
         if (r != JOptionPane.OK_OPTION) return;
         filas.remove(i);

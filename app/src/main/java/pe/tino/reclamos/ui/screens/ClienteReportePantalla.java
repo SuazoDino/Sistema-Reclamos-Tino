@@ -11,6 +11,7 @@ import pe.tino.reclamos.ui.theme.Tema;
 
 import javax.swing.*;
 import java.awt.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -142,7 +143,11 @@ public class ClienteReportePantalla extends Pantalla {
         if (r == 0) impugnar(t);
     }
 
-    /** Los tres casos del informe, ahora resueltos con datos del ticket. */
+    /**
+     * Los casos del informe, ahora resueltos con datos del ticket: un mensaje
+     * por cada estado real, para que lo que lee el cliente coincida con la
+     * columna Estado.
+     */
     private static String mensaje(Ticket t) {
         if (t.estado() == Estado.RECHAZADO) {
             if (!t.instancia().admiteImpugnacion()) {
@@ -153,14 +158,26 @@ public class ClienteReportePantalla extends Pantalla {
                 return "Su reclamo fue rechazado y el plazo de impugnación de "
                         + t.instancia().diasImpugnacion() + " días expiró.";
             }
-            long dias = ChronoUnit.DAYS.between(LocalDateTime.now(), t.limiteImpugnacion());
+            long dias = ChronoUnit.DAYS.between(LocalDate.now(), t.limiteImpugnacion().toLocalDate());
             return "Su reclamo ha sido rechazado. Le quedan " + Math.max(dias, 0)
                     + " días para impugnar ante " + t.instancia().siguiente().resuelve() + ".";
         }
-        if (t.estado() == Estado.CERRADO) return "Su reclamo fue atendido y cerrado.";
-        if (t.estado() == Estado.RESUELTO) return "Su reclamo fue resuelto y espera la entrega.";
-        if (t.vencido()) return "Su reclamo está en atención y excedió el plazo comprometido.";
-        return "Su reclamo está en atención dentro del plazo comprometido.";
+        String plazo = t.vencido()
+                ? " Ya excedió el plazo comprometido."
+                : " Está dentro del plazo comprometido.";
+        return switch (t.estado()) {
+            case REGISTRADO -> "Su reclamo fue registrado y espera que se le asigne un área."
+                    + plazo;
+            case ASIGNADO -> "Su reclamo fue asignado a " + t.area()
+                    + " y espera que el especialista inicie la atención." + plazo;
+            case EN_ATENCION -> "Su reclamo está en atención por " + t.area() + "." + plazo;
+            case IMPUGNADO -> "Su impugnación fue recibida. El reclamo pasó a "
+                    + t.instancia().etiqueta().toLowerCase() + " instancia y espera asignación."
+                    + plazo;
+            case RESUELTO -> "Su reclamo fue resuelto y espera la entrega.";
+            case CERRADO -> "Su reclamo fue atendido y cerrado.";
+            case RECHAZADO -> throw new IllegalStateException("resuelto arriba");
+        };
     }
 
     private static boolean puedeImpugnar(Ticket t) {

@@ -1,5 +1,6 @@
 package pe.tino.reclamos.ui.screens;
 
+import pe.tino.reclamos.repo.Datos;
 import pe.tino.reclamos.repo.Prototipo;
 import pe.tino.reclamos.ui.components.*;
 import pe.tino.reclamos.ui.theme.Tema;
@@ -23,6 +24,7 @@ public class PoliticasPantalla extends Pantalla {
     private final JComboBox<String> estado;
     private final List<String[]> filasPolitica = Prototipo.politicas();
     private final List<String[]> filasTipo = Prototipo.tiposDePolitica();
+    private List<String[]> tiposVisibles = List.of();
 
     public PoliticasPantalla() {
         super("Catálogo de Políticas",
@@ -36,7 +38,7 @@ public class PoliticasPantalla extends Pantalla {
         politicas.anchos(240, 240);
         filasPolitica.forEach(f -> politicas.agregar((Object[]) f));
 
-        tipos.anchos(190, 190, 150, 170).centrar(2);
+        tipos.anchos(320, 150, 130, 150).centrar(2);
         refrescarTipos();
 
         JPanel arriba = Ui.panel(new BorderLayout(Tema.ESP_MD, 0));
@@ -83,7 +85,7 @@ public class PoliticasPantalla extends Pantalla {
         eliminar.addActionListener(e -> {
             int i = politicas.filaModelo();
             if (i < 0) { avisar("Seleccione la política que desea eliminar."); return; }
-            if (!confirmar("Eliminar la política seleccionada?")) return;
+            if (!confirmar("¿Eliminar la política seleccionada?")) return;
             filasPolitica.remove(i);
             politicas.limpiar();
             filasPolitica.forEach(f -> politicas.agregar((Object[]) f));
@@ -132,19 +134,17 @@ public class PoliticasPantalla extends Pantalla {
     private void cambiarEstado(String nuevo) {
         int i = tipos.filaModelo();
         if (i < 0) { avisar("Seleccione un tipo de política."); return; }
-        String producto = String.valueOf(tipos.modelo().getValueAt(i, 0));
-        String garantia = String.valueOf(tipos.modelo().getValueAt(i, 1));
-        filasTipo.stream()
-                .filter(f -> f[0].equals(producto) && f[1].equals(garantia))
-                .forEach(f -> f[3] = nuevo);
+        tiposVisibles.get(i)[3] = nuevo;
         refrescarTipos();
     }
 
     private void refrescarTipos() {
         String filtro = estado == null ? "" : String.valueOf(estado.getSelectedItem());
         tipos.limpiar();
-        filasTipo.stream()
+        tiposVisibles = filasTipo.stream()
                 .filter(f -> filtro == null || filtro.isBlank() || filtro.equals(f[3]))
-                .forEach(f -> tipos.agregar((Object[]) f));
+                .toList();
+        tiposVisibles.forEach(f -> tipos.agregar(
+                f[0] + " - " + Datos.nombreProducto(f[0]), f[1], f[2], f[3]));
     }
 }

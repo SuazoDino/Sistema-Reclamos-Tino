@@ -103,7 +103,7 @@ public class ParametrosPantalla extends Pantalla {
         eliminar.addActionListener(e -> {
             String v = lista.getSelectedValue();
             if (v == null) { avisar("Seleccione la magnitud que desea eliminar."); return; }
-            if (confirmar("Eliminar la magnitud \"" + v + "\"?")) modelo.removeElement(v);
+            if (confirmar("¿Eliminar la magnitud \"" + v + "\"?")) modelo.removeElement(v);
         });
 
         JPanel botones = Ui.panel(new GridBagLayout());

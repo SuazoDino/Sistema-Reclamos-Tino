@@ -114,5 +114,13 @@ public final class Tema {
         UIManager.put("Tree.selectionInactiveBackground", SELECCION);
         UIManager.put("Tree.selectionInactiveForeground", TEXTO);
         UIManager.put("TitledBorder.titleColor", TEXTO);
+
+        // los dialogos estandar de Swing vienen en ingles
+        java.util.Locale.setDefault(java.util.Locale.forLanguageTag("es-PE"));
+        JComponent.setDefaultLocale(java.util.Locale.forLanguageTag("es-PE"));
+        UIManager.put("OptionPane.okButtonText", "Aceptar");
+        UIManager.put("OptionPane.cancelButtonText", "Cancelar");
+        UIManager.put("OptionPane.yesButtonText", "Sí");
+        UIManager.put("OptionPane.noButtonText", "No");
     }
 }

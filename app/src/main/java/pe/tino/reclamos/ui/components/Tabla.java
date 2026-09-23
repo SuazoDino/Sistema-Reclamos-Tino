@@ -70,7 +70,7 @@ public class Tabla extends JTable {
         return this;
     }
 
-    /** Renderer con filas alternadas suaves y texto completo en el tooltip. */
+    /** Renderer con filas alternadas suaves y el texto completo en el tooltip si no entra. */
     private static class Render extends DefaultTableCellRenderer {
         @Override public Component getTableCellRendererComponent(
                 JTable t, Object v, boolean sel, boolean foco, int f, int c) {
@@ -81,7 +81,10 @@ public class Tabla extends JTable {
                 l.setBackground(f % 2 == 0 ? Tema.SUPERFICIE : Tema.FILA_ALTERNA);
                 l.setForeground(Tema.TEXTO);
             }
-            l.setToolTipText(v == null ? null : String.valueOf(v));
+            // el tooltip solo aparece si el texto no entra en la celda
+            boolean cortado = v != null
+                    && l.getPreferredSize().width > t.getColumnModel().getColumn(c).getWidth();
+            l.setToolTipText(cortado ? String.valueOf(v) : null);
             return l;
         }
     }

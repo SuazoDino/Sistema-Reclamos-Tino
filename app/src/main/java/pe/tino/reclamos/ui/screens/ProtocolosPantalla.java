@@ -26,9 +26,9 @@ public class ProtocolosPantalla extends Pantalla {
     private final JComboBox<String> protocolo = Ui.combo(
             Prototipo.protocolos().stream().map(f -> f[0]).toList());
 
-    private final Tabla resultados = new Tabla(new String[]{"Producto", "Problema"});
+    private final Tabla resultados = new Tabla(new String[]{"Tipo Problema", "Problema"});
     private final Tabla acciones = new Tabla(new String[]{
-            "Acción", "Tiempo Máximo(s)", "Tipo Operario", "Criticidad"});
+            "Acción", "Tiempo Máximo (min)", "Tipo Operario", "Criticidad"});
 
     private final JTextField accion = Ui.texto();
     private final JTextField tiempoMaximo = Ui.texto();
@@ -42,7 +42,8 @@ public class ProtocolosPantalla extends Pantalla {
                 "Acciones que componen el protocolo de cada evento.");
 
         resultados.anchos(300, 380);
-        Prototipo.PROBLEMAS_EXISTENTES.forEach(p -> resultados.agregar("Celular", p));
+        tipoProblema.addActionListener(e -> buscar());
+        buscar();
 
         acciones.anchos(240, 150, 160, 150);
         refrescar();
@@ -69,13 +70,15 @@ public class ProtocolosPantalla extends Pantalla {
         busqueda.add(familia);
 
         JButton verProtocolo = Ui.boton("Protocolo");
-        verProtocolo.addActionListener(e -> {
-            if (resultados.filaModelo() < 0) { avisar("Seleccione un problema."); return; }
-            refrescar();
-        });
+        verProtocolo.addActionListener(e -> verProtocolo());
 
         protocolo.addActionListener(e -> {
-            filas = Prototipo.accionesDe(String.valueOf(protocolo.getSelectedItem()));
+            String codigo = String.valueOf(protocolo.getSelectedItem());
+            Prototipo.protocolos().stream()
+                    .filter(f -> f[0].equals(codigo))
+                    .findFirst()
+                    .ifPresent(f -> evento.setSelectedItem(f[2]));
+            filas = Prototipo.accionesDe(codigo);
             refrescar();
         });
 
@@ -138,6 +141,21 @@ public class ProtocolosPantalla extends Pantalla {
         return g;
     }
 
+    /** Los problemas del tipo elegido en la busqueda. */
+    private void buscar() {
+        String tipo = String.valueOf(tipoProblema.getSelectedItem());
+        resultados.limpiar();
+        Prototipo.problemasDe(tipo).forEach(p -> resultados.agregar(tipo, p));
+    }
+
+    /** El protocolo sale del tipo de problema, igual que al asignar un ticket. */
+    private void verProtocolo() {
+        int i = resultados.filaModelo();
+        if (i < 0) { avisar("Seleccione un problema."); return; }
+        String tipo = String.valueOf(resultados.modelo().getValueAt(i, 0));
+        protocolo.setSelectedItem(Prototipo.protocoloDe(tipo));
+    }
+
     private void agregar() {
         if (accion.getText().isBlank()) { avisar("Indique la acción."); return; }
         filas.add(new String[]{accion.getText().trim(), tiempoMaximo.getText().trim(),
@@ -159,7 +177,7 @@ public class ProtocolosPantalla extends Pantalla {
     private void eliminar() {
         int i = acciones.filaModelo();
         if (i < 0) { avisar("Seleccione la acción que desea eliminar."); return; }
-        if (!confirmar("Eliminar la acción seleccionada?")) return;
+        if (!confirmar("¿Eliminar la acción seleccionada?")) return;
         filas.remove(i);
         refrescar();
         limpiar();

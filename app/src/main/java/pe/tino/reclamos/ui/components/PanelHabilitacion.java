@@ -135,7 +135,7 @@ public class PanelHabilitacion extends JPanel {
     private void eliminar() {
         String v = listaExistentes.getSelectedValue();
         if (v == null) { avisar("Seleccione el valor que desea eliminar."); return; }
-        int r = JOptionPane.showConfirmDialog(padre, "Eliminar \"" + v + "\"?",
+        int r = JOptionPane.showConfirmDialog(padre, "¿Eliminar \"" + v + "\"?",
                 "Confirmar", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
         if (r != JOptionPane.OK_OPTION) return;
         existentes.removeElement(v);

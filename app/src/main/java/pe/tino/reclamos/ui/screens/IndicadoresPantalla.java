@@ -1,6 +1,7 @@
 package pe.tino.reclamos.ui.screens;
 
 import pe.tino.reclamos.model.Ticket;
+import pe.tino.reclamos.repo.Dominio.TipoObjeto;
 import pe.tino.reclamos.repo.Estadisticas;
 import pe.tino.reclamos.repo.Prototipo;
 import pe.tino.reclamos.repo.Tickets;
@@ -19,6 +20,7 @@ import java.time.YearMonth;
 import java.time.format.TextStyle;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -130,9 +132,9 @@ public class IndicadoresPantalla extends Pantalla {
             case "Tiempo promedio de solución por reclamo" -> tendenciaTiempo(tickets);
             case "% de reclamos en un mes" -> tendenciaReclamos(tickets);
             case "Tipo de bienes más reclamados" ->
-                    grafico.barras(conteoOrdenado(tickets, Ticket::objeto), "tickets");
+                    grafico.barras(conteoOrdenado(bienes(tickets), Ticket::objeto), "tickets");
             case "Áreas con mayor demanda de reclamo" ->
-                    grafico.barras(conteoOrdenado(tickets, Ticket::area), "tickets");
+                    grafico.barras(conteoOrdenado(conArea(tickets), Ticket::area), "tickets");
             case "Número de reclamos por clase de producto" ->
                     grafico.barras(conteoOrdenado(tickets, t -> t.tipoObjeto().etiqueta()), "tickets");
             case "% de reclamos críticos" ->
@@ -228,8 +230,8 @@ public class IndicadoresPantalla extends Pantalla {
 
         return switch (indicador) {
             case "Tiempo promedio de solución por reclamo" -> tiempoPromedio(tickets);
-            case "Tipo de bienes más reclamados" -> masFrecuente(tickets, Ticket::objeto);
-            case "Áreas con mayor demanda de reclamo" -> masFrecuente(tickets, Ticket::area);
+            case "Tipo de bienes más reclamados" -> masFrecuente(bienes(tickets), Ticket::objeto);
+            case "Áreas con mayor demanda de reclamo" -> masFrecuente(conArea(tickets), Ticket::area);
             case "Número de reclamos por clase de producto" ->
                     conteo(tickets, t -> t.tipoObjeto().etiqueta());
             case "% de reclamos en un mes" -> porcentajeDelMes(tickets);
@@ -257,13 +259,29 @@ public class IndicadoresPantalla extends Pantalla {
                 .average().orElse(0);
     }
 
+    /** Los bienes son productos: un servicio no es un bien. */
+    private static List<Ticket> bienes(List<Ticket> tickets) {
+        return tickets.stream().filter(t -> t.tipoObjeto() == TipoObjeto.PRODUCTO).toList();
+    }
+
+    /** La demanda de un area se mide con los tickets que ya tienen area. */
+    private static List<Ticket> conArea(List<Ticket> tickets) {
+        return tickets.stream().filter(t -> !t.area().equals("Sin asignar")).toList();
+    }
+
+    /** El valor mas frecuente; si varios empatan, los nombra a todos. */
     private static String masFrecuente(List<Ticket> tickets, Function<Ticket, String> clave) {
+        if (tickets.isEmpty()) return "Sin tickets que cumplan el criterio";
         Map<String, Integer> conteo = new LinkedHashMap<>();
         tickets.forEach(t -> conteo.merge(clave.apply(t), 1, Integer::sum));
-        return conteo.entrySet().stream()
-                .max(Map.Entry.comparingByValue())
-                .map(e -> e.getKey() + "  (" + e.getValue() + " tickets)")
-                .orElse(SIN_DATO);
+        int maximo = Collections.max(conteo.values());
+        List<String> primeros = conteo.entrySet().stream()
+                .filter(e -> e.getValue() == maximo)
+                .map(Map.Entry::getKey)
+                .toList();
+        String cantidad = maximo + (maximo == 1 ? " ticket" : " tickets");
+        if (primeros.size() == 1) return primeros.get(0) + "  (" + cantidad + ")";
+        return "Empate: " + String.join(", ", primeros) + "  (" + cantidad + " cada uno)";
     }
 
     private static String conteo(List<Ticket> tickets, Function<Ticket, String> clave) {

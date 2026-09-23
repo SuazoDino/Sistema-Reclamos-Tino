@@ -37,7 +37,8 @@ public class AreaDataEntryPantalla extends Pantalla {
     private List<Ticket> visibles = new ArrayList<>();
 
     public AreaDataEntryPantalla() {
-        super("Atender Ticket", "Tickets abiertos asignados al usuario del área.");
+        super("Atender Ticket",
+                "Tickets asignados al usuario y los que esperan responsable.");
 
         tabla.anchos(110, 120, 180, 200, 160, 90, 110, 120, 80);
         fecha.setText(LocalDate.now().format(FECHA));
@@ -105,8 +106,16 @@ public class AreaDataEntryPantalla extends Pantalla {
         refrescar();
     }
 
+    /**
+     * La cola del empleado: sus tickets en curso y los que todavia no tienen
+     * responsable. Un rechazado espera al cliente y un ticket de otro
+     * empleado no es suyo, asi que ninguno de los dos aparece.
+     */
     private void refrescar() {
-        visibles = Tickets.abiertos();
+        String id = idEmpleado.getText();
+        visibles = id.isBlank() ? List.of() : Tickets.todos().stream()
+                .filter(t -> esDeLaCola(t, id))
+                .toList();
         tabla.limpiar();
         for (Ticket t : visibles) {
             tabla.agregar(t.numero(), t.apertura().format(RELOJ), t.nombreCliente(),
@@ -114,6 +123,14 @@ public class AreaDataEntryPantalla extends Pantalla {
                     t.limiteAtencion() == null ? "-" : t.limiteAtencion().format(RELOJ),
                     t.vencido() ? "Sí" : "No");
         }
+    }
+
+    private static boolean esDeLaCola(Ticket t, String empleado) {
+        return switch (t.estado()) {
+            case REGISTRADO, IMPUGNADO -> true;
+            case ASIGNADO, EN_ATENCION -> empleado.equals(t.especialista());
+            default -> false;
+        };
     }
 
     private Ticket seleccionado() {
@@ -126,6 +143,10 @@ public class AreaDataEntryPantalla extends Pantalla {
         Ticket t = seleccionado();
         if (t == null) { avisar("Seleccione un ticket de la cola."); return; }
         if (idEmpleado.getText().isBlank()) { avisar("Primero ingrese su ID de empleado."); return; }
+        if (t.estado() != Estado.REGISTRADO && t.estado() != Estado.IMPUGNADO) {
+            avisar("El ticket " + t.numero() + " ya está asignado a " + t.especialista() + ".");
+            return;
+        }
 
         t.asignar(area.getText(), idEmpleado.getText(),
                 Prototipo.protocoloDe(t.tipoProblema()), idEmpleado.getText());
@@ -139,7 +160,7 @@ public class AreaDataEntryPantalla extends Pantalla {
         Ticket t = seleccionado();
         if (t == null) { avisar("Seleccione un ticket de la cola."); return; }
         if (idEmpleado.getText().isBlank()) { avisar("Primero ingrese su ID de empleado."); return; }
-        if (t.estado() == Estado.REGISTRADO) {
+        if (t.estado() == Estado.REGISTRADO || t.estado() == Estado.IMPUGNADO) {
             avisar("El ticket todavía no está asignado. Use Asignarme primero.");
             return;
         }
@@ -167,7 +188,7 @@ public class AreaDataEntryPantalla extends Pantalla {
         List<JCheckBox> casillas = new ArrayList<>();
         List<String[]> acciones = Prototipo.accionesDe(t.protocolo());
         for (String[] a : acciones) {
-            JCheckBox c = new JCheckBox(a[0] + "   (" + a[1] + " s, " + a[2] + ", " + a[3] + ")");
+            JCheckBox c = new JCheckBox(a[0] + "   (" + a[1] + " min, " + a[2] + ", " + a[3] + ")");
             c.setFont(Tema.cuerpo());
             c.setOpaque(false);
             casillas.add(c);

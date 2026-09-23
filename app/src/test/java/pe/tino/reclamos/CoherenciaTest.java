@@ -78,14 +78,14 @@ class CoherenciaTest {
 
     @Test
     void elCatalogoDePoliticasDaElPlazoQueLeeElMotor() {
-        int plazo = Prototipo.plazoDeGarantia("Prod001");
+        int plazo = Prototipo.plazoDeGarantia("PROD007");
         assertTrue(plazo > 0, "sin plazo, la condición CND2 no tiene contra que comparar");
     }
 
     @Test
     void unaPoliticaDeshabilitadaNoAportaPlazo() {
-        // Prod002 Comercial esta deshabilitada: el plazo vigente es el de la Legal
-        assertEquals(365, Prototipo.plazoDeGarantia("Prod002"));
+        // PROD012 Comercial esta deshabilitada: el plazo vigente es el de la Legal
+        assertEquals(365, Prototipo.plazoDeGarantia("PROD012"));
     }
 
     /* ---------------- la cadena completa ---------------- */
@@ -128,7 +128,7 @@ class CoherenciaTest {
         Map<String, String> valores = new LinkedHashMap<>();
         valores.put("Tiene_Comprobante", "true");
         valores.put("Tiempo_Transcurrido", "100");
-        valores.put("Tiempo_Garantia", String.valueOf(Prototipo.plazoDeGarantia("Prod001")));
+        valores.put("Tiempo_Garantia", String.valueOf(Prototipo.plazoDeGarantia("PROD007")));
         valores.put("Reparable", "false");
         valores.put("Stock", "0");
 

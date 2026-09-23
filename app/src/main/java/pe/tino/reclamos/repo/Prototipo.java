@@ -18,21 +18,21 @@ public final class Prototipo {
 
     public static final List<String> TIPO_PROBLEMA =
             List.of("Entrega", "Atención", "Funcionamiento", "Cobranza", "Instalación");
-    public static final List<String> INSTANCIA = List.of("primera", "segunda");
+    public static final List<String> INSTANCIA = List.of("Primera", "Segunda");
     public static final List<String> CRITICIDAD = List.of("Alta", "Media", "Baja");
     public static final List<String> ESTADO = List.of("Habilitado", "Deshabilitado");
 
     /** Tipo de Problema | Instancia | Criticidad | Estado. */
     public static List<String[]> reclamos() {
         return new ArrayList<>(List.of(
-                new String[]{"Entrega", "primera", "Alta", "Habilitado"},
-                new String[]{"Entrega", "primera", "Media", "Habilitado"},
-                new String[]{"Entrega", "primera", "Baja", "Habilitado"},
-                new String[]{"Entrega", "segunda", "Alta", "Deshabilitado"},
-                new String[]{"Entrega", "segunda", "Media", "Deshabilitado"},
-                new String[]{"Entrega", "segunda", "Baja", "Deshabilitado"},
-                new String[]{"Entrega", "segunda", "Alta", "Deshabilitado"},
-                new String[]{"Atención", "primera", "Alta", "Habilitado"}
+                new String[]{"Entrega", "Primera", "Alta", "Habilitado"},
+                new String[]{"Entrega", "Primera", "Media", "Habilitado"},
+                new String[]{"Entrega", "Primera", "Baja", "Habilitado"},
+                new String[]{"Entrega", "Segunda", "Alta", "Deshabilitado"},
+                new String[]{"Entrega", "Segunda", "Media", "Deshabilitado"},
+                new String[]{"Entrega", "Segunda", "Baja", "Deshabilitado"},
+                new String[]{"Entrega", "Segunda", "Alta", "Deshabilitado"},
+                new String[]{"Atención", "Primera", "Alta", "Habilitado"}
         ));
     }
 
@@ -97,18 +97,18 @@ public final class Prototipo {
                 .findFirst().orElse("PR-ATEN-01");
     }
 
-    /** Protocolo | Accion | Tiempo Maximo(s) | Tipo Operario | Criticidad. */
+    /** Protocolo | Accion | Tiempo Maximo (min) | Tipo Operario | Criticidad. */
     public static List<String[]> accionesDeProtocolo() {
         return new ArrayList<>(List.of(
-                new String[]{"PR-FUNC-01", "Reiniciar equipo", "120", "Técnico", "No Crítico"},
-                new String[]{"PR-FUNC-01", "Abrir aplicación de cámara", "60", "Técnico", "No Crítico"},
-                new String[]{"PR-FUNC-01", "Tomar foto de prueba", "20", "Técnico", "Crítico"},
-                new String[]{"PR-FUNC-02", "Reemplazar componente", "600", "Especialista", "Crítico"},
-                new String[]{"PR-ENTR-01", "Verificar empaque", "90", "Asistente", "Crítico"},
-                new String[]{"PR-ENTR-01", "Contrastar guía de remisión", "120", "Asistente", "No Crítico"},
-                new String[]{"PR-COBR-01", "Revisar comprobantes emitidos", "180", "Asistente", "Crítico"},
-                new String[]{"PR-COBR-01", "Solicitar nota de crédito", "300", "Especialista", "No Crítico"},
-                new String[]{"PR-ATEN-01", "Registrar descargo del área", "120", "Asistente", "Crítico"}
+                new String[]{"PR-FUNC-01", "Reiniciar equipo", "10", "Técnico", "No Crítico"},
+                new String[]{"PR-FUNC-01", "Abrir aplicación de cámara", "5", "Técnico", "No Crítico"},
+                new String[]{"PR-FUNC-01", "Tomar foto de prueba", "5", "Técnico", "Crítico"},
+                new String[]{"PR-FUNC-02", "Reemplazar componente", "120", "Especialista", "Crítico"},
+                new String[]{"PR-ENTR-01", "Verificar empaque", "15", "Asistente", "Crítico"},
+                new String[]{"PR-ENTR-01", "Contrastar guía de remisión", "20", "Asistente", "No Crítico"},
+                new String[]{"PR-COBR-01", "Revisar comprobantes emitidos", "30", "Asistente", "Crítico"},
+                new String[]{"PR-COBR-01", "Solicitar nota de crédito", "60", "Especialista", "No Crítico"},
+                new String[]{"PR-ATEN-01", "Registrar descargo del área", "30", "Asistente", "Crítico"}
         ));
     }
 
@@ -137,21 +137,22 @@ public final class Prototipo {
     }
 
     /**
-     * Producto | Garantia | Plazo (dias) | Estado.
+     * Codigo de producto | Garantia | Plazo (dias) | Estado. El codigo es el
+     * del Catalogo de Producto; la pantalla muestra su nombre.
      *
      * El plazo es el que el motor de reglas lee como Tiempo_Garantia: sin el,
      * la condicion CND2 no tenia contra que comparar.
      */
     public static List<String[]> tiposDePolitica() {
         return new ArrayList<>(List.of(
-                new String[]{"Prod001", "Legal", "365", "Habilitado"},
-                new String[]{"Prod001", "Comercial", "180", "Habilitado"},
-                new String[]{"Prod002", "Legal", "365", "Habilitado"},
-                new String[]{"Prod002", "Comercial", "90", "Deshabilitado"},
-                new String[]{"Prod003", "Legal", "730", "Habilitado"},
-                new String[]{"Prod003", "Comercial", "365", "Habilitado"},
-                new String[]{"Prod004", "Legal", "365", "Habilitado"},
-                new String[]{"Prod004", "Comercial", "180", "Habilitado"}
+                new String[]{"PROD007", "Legal", "365", "Habilitado"},
+                new String[]{"PROD007", "Comercial", "180", "Habilitado"},
+                new String[]{"PROD012", "Legal", "365", "Habilitado"},
+                new String[]{"PROD012", "Comercial", "90", "Deshabilitado"},
+                new String[]{"PROD019", "Legal", "730", "Habilitado"},
+                new String[]{"PROD019", "Comercial", "365", "Habilitado"},
+                new String[]{"PROD023", "Legal", "365", "Habilitado"},
+                new String[]{"PROD023", "Comercial", "180", "Habilitado"}
         ));
     }
 
@@ -177,9 +178,9 @@ public final class Prototipo {
 
     public static final Map<String, Empleado> EMPLEADOS = new LinkedHashMap<>();
     static {
-        EMPLEADOS.put("E01", new Empleado("E01", "Técnico", "Técnica de Reparación e Inspección"));
-        EMPLEADOS.put("E02", new Empleado("E02", "Técnico", "Técnica de Reparación e Inspección"));
-        EMPLEADOS.put("E03", new Empleado("E03", "Especialista", "Área Especializada"));
+        EMPLEADOS.put("E01", new Empleado("E01", "Técnico", "Área Técnica de Reparación e Inspección"));
+        EMPLEADOS.put("E02", new Empleado("E02", "Asistente", "Logística"));
+        EMPLEADOS.put("E03", new Empleado("E03", "Especialista", "Ventas"));
     }
 
     /** IdReclamo | Fecha de emision | Fecha de Atencion | Hora de Atencion | Estado. */
