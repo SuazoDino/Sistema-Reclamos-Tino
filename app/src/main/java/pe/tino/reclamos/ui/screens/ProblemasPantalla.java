@@ -20,7 +20,7 @@ public class ProblemasPantalla extends Pantalla {
     private final PanelBusqueda busqueda;
 
     public ProblemasPantalla() {
-        super("CatalogoProblemas", "Problemas registrados y el producto al que aplican.");
+        super("Catálogo de Problemas", "Problemas registrados y el producto al que aplican.");
 
         Map<String, List<String>> filtros = new LinkedHashMap<>();
         filtros.put("Tipo Problema", Prototipo.tiposDeProblema());
@@ -42,7 +42,7 @@ public class ProblemasPantalla extends Pantalla {
                         "Producto:", Prototipo.PRODUCTOS_SIMPLES, Prototipo.PRODUCTOS_SIMPLES)));
 
         contenido().add(FormularioCatalogo.armar(
-                FormularioCatalogo.cabecera(busqueda, "Resultado de Busqueda", tabla, 230),
+                FormularioCatalogo.cabecera(busqueda, "Resultado de Búsqueda", tabla, 230),
                 FormularioCatalogo.agregar(pestanias), 190), BorderLayout.CENTER);
     }
 

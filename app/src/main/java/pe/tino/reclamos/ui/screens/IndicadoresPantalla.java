@@ -55,7 +55,7 @@ public class IndicadoresPantalla extends Pantalla {
 
     public IndicadoresPantalla() {
         super("Consulta de Indicadores",
-                "Indicadores de gestion calculados sobre los tickets registrados.");
+                "Indicadores de gestión calculados sobre los tickets registrados.");
 
         Prototipo.INDICADORES.forEach(modelo::addElement);
         lista.setFont(Tema.cuerpo());
@@ -105,7 +105,7 @@ public class IndicadoresPantalla extends Pantalla {
     private void calcular() {
         List<Ticket> tickets = Tickets.todos();
         base.setText("Calculado sobre los " + tickets.size()
-                + " tickets registrados en la sesion.");
+                + " tickets registrados en la sesión.");
 
         detalle.limpiar();
         for (String indicador : Prototipo.INDICADORES) {
@@ -127,23 +127,23 @@ public class IndicadoresPantalla extends Pantalla {
         lectura.setText(resultado(indicador, tickets));
 
         switch (indicador) {
-            case "tiempo promedio de solucion por reclamo" -> tendenciaTiempo(tickets);
+            case "Tiempo promedio de solución por reclamo" -> tendenciaTiempo(tickets);
             case "% de reclamos en un mes" -> tendenciaReclamos(tickets);
-            case "tipo de bienes mas reclamados" ->
+            case "Tipo de bienes más reclamados" ->
                     grafico.barras(conteoOrdenado(tickets, Ticket::objeto), "tickets");
-            case "areas con mayor demanda de reclamo" ->
+            case "Áreas con mayor demanda de reclamo" ->
                     grafico.barras(conteoOrdenado(tickets, Ticket::area), "tickets");
-            case "numeros de reclamos por clase de producto" ->
+            case "Número de reclamos por clase de producto" ->
                     grafico.barras(conteoOrdenado(tickets, t -> t.tipoObjeto().etiqueta()), "tickets");
-            case "% de reclamos criticos" ->
+            case "% de reclamos críticos" ->
                     grafico.barras(conteoOrdenado(tickets, t -> "Prioridad " + t.prioridad().etiqueta()),
                             "tickets");
-            case "porcentaje de reclamos solucionados fuera de plazo" ->
+            case "Porcentaje de reclamos solucionados fuera de plazo" ->
                     grafico.barras(conteoOrdenado(tickets,
                             t -> t.vencido() ? "Fuera de plazo" : "Dentro del plazo"), "tickets");
-            case "numero de rotacion de especialitas por reclamo" ->
+            case "Número de rotación de especialistas por reclamo" ->
                     grafico.barras(conteoOrdenado(tickets,
-                            t -> asignaciones(t) + (asignaciones(t) == 1 ? " asignacion" : " asignaciones")),
+                            t -> asignaciones(t) + (asignaciones(t) == 1 ? " asignación" : " asignaciones")),
                             "tickets");
             default -> grafico.vacio(SIN_DATO);
         }
@@ -166,7 +166,7 @@ public class IndicadoresPantalla extends Pantalla {
 
         grafico.tendencia(meses,
                 new Punto(mes(actual), delMes, nombreMes(actual) + " en curso: " + delMes
-                        + " reclamos registrados en la sesion"),
+                        + " reclamos registrados en la sesión"),
                 new Punto(mes(actual), Math.round(proyectado), nombreMes(actual) + " proyectado: "
                         + Math.round(proyectado) + " reclamos, extrapolando los meses cerrados"),
                 "(reclamos)");
@@ -227,25 +227,25 @@ public class IndicadoresPantalla extends Pantalla {
         if (tickets.isEmpty()) return "Sin tickets registrados";
 
         return switch (indicador) {
-            case "tiempo promedio de solucion por reclamo" -> tiempoPromedio(tickets);
-            case "tipo de bienes mas reclamados" -> masFrecuente(tickets, Ticket::objeto);
-            case "areas con mayor demanda de reclamo" -> masFrecuente(tickets, Ticket::area);
-            case "numeros de reclamos por clase de producto" ->
+            case "Tiempo promedio de solución por reclamo" -> tiempoPromedio(tickets);
+            case "Tipo de bienes más reclamados" -> masFrecuente(tickets, Ticket::objeto);
+            case "Áreas con mayor demanda de reclamo" -> masFrecuente(tickets, Ticket::area);
+            case "Número de reclamos por clase de producto" ->
                     conteo(tickets, t -> t.tipoObjeto().etiqueta());
             case "% de reclamos en un mes" -> porcentajeDelMes(tickets);
-            case "% de reclamos criticos" ->
+            case "% de reclamos críticos" ->
                     porcentaje(tickets, t -> t.prioridad().etiqueta().equals("Alta"),
                             "de prioridad alta");
-            case "porcentaje de reclamos solucionados fuera de plazo" ->
+            case "Porcentaje de reclamos solucionados fuera de plazo" ->
                     porcentaje(tickets, Ticket::vencido, "fuera del plazo comprometido");
-            case "numero de rotacion de especialitas por reclamo" -> rotacion(tickets);
+            case "Número de rotación de especialistas por reclamo" -> rotacion(tickets);
             default -> SIN_DATO;
         };
     }
 
     private static String tiempoPromedio(List<Ticket> tickets) {
         List<Ticket> cerrados = tickets.stream().filter(t -> !t.estado().abierto()).toList();
-        if (cerrados.isEmpty()) return "Todavia no hay tickets cerrados";
+        if (cerrados.isEmpty()) return "Todavía no hay tickets cerrados";
         return String.format("%.1f horas  (sobre %d tickets cerrados)",
                 horasPromedio(cerrados), cerrados.size());
     }
@@ -291,7 +291,7 @@ public class IndicadoresPantalla extends Pantalla {
     }
 
     private static long asignaciones(Ticket t) {
-        return t.bitacora().stream().filter(e -> e.accion().equals("Asignacion")).count();
+        return t.bitacora().stream().filter(e -> e.accion().equals("Asignación")).count();
     }
 
     /** Cuantas veces cambio de responsable un ticket, en promedio. */

@@ -16,13 +16,13 @@ import java.util.List;
 public class ServiciosPantalla extends Pantalla {
 
     public ServiciosPantalla() {
-        super("Catalogo de Servicios",
-                "Servicios sobre los que se puede reclamar y como se atiende cada uno.");
+        super("Catálogo de Servicios",
+                "Servicios sobre los que se puede reclamar y cómo se atiende cada uno.");
 
         contenido().add(new TablaCatalogo(this, "Servicios",
                 List.of(Campo.lista("Tipo de servicio", Catalogos.TIPOS_SERVICIO),
                         Campo.libre("Servicio"),
-                        Campo.lista("Unidad de atencion", Catalogos.UNIDADES_ATENCION),
+                        Campo.lista("Unidad de atención", Catalogos.UNIDADES_ATENCION),
                         Campo.lista("Estado", List.of("Habilitado", "Deshabilitado"))),
                 Catalogos.servicios(),
                 new int[]{200, 260, 200, 160}), BorderLayout.CENTER);

@@ -58,8 +58,8 @@ public final class Tickets {
                 comprobante, fechaComprobante, prioridad, ahora.plusHours(horas));
 
         t.anotar("Sistema", "Prioridad", prioridad.etiqueta()
-                + " segun " + tipoProblema + " y cliente " + tipoCliente);
-        t.anotar("Sistema", "Plazo", "Atencion dentro de " + horas + " horas");
+                + " según " + tipoProblema + " y cliente " + tipoCliente);
+        t.anotar("Sistema", "Plazo", "Atención dentro de " + horas + " horas");
 
         TICKETS.add(0, t);
         notificar();
@@ -86,28 +86,28 @@ public final class Tickets {
 
     /** Tickets de ejemplo para que las pantallas no arranquen vacias. */
     private static void sembrar() {
-        Ticket t1 = abrir(Canal.PRESENCIAL, "Loc01", "72119474", "Alexander Rodriguez Camacho",
-                "Vip", TipoObjeto.PRODUCTO, "Telefono Movil Samsung Galaxy A54",
-                "Funcionamiento", "La camara no funciona", "25713", "12/01/2019");
-        t1.asignar("Area Tecnica de Reparacion e Inspeccion", "E01", "PR-FUNC-01", "E01");
-        t1.cambiarEstado(Dominio.Estado.EN_ATENCION, "E01", "Inspeccion iniciada");
+        Ticket t1 = abrir(Canal.PRESENCIAL, "Loc01", "72119474", "Alexander Rodríguez Camacho",
+                "Vip", TipoObjeto.PRODUCTO, "Teléfono Móvil Samsung Galaxy A54",
+                "Funcionamiento", "La cámara no funciona", "25713", "12/01/2019");
+        t1.asignar("Área Técnica de Reparación e Inspección", "E01", "PR-FUNC-01", "E01");
+        t1.cambiarEstado(Dominio.Estado.EN_ATENCION, "E01", "Inspección iniciada");
 
-        Ticket t2 = abrir(Canal.WEB, "Loc02", "72119474", "Alexander Rodriguez Camacho",
+        Ticket t2 = abrir(Canal.WEB, "Loc02", "72119474", "Alexander Rodríguez Camacho",
                 "Vip", TipoObjeto.SERVICIO, "Delivery", "Entrega", "Empaque abierto",
                 "32847", "17/01/2019");
-        t2.asignar("Logistica", "E02", "PR-ENTR-01", "E02");
+        t2.asignar("Logística", "E02", "PR-ENTR-01", "E02");
         t2.cambiarEstado(Dominio.Estado.EN_ATENCION, "E02", "");
         t2.cambiarEstado(Dominio.Estado.RECHAZADO, "E02",
                 "El empaque fue abierto por el cliente al recibir");
 
         Ticket t3 = abrir(Canal.TELEFONICO, "Loc01", "10112387203", "Michael Skinner Brito Calero",
                 "Ordinario", TipoObjeto.PRODUCTO, "Computadores Notebook HP Omen 16",
-                "Cobranza", "Facturacion Doble", "25592", "27/02/2019");
+                "Cobranza", "Facturación Doble", "25592", "27/02/2019");
         t3.asignar("Ventas", "E03", "PR-COBR-01", "E03");
 
         Ticket t4 = abrir(Canal.INTERNET, "Loc03", "10112387203", "Michael Skinner Brito Calero",
-                "Ordinario", TipoObjeto.SERVICIO, "Instalacion", "Atencion", "Demora",
+                "Ordinario", TipoObjeto.SERVICIO, "Instalación", "Atención", "Demora",
                 "", "");
-        t4.anotar("Sistema", "Sustento", "Reclamo sin comprobante: es por atencion");
+        t4.anotar("Sistema", "Sustento", "Reclamo sin comprobante: es por atención");
     }
 }

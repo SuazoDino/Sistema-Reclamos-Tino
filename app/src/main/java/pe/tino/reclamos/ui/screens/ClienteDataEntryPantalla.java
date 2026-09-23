@@ -97,8 +97,8 @@ public class ClienteDataEntryPantalla extends Pantalla {
         f.campo("DNI/RUC:", Ui.fila(documento, validar))
          .campo("Nombre:", nombre)
          .campo("Apellido:", apellido)
-         .campo("Correo electronico:", correo)
-         .campo("Telefono:", telefono)
+         .campo("Correo electrónico:", correo)
+         .campo("Teléfono:", telefono)
          .campo("Tipo de cliente:", tipoCliente);
 
         Grupo g = new Grupo("Datos del Cliente");
@@ -112,8 +112,8 @@ public class ClienteDataEntryPantalla extends Pantalla {
             List.of(nombre, apellido, correo, telefono, tipoCliente)
                     .forEach(c -> c.setText(""));
             reclamo.setVisible(false);
-            JOptionPane.showMessageDialog(this, "Su usuario no es valido.",
-                    "Validacion de Usuario", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Su usuario no es válido.",
+                    "Validación de Usuario", JOptionPane.WARNING_MESSAGE);
             return;
         }
         nombre.setText(cliente.nombres());
@@ -160,12 +160,12 @@ public class ClienteDataEntryPantalla extends Pantalla {
 
         JPanel nota = Ui.panel(new BorderLayout(0, Tema.ESP_XS));
         nota.add(tieneComprobante, BorderLayout.NORTH);
-        nota.add(Ui.suave("El comprobante solo prueba la garantia. No es el ticket: una misma "
-                + "compra puede originar varios tickets, y hay reclamos de atencion o de "
+        nota.add(Ui.suave("El comprobante solo prueba la garantía. No es el ticket: una misma "
+                + "compra puede originar varios tickets, y hay reclamos de atención o de "
                 + "servicio que no tienen comprobante."), BorderLayout.SOUTH);
         nota.setBorder(Ui.relleno(0, 0, Tema.ESP_SM, 0));
 
-        Grupo g = new Grupo("Sustento de la garantia");
+        Grupo g = new Grupo("Sustento de la garantía");
         g.add(nota, BorderLayout.NORTH);
         g.add(f, BorderLayout.CENTER);
         return g;
@@ -200,7 +200,7 @@ public class ClienteDataEntryPantalla extends Pantalla {
     private void generar() {
         if (cliente == null) { avisar("Primero valide el documento del cliente."); return; }
         if (tieneComprobante.isSelected() && comprobante.getText().isBlank()) {
-            avisar("Indique el numero de comprobante o desmarque la casilla.");
+            avisar("Indique el número de comprobante o desmarque la casilla.");
             return;
         }
         if (!confirmar("Confirma el registro del reclamo?")) return;
@@ -237,7 +237,7 @@ public class ClienteDataEntryPantalla extends Pantalla {
         resumen.agregar("Instancia", t.instancia().etiqueta());
         resumen.agregar("Prioridad", t.prioridad().etiqueta());
         resumen.agregar("Estado", t.estado().etiqueta());
-        resumen.agregar("Limite de atencion", t.limiteAtencion().format(RELOJ));
+        resumen.agregar("Límite de atención", t.limiteAtencion().format(RELOJ));
         resumen.agregar("Sustento",
                 t.comprobante().isBlank() ? "Sin comprobante" : "Comprobante " + t.comprobante());
 

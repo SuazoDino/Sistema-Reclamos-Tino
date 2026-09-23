@@ -128,7 +128,7 @@ public class PanelHabilitacion extends JPanel {
     private void habilitar() {
         String v = listaExistentes.getSelectedValue();
         if (v == null) { avisar("Seleccione un valor de la lista de existentes."); return; }
-        if (habilitados.contains(v)) { avisar("\"" + v + "\" ya esta habilitado."); return; }
+        if (habilitados.contains(v)) { avisar("\"" + v + "\" ya está habilitado."); return; }
         habilitados.addElement(v);
     }
 

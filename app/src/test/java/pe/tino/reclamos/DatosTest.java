@@ -15,8 +15,8 @@ class DatosTest {
     void todoValorHabilitadoExisteEnSuCatalogo() {
         for (String clave : Datos.clavesCatalogo()) {
             Datos.Catalogo c = Datos.catalogo(clave);
-            assertNotNull(c, "catalogo inexistente: " + clave);
-            assertFalse(c.existentes().isEmpty(), "catalogo vacio: " + clave);
+            assertNotNull(c, "catálogo inexistente: " + clave);
+            assertFalse(c.existentes().isEmpty(), "catálogo vacío: " + clave);
             assertTrue(c.existentes().containsAll(c.habilitados()),
                     "hay habilitados fuera del universo en: " + clave);
         }
@@ -74,6 +74,6 @@ class DatosTest {
         var habilitadas = Datos.catalogo("areas").habilitados();
         Datos.reclamosDemo().forEach(r ->
                 assertTrue(habilitadas.contains(r.area()),
-                        "area no habilitada: " + r.area() + " en " + r.id()));
+                        "área no habilitada: " + r.area() + " en " + r.id()));
     }
 }

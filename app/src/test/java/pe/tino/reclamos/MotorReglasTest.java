@@ -37,7 +37,7 @@ class MotorReglasTest {
         Resultado r = MotorReglas.evaluar(caso("false", "10", "365", "true", "5"));
         assertTrue(r.valido());
         assertEquals("Rechazo", r.accion());
-        assertEquals(1, r.traza().size(), "deberia cortar en la primera condicion");
+        assertEquals(1, r.traza().size(), "debería cortar en la primera condición");
     }
 
     @Test
@@ -51,7 +51,7 @@ class MotorReglasTest {
     void dentroDeGarantiaYReparableSeRepara() {
         Resultado r = MotorReglas.evaluar(caso("true", "120", "365", "true", "0"));
         assertTrue(r.valido());
-        assertEquals("Reparacion Equipo", r.accion());
+        assertEquals("Reparación Equipo", r.accion());
     }
 
     @Test
@@ -71,7 +71,7 @@ class MotorReglasTest {
     @Test
     void laTrazaExplicaCadaPasoQueSeEvaluo() {
         Resultado r = MotorReglas.evaluar(caso("true", "120", "365", "false", "0"));
-        assertEquals(4, r.traza().size(), "deberia pasar por las cuatro condiciones");
+        assertEquals(4, r.traza().size(), "debería pasar por las cuatro condiciones");
         assertEquals("CND1", r.traza().get(0).codigo());
         assertEquals("CND4", r.traza().get(3).codigo());
         r.traza().forEach(p -> assertFalse(p.comparacion().isBlank()));
@@ -84,7 +84,7 @@ class MotorReglasTest {
 
         assertFalse(r.valido());
         assertTrue(r.error().contains("Tiempo_Transcurrido"),
-                "el error deberia nombrar la variable que falta: " + r.error());
+                "el error debería nombrar la variable que falta: " + r.error());
     }
 
     @Test
@@ -93,7 +93,7 @@ class MotorReglasTest {
         Resultado dentro = MotorReglas.evaluar(caso("true", "100", "365", "true", "1"));
         Resultado fuera = MotorReglas.evaluar(caso("true", "100", "50", "true", "1"));
 
-        assertEquals("Reparacion Equipo", dentro.accion());
+        assertEquals("Reparación Equipo", dentro.accion());
         assertEquals("Pago Adicional", fuera.accion());
     }
 
@@ -111,6 +111,6 @@ class MotorReglasTest {
     void todaVariableUsadaEstaEnElCatalogo() {
         MotorReglas.condiciones().forEach(c ->
                 assertNotNull(MotorReglas.variable(c.variable()),
-                        "variable fuera del catalogo: " + c.variable()));
+                        "variable fuera del catálogo: " + c.variable()));
     }
 }

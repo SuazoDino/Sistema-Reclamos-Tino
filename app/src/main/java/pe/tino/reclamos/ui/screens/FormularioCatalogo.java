@@ -70,7 +70,7 @@ public final class FormularioCatalogo {
         agregar.addActionListener(e -> {
             String v = String.valueOf(combo.getSelectedItem());
             if (modelo.contains(v)) {
-                JOptionPane.showMessageDialog(padre, "El valor " + v + " ya esta en la lista.",
+                JOptionPane.showMessageDialog(padre, "El valor " + v + " ya está en la lista.",
                         "Sistema de Reclamos", JOptionPane.INFORMATION_MESSAGE);
                 return;
             }

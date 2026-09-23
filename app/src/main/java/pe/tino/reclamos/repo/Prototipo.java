@@ -17,7 +17,7 @@ public final class Prototipo {
     /* ---------------- catalogo de reclamos y eventos ---------------- */
 
     public static final List<String> TIPO_PROBLEMA =
-            List.of("Entrega", "Atencion", "Funcionamiento", "Cobranza", "Instalacion");
+            List.of("Entrega", "Atención", "Funcionamiento", "Cobranza", "Instalación");
     public static final List<String> INSTANCIA = List.of("primera", "segunda");
     public static final List<String> CRITICIDAD = List.of("Alta", "Media", "Baja");
     public static final List<String> ESTADO = List.of("Habilitado", "Deshabilitado");
@@ -32,48 +32,48 @@ public final class Prototipo {
                 new String[]{"Entrega", "segunda", "Media", "Deshabilitado"},
                 new String[]{"Entrega", "segunda", "Baja", "Deshabilitado"},
                 new String[]{"Entrega", "segunda", "Alta", "Deshabilitado"},
-                new String[]{"Atencion", "primera", "Alta", "Habilitado"}
+                new String[]{"Atención", "primera", "Alta", "Habilitado"}
         ));
     }
 
-    public static final List<String> EVENTOS_EXISTENTES = List.of("Inspeccion",
-            "Solucion del Reclamo", "Reasignacion de Area", "Seguimiento de Reclamo", "Entrega");
-    public static final List<String> EVENTOS_HABILITADOS = List.of("Inspeccion",
-            "Solucion del Reclamo", "Reasignacion de Area", "Seguimiento de Reclamo");
+    public static final List<String> EVENTOS_EXISTENTES = List.of("Inspección",
+            "Solución del Reclamo", "Reasignación de Área", "Seguimiento de Reclamo", "Entrega");
+    public static final List<String> EVENTOS_HABILITADOS = List.of("Inspección",
+            "Solución del Reclamo", "Reasignación de Área", "Seguimiento de Reclamo");
 
     /** Evento | Estado. */
     public static List<String[]> eventos() {
         return new ArrayList<>(List.of(
-                new String[]{"Inspeccion", "Habilitado"},
-                new String[]{"Solucion del Reclamo", "Habilitado"},
-                new String[]{"Reasignacion de Area", "Deshabilitado"},
+                new String[]{"Inspección", "Habilitado"},
+                new String[]{"Solución del Reclamo", "Habilitado"},
+                new String[]{"Reasignación de Área", "Deshabilitado"},
                 new String[]{"Seguimiento de Reclamo", "Habilitado"}
         ));
     }
 
     /* ---------------- catalogo de problemas ---------------- */
 
-    public static final List<String> PROBLEMAS_EXISTENTES = List.of("La camara no funciona",
-            "Telefono Sobrecalentado", "El Telefono No Responde", "La Tarjeta MicroSD No Funciona",
-            "Puerto de Carga Daniado", "Reinicio automatico");
-    public static final List<String> PROBLEMAS_HABILITADOS = List.of("La camara no funciona",
-            "Telefono Sobrecalentado", "El Telefono No Responde", "La Tarjeta MicroSD No Funciona");
+    public static final List<String> PROBLEMAS_EXISTENTES = List.of("La cámara no funciona",
+            "Teléfono Sobrecalentado", "El Teléfono No Responde", "La Tarjeta MicroSD No Funciona",
+            "Puerto de Carga Dañado", "Reinicio automático");
+    public static final List<String> PROBLEMAS_HABILITADOS = List.of("La cámara no funciona",
+            "Teléfono Sobrecalentado", "El Teléfono No Responde", "La Tarjeta MicroSD No Funciona");
 
     /** Problema | Producto. */
     public static List<String[]> problemasPorProducto() {
         return new ArrayList<>(List.of(
-                new String[]{"No funciona la camara", "Celular"},
-                new String[]{"No Funciona la camara", "Laptop"},
-                new String[]{"No funciona la camara", "Camara"}
+                new String[]{"No funciona la cámara", "Celular"},
+                new String[]{"No Funciona la cámara", "Laptop"},
+                new String[]{"No funciona la cámara", "Cámara"}
         ));
     }
 
-    public static final List<String> PRODUCTOS_SIMPLES = List.of("Celular", "Laptop", "Camara");
+    public static final List<String> PRODUCTOS_SIMPLES = List.of("Celular", "Laptop", "Cámara");
 
     /* ---------------- catalogo de protocolos ---------------- */
 
-    public static final List<String> TIPO_OPERARIO = List.of("Tecnico", "Especialista", "Asistente");
-    public static final List<String> CRITICIDAD_ACCION = List.of("No Critico", "Critico");
+    public static final List<String> TIPO_OPERARIO = List.of("Técnico", "Especialista", "Asistente");
+    public static final List<String> CRITICIDAD_ACCION = List.of("No Crítico", "Crítico");
 
     /**
      * Protocolo | Tipo de problema | Evento. El ticket guarda este codigo, asi
@@ -81,11 +81,11 @@ public final class Prototipo {
      */
     public static List<String[]> protocolos() {
         return new ArrayList<>(List.of(
-                new String[]{"PR-FUNC-01", "Funcionamiento", "Inspeccion"},
-                new String[]{"PR-FUNC-02", "Funcionamiento", "Solucion del Reclamo"},
-                new String[]{"PR-ENTR-01", "Entrega", "Inspeccion"},
-                new String[]{"PR-COBR-01", "Cobranza", "Solucion del Reclamo"},
-                new String[]{"PR-ATEN-01", "Atencion", "Seguimiento de Reclamo"}
+                new String[]{"PR-FUNC-01", "Funcionamiento", "Inspección"},
+                new String[]{"PR-FUNC-02", "Funcionamiento", "Solución del Reclamo"},
+                new String[]{"PR-ENTR-01", "Entrega", "Inspección"},
+                new String[]{"PR-COBR-01", "Cobranza", "Solución del Reclamo"},
+                new String[]{"PR-ATEN-01", "Atención", "Seguimiento de Reclamo"}
         ));
     }
 
@@ -100,15 +100,15 @@ public final class Prototipo {
     /** Protocolo | Accion | Tiempo Maximo(s) | Tipo Operario | Criticidad. */
     public static List<String[]> accionesDeProtocolo() {
         return new ArrayList<>(List.of(
-                new String[]{"PR-FUNC-01", "Reiniciar equipo", "120", "Tecnico", "No Critico"},
-                new String[]{"PR-FUNC-01", "Abrir aplicacion de camara", "60", "Tecnico", "No Critico"},
-                new String[]{"PR-FUNC-01", "Tomar foto de prueba", "20", "Tecnico", "Critico"},
-                new String[]{"PR-FUNC-02", "Reemplazar componente", "600", "Especialista", "Critico"},
-                new String[]{"PR-ENTR-01", "Verificar empaque", "90", "Asistente", "Critico"},
-                new String[]{"PR-ENTR-01", "Contrastar guia de remision", "120", "Asistente", "No Critico"},
-                new String[]{"PR-COBR-01", "Revisar comprobantes emitidos", "180", "Asistente", "Critico"},
-                new String[]{"PR-COBR-01", "Solicitar nota de credito", "300", "Especialista", "No Critico"},
-                new String[]{"PR-ATEN-01", "Registrar descargo del area", "120", "Asistente", "Critico"}
+                new String[]{"PR-FUNC-01", "Reiniciar equipo", "120", "Técnico", "No Crítico"},
+                new String[]{"PR-FUNC-01", "Abrir aplicación de cámara", "60", "Técnico", "No Crítico"},
+                new String[]{"PR-FUNC-01", "Tomar foto de prueba", "20", "Técnico", "Crítico"},
+                new String[]{"PR-FUNC-02", "Reemplazar componente", "600", "Especialista", "Crítico"},
+                new String[]{"PR-ENTR-01", "Verificar empaque", "90", "Asistente", "Crítico"},
+                new String[]{"PR-ENTR-01", "Contrastar guía de remisión", "120", "Asistente", "No Crítico"},
+                new String[]{"PR-COBR-01", "Revisar comprobantes emitidos", "180", "Asistente", "Crítico"},
+                new String[]{"PR-COBR-01", "Solicitar nota de crédito", "300", "Especialista", "No Crítico"},
+                new String[]{"PR-ATEN-01", "Registrar descargo del área", "120", "Asistente", "Crítico"}
         ));
     }
 
@@ -125,14 +125,14 @@ public final class Prototipo {
 
     /* ---------------- catalogo de politicas ---------------- */
 
-    public static final List<String> CATALOGOS = List.of("Producto", "Reclamo", "Garantia",
+    public static final List<String> CATALOGOS = List.of("Producto", "Reclamo", "Garantía",
             "Canal", "Cliente", "Problema");
 
     /** Catalogo1 | Catalogo2: una politica cruza dos catalogos. */
     public static List<String[]> politicas() {
         return new ArrayList<>(List.of(
                 new String[]{"Reclamo", "Canal"},
-                new String[]{"Producto", "Garantia"}
+                new String[]{"Producto", "Garantía"}
         ));
     }
 
@@ -168,8 +168,8 @@ public final class Prototipo {
     public static final List<String> MAGNITUD_EXISTENTE = List.of("Corporativa");
     public static final List<String> MAGNITUDES = List.of("Corporativa", "Nacional",
             "MultiNacional", "InterNacional");
-    public static final List<String> IDIOMAS_EXISTENTES = List.of("Espaniol", "Ingles", "Quechua");
-    public static final List<String> IDIOMAS_HABILITADOS = List.of("Espaniol");
+    public static final List<String> IDIOMAS_EXISTENTES = List.of("Español", "Inglés", "Quechua");
+    public static final List<String> IDIOMAS_HABILITADOS = List.of("Español");
 
     /* ---------------- area: atender reclamos ---------------- */
 
@@ -177,9 +177,9 @@ public final class Prototipo {
 
     public static final Map<String, Empleado> EMPLEADOS = new LinkedHashMap<>();
     static {
-        EMPLEADOS.put("E01", new Empleado("E01", "Tecnico", "Tecnica de Reparacion e Inspeccion"));
-        EMPLEADOS.put("E02", new Empleado("E02", "Tecnico", "Tecnica de Reparacion e Inspeccion"));
-        EMPLEADOS.put("E03", new Empleado("E03", "Especialista", "Area Especializada"));
+        EMPLEADOS.put("E01", new Empleado("E01", "Técnico", "Técnica de Reparación e Inspección"));
+        EMPLEADOS.put("E02", new Empleado("E02", "Técnico", "Técnica de Reparación e Inspección"));
+        EMPLEADOS.put("E03", new Empleado("E03", "Especialista", "Área Especializada"));
     }
 
     /** IdReclamo | Fecha de emision | Fecha de Atencion | Hora de Atencion | Estado. */
@@ -200,11 +200,11 @@ public final class Prototipo {
     public static DatosReclamo datosDe(String idReclamo) {
         return switch (idReclamo) {
             case "R002" -> new DatosReclamo("R002", "Laptop", "HP", "Funcionamiento", "No enciende");
-            case "R003" -> new DatosReclamo("R003", "Camara", "Canon", "Funcionamiento", "No enfoca");
+            case "R003" -> new DatosReclamo("R003", "Cámara", "Canon", "Funcionamiento", "No enfoca");
             case "R004" -> new DatosReclamo("R004", "Celular", "Motorola", "Entrega", "Empaque abierto");
             case "R005" -> new DatosReclamo("R005", "Celular", "Huawei", "Funcionamiento", "No carga");
             default -> new DatosReclamo("R001", "Celular", "Samsung",
-                    "Funcionamiento", "No funciona Camara");
+                    "Funcionamiento", "No funciona Cámara");
         };
     }
 
@@ -228,11 +228,11 @@ public final class Prototipo {
 
     private static final Map<String, List<String>> PROBLEMAS_POR_TIPO = new LinkedHashMap<>();
     static {
-        PROBLEMAS_POR_TIPO.put("Funcionamiento", List.of("La camara no funciona",
-                "Telefono Sobrecalentado", "El Telefono No Responde", "No enciende"));
+        PROBLEMAS_POR_TIPO.put("Funcionamiento", List.of("La cámara no funciona",
+                "Teléfono Sobrecalentado", "El Teléfono No Responde", "No enciende"));
         PROBLEMAS_POR_TIPO.put("Entrega", List.of("Empaque abierto", "Producto equivocado", "Demora"));
-        PROBLEMAS_POR_TIPO.put("Cobranza", List.of("Facturacion Doble", "Error de Facturacion"));
-        PROBLEMAS_POR_TIPO.put("Atencion", List.of("Mal trato", "Demora"));
+        PROBLEMAS_POR_TIPO.put("Cobranza", List.of("Facturación Doble", "Error de Facturación"));
+        PROBLEMAS_POR_TIPO.put("Atención", List.of("Mal trato", "Demora"));
     }
 
     public static List<String> tiposDeProblema() { return List.copyOf(PROBLEMAS_POR_TIPO.keySet()); }
@@ -261,34 +261,34 @@ public final class Prototipo {
     public static Detalle detalleDe(int fila) {
         return switch (fila) {
             case 2 -> new Detalle("R003", "Celular", "Samsung", "Funcionamiento",
-                    "No Funciona la camara", "02/12/2019", "8/12/2019", "13/12/2019",
-                    "Su reclamo fue aceptado. El equipo pasa a reparacion.", "Aceptado");
+                    "No Funciona la cámara", "02/12/2019", "8/12/2019", "13/12/2019",
+                    "Su reclamo fue aceptado. El equipo pasa a reparación.", "Aceptado");
             case 3 -> new Detalle("R004", "Celular", "Azumi", "Funcionamiento",
-                    "No Funciona la camara", "05/12/2019", "-", "15/12/2019",
-                    "Su reclamo esta en evaluacion por el area tecnica.", "Pendiente");
+                    "No Funciona la cámara", "05/12/2019", "-", "15/12/2019",
+                    "Su reclamo está en evaluación por el área técnica.", "Pendiente");
             case 1 -> new Detalle("R002", "Celular", "Motorola", "Funcionamiento",
-                    "No Funciona la camara", "02/12/2019", "8/12/2019", "13/12/2019",
-                    "Su equipo se encuentra daniado por lo que no cumple los requisitos "
-                            + "de la garantia.", "Rechazado");
+                    "No Funciona la cámara", "02/12/2019", "8/12/2019", "13/12/2019",
+                    "Su equipo se encuentra dañado por lo que no cumple los requisitos "
+                            + "de la garantía.", "Rechazado");
             default -> new Detalle("R001", "Celular", "Huawei", "Funcionamiento",
-                    "No Funciona la camara", "02/12/2019", "8/12/2019", "13/12/2019",
-                    "Su equipo se encuentra daniado por lo que no cumple los requisitos "
-                            + "de la garantia.", "Rechazado");
+                    "No Funciona la cámara", "02/12/2019", "8/12/2019", "13/12/2019",
+                    "Su equipo se encuentra dañado por lo que no cumple los requisitos "
+                            + "de la garantía.", "Rechazado");
         };
     }
 
     /* ---------------- consulta de indicadores ---------------- */
 
     public static final List<String> INDICADORES = List.of(
-            "nivel de satisfaccion del cliente",
-            "tiempo promedio de solucion por reclamo",
-            "tipo de bienes mas reclamados",
-            "areas con mayor demanda de reclamo",
-            "numeros de reclamos por clase de producto",
-            "costo por atencion de reclamo",
-            "numero de rotacion de especialitas por reclamo",
+            "Nivel de satisfacción del cliente",
+            "Tiempo promedio de solución por reclamo",
+            "Tipo de bienes más reclamados",
+            "Áreas con mayor demanda de reclamo",
+            "Número de reclamos por clase de producto",
+            "Costo por atención de reclamo",
+            "Número de rotación de especialistas por reclamo",
             "% de reclamos en un mes",
-            "% de reclamos criticos",
-            "porcentaje de reclamos solucionados fuera de plazo",
-            "eficiencia de reclamo por tipo de bien");
+            "% de reclamos críticos",
+            "Porcentaje de reclamos solucionados fuera de plazo",
+            "Eficiencia de reclamo por tipo de bien");
 }

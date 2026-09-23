@@ -27,10 +27,10 @@ class CoherenciaTest {
     @Test
     void elClienteTieneUnaSolaFuente() {
         Cliente c = Datos.clientePorDocumento("72119474");
-        assertNotNull(c, "el cliente del prototipo deberia existir en el catalogo");
+        assertNotNull(c, "el cliente del prototipo debería existir en el catálogo");
         assertFalse(c.nombres().isBlank());
         assertFalse(c.apellidos().isBlank());
-        assertNotNull(c.tipo(), "sin categoria no se puede calcular prioridad ni plazo");
+        assertNotNull(c.tipo(), "sin categoría no se puede calcular prioridad ni plazo");
     }
 
     @Test
@@ -51,7 +51,7 @@ class CoherenciaTest {
         for (String tipo : Prototipo.tiposDeProblema()) {
             String protocolo = Prototipo.protocoloDe(tipo);
             assertTrue(codigos.contains(protocolo),
-                    "el protocolo " + protocolo + " de " + tipo + " no esta en el catalogo");
+                    "el protocolo " + protocolo + " de " + tipo + " no está en el catálogo");
         }
     }
 
@@ -67,7 +67,7 @@ class CoherenciaTest {
         Prototipo.accionesDeProtocolo().forEach(f -> {
             assertEquals(5, f.length);
             assertDoesNotThrow(() -> Integer.parseInt(f[2]),
-                    "el tiempo maximo de " + f[1] + " deberia ser un numero");
+                    "el tiempo máximo de " + f[1] + " debería ser un número");
             assertTrue(Prototipo.TIPO_OPERARIO.contains(f[3]), "operario desconocido: " + f[3]);
             assertTrue(Prototipo.CRITICIDAD_ACCION.contains(f[4]),
                     "criticidad desconocida: " + f[4]);
@@ -79,7 +79,7 @@ class CoherenciaTest {
     @Test
     void elCatalogoDePoliticasDaElPlazoQueLeeElMotor() {
         int plazo = Prototipo.plazoDeGarantia("Prod001");
-        assertTrue(plazo > 0, "sin plazo, la condicion CND2 no tiene contra que comparar");
+        assertTrue(plazo > 0, "sin plazo, la condición CND2 no tiene contra que comparar");
     }
 
     @Test
@@ -96,8 +96,8 @@ class CoherenciaTest {
 
         // 1. el cliente abre el ticket
         Ticket t = Tickets.abrir(Canal.PRESENCIAL, "Loc01", c.documento(), c.nombreCompleto(),
-                c.tipo().etiqueta(), TipoObjeto.PRODUCTO, "Telefono Movil Samsung",
-                "Funcionamiento", "La camara no funciona", "25713", "12/01/2019");
+                c.tipo().etiqueta(), TipoObjeto.PRODUCTO, "Teléfono Móvil Samsung",
+                "Funcionamiento", "La cámara no funciona", "25713", "12/01/2019");
 
         // 2. la prioridad y el plazo salieron de los catalogos
         assertEquals(Catalogos.prioridadDe("Funcionamiento", c.tipo().etiqueta()), t.prioridad());
@@ -105,14 +105,14 @@ class CoherenciaTest {
 
         // 3. el area lo toma con el protocolo que le corresponde
         String protocolo = Prototipo.protocoloDe(t.tipoProblema());
-        t.asignar("Area Tecnica de Reparacion e Inspeccion", "E01", protocolo, "E01");
+        t.asignar("Área Técnica de Reparación e Inspección", "E01", protocolo, "E01");
         assertEquals(Estado.ASIGNADO, t.estado());
         assertFalse(Prototipo.accionesDe(t.protocolo()).isEmpty());
 
         // 4. avanza por la maquina de estados hasta rechazarse
         assertTrue(t.cambiarEstado(Estado.EN_ATENCION, "E01", ""));
-        assertTrue(t.cambiarEstado(Estado.RECHAZADO, "E01", "fuera de garantia"));
-        assertNotNull(t.limiteImpugnacion(), "el rechazo abre el plazo de impugnacion");
+        assertTrue(t.cambiarEstado(Estado.RECHAZADO, "E01", "fuera de garantía"));
+        assertNotNull(t.limiteImpugnacion(), "el rechazo abre el plazo de impugnación");
 
         // 5. el cliente impugna y sube de instancia
         assertTrue(t.impugnar("No estoy de acuerdo", "Cliente"));
@@ -120,7 +120,7 @@ class CoherenciaTest {
         assertEquals(Instancia.SEGUNDA.resuelve(), t.area());
 
         // 6. todo el recorrido quedo en la bitacora
-        assertTrue(t.bitacora().size() >= 6, "la bitacora deberia registrar cada paso");
+        assertTrue(t.bitacora().size() >= 6, "la bitácora debería registrar cada paso");
     }
 
     @Test
@@ -133,21 +133,21 @@ class CoherenciaTest {
         valores.put("Stock", "0");
 
         MotorReglas.Resultado r = MotorReglas.evaluar(valores);
-        assertTrue(r.valido(), "la cadena deberia resolver: " + r.error());
+        assertTrue(r.valido(), "la cadena debería resolver: " + r.error());
         assertTrue(MotorReglas.ACCIONES.contains(r.accion()),
-                "la solucion deberia estar en el catalogo de acciones");
+                "la solución debería estar en el catálogo de acciones");
     }
 
     /* ---------------- seguridad al dia ---------------- */
 
     @Test
     void losAccesosDeSeguridadNombranPantallasQueExisten() {
-        List<String> pantallas = List.of("Parametro General", "Catalogo de Reclamo",
-                "Catalogo de Producto", "Catalogo de Servicios", "Catalogo de Problemas",
-                "Catalogo de Cliente", "Catalogo de Protocolos", "Catalogo de Reglas",
-                "Catalogo de Politicas", "Parametros de Atencion", "Consulta de Tickets",
-                "Consulta de Indicadores", "Area - Data Entry", "Area - Reportes",
-                "Cliente - Data Entry", "Cliente - Reportes", "Seguridad", "Modulo BATCH");
+        List<String> pantallas = List.of("Parámetro General", "Catálogo de Reclamo",
+                "Catálogo de Producto", "Catálogo de Servicios", "Catálogo de Problemas",
+                "Catálogo de Cliente", "Catálogo de Protocolos", "Catálogo de Reglas",
+                "Catálogo de Políticas", "Parámetros de Atención", "Consulta de Tickets",
+                "Consulta de Indicadores", "Área - Data Entry", "Área - Reportes",
+                "Cliente - Data Entry", "Cliente - Reportes", "Seguridad", "Módulo BATCH");
         assertEquals(pantallas.size(), Datos.ACCESOS.size());
         assertTrue(Datos.ACCESOS.containsAll(pantallas));
     }

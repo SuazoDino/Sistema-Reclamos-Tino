@@ -33,7 +33,7 @@ class CatalogosTest {
 
     @Test
     void laReglaDePrioridadCubreLosTiposDeProblemaDelSistema() {
-        List<String> tipos = List.of("Funcionamiento", "Cobranza", "Entrega", "Atencion");
+        List<String> tipos = List.of("Funcionamiento", "Cobranza", "Entrega", "Atención");
         for (String tipo : tipos) {
             for (String cliente : List.of("SuperVip", "Vip", "Ordinario", "Nuevo")) {
                 boolean hay = Catalogos.reglasPrioridad().stream()
@@ -52,7 +52,7 @@ class CatalogosTest {
     void cadaInstanciaDeclaraQuienResuelve() {
         Catalogos.instancias().forEach(f -> {
             assertEquals(4, f.length);
-            assertFalse(f[1].isBlank(), "la instancia " + f[0] + " no dice quien resuelve");
+            assertFalse(f[1].isBlank(), "la instancia " + f[0] + " no dice quién resuelve");
         });
     }
 }

@@ -24,14 +24,14 @@ import java.awt.*;
 public class AtencionParamPantalla extends Pantalla {
 
     public AtencionParamPantalla() {
-        super("Parametros de Atencion",
+        super("Parámetros de Atención",
                 "Canales, instancias, plazos, prioridad y estados del ticket.");
 
         JTabbedPane pestanias = new JTabbedPane();
         pestanias.setFont(Tema.cuerpo());
         pestanias.addTab("Canales", canales());
         pestanias.addTab("Instancias", instancias());
-        pestanias.addTab("Tiempos de atencion", tiempos());
+        pestanias.addTab("Tiempos de atención", tiempos());
         pestanias.addTab("Prioridad", prioridad());
         pestanias.addTab("Estados", estados());
 
@@ -43,26 +43,26 @@ public class AtencionParamPantalla extends Pantalla {
         Catalogos.canales().forEach(f -> t.agregar((Object[]) f));
         t.anchos(160, 300, 150, 150);
         return envolver(t, "Canales de ingreso",
-                "Por donde puede entrar un reclamo. Un canal deshabilitado no ofrece atencion.");
+                "Por dónde puede entrar un reclamo. Un canal deshabilitado no ofrece atención.");
     }
 
     private JComponent instancias() {
         Tabla t = new Tabla(new String[]{
-                "Instancia", "Quien resuelve", "Dias de impugnacion", "Admite impugnacion"});
+                "Instancia", "Quién resuelve", "Días de impugnación", "Admite impugnación"});
         Catalogos.instancias().forEach(f -> t.agregar((Object[]) f));
         t.anchos(150, 280, 180, 170).centrar(2, 3);
-        return envolver(t, "Instancias de atencion",
-                "De aqui sale la fecha limite de impugnacion del ticket. "
-                        + "La ultima instancia no admite impugnacion.");
+        return envolver(t, "Instancias de atención",
+                "De aquí sale la fecha límite de impugnación del ticket. "
+                        + "La última instancia no admite impugnación.");
     }
 
     private JComponent tiempos() {
         Tabla t = new Tabla(new String[]{"Tipo de cliente", "Prioridad", "Tiempo", "Unidad"});
         Catalogos.tiemposAtencion().forEach(f -> t.agregar((Object[]) f));
         t.anchos(180, 150, 120, 150).centrar(2);
-        return envolver(t, "Tiempos de atencion",
-                "El plazo que tiene el area segun quien reclama y que tan urgente es. "
-                        + "Es lo que conecta la categorizacion del cliente con la operacion.");
+        return envolver(t, "Tiempos de atención",
+                "El plazo que tiene el área según quién reclama y qué tan urgente es. "
+                        + "Es lo que conecta la categorización del cliente con la operación.");
     }
 
     private JComponent prioridad() {
@@ -70,16 +70,16 @@ public class AtencionParamPantalla extends Pantalla {
         Catalogos.reglasPrioridad().forEach(f -> t.agregar((Object[]) f));
         t.anchos(220, 200, 160);
         return envolver(t, "Regla de prioridad",
-                "Con que prioridad nace el ticket. Antes la criticidad se cargaba a mano "
+                "Con qué prioridad nace el ticket. Antes la criticidad se cargaba a mano "
                         + "y no se derivaba de nada.");
     }
 
     private JComponent estados() {
-        Tabla t = new Tabla(new String[]{"Estado", "Que significa", "Puede pasar a"});
+        Tabla t = new Tabla(new String[]{"Estado", "Qué significa", "Puede pasar a"});
         Catalogos.estados().forEach(f -> t.agregar((Object[]) f));
         t.anchos(150, 340, 260);
         return envolver(t, "Estados del ticket",
-                "Es la maquina de estados: un ticket solo puede moverse a los estados "
+                "Es la máquina de estados: un ticket solo puede moverse a los estados "
                         + "que su estado actual permite.");
     }
 

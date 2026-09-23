@@ -37,16 +37,16 @@ public class ParametrosPantalla extends Pantalla {
     }
 
     private JComponent areas() {
-        Grupo g = new Grupo("Areas");
+        Grupo g = new Grupo("Áreas");
         var cat = Datos.catalogo("areas");
-        g.add(alta("Ingresar Area:", Ui.texto(14)), BorderLayout.NORTH);
-        g.add(dobleLista("Areas Existentes", cat.existentes(),
-                "Areas Habilitadas", cat.habilitados()), BorderLayout.CENTER);
+        g.add(alta("Ingresar Área:", Ui.texto(14)), BorderLayout.NORTH);
+        g.add(dobleLista("Áreas Existentes", cat.existentes(),
+                "Áreas Habilitadas", cat.habilitados()), BorderLayout.CENTER);
         return g;
     }
 
     private JComponent especialistas() {
-        Grupo g = new Grupo("Especialistas Areas");
+        Grupo g = new Grupo("Especialistas Áreas");
         var areas = Datos.catalogo("areas").habilitados();
         var empleados = Datos.catalogo("empleados");
 
@@ -57,7 +57,7 @@ public class ParametrosPantalla extends Pantalla {
         gc.anchor = GridBagConstraints.LINE_START;
 
         gc.gridx = 0; gc.gridy = 0; gc.weightx = 0;
-        alta.add(Ui.etiqueta("Area:"), gc);
+        alta.add(Ui.etiqueta("Área:"), gc);
         gc.gridx = 1; gc.weightx = 1;
         alta.add(Ui.combo(areas), gc);
         gc.gridx = 2; gc.weightx = 0;
@@ -160,7 +160,7 @@ public class ParametrosPantalla extends Pantalla {
         pasar.addActionListener(e -> {
             String v = izq.getSelectedValue();
             if (v == null) { avisar("Seleccione un valor de la lista de existentes."); return; }
-            if (mDer.contains(v)) { avisar("\"" + v + "\" ya esta habilitado."); return; }
+            if (mDer.contains(v)) { avisar("\"" + v + "\" ya está habilitado."); return; }
             mDer.addElement(v);
         });
         JButton quitar = Ui.boton("<");

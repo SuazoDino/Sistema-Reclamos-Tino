@@ -13,7 +13,7 @@ public final class Modelo {
 
     /** Estado del ciclo de vida de un reclamo (hoja DATA_ENTRY / MANT-PARAM). */
     public enum EstadoReclamo {
-        EN_COLA("En cola"), EN_ATENCION("En atencion"), ATENDIDO("Atendido"),
+        EN_COLA("En cola"), EN_ATENCION("En atención"), ATENDIDO("Atendido"),
         ENTREGADO("Entregado"), RECHAZADO("Rechazado");
 
         private final String etiqueta;

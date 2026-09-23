@@ -25,9 +25,9 @@ public class TicketPantalla extends Pantalla {
 
     private final Tabla tabla = new Tabla(new String[]{
             "Nro Ticket", "Apertura", "Cliente", "Objeto", "Problema",
-            "Instancia", "Prioridad", "Estado", "Limite atencion"});
+            "Instancia", "Prioridad", "Estado", "Límite atención"});
     private final JPanel ficha = Ui.panel(new BorderLayout());
-    private final Tabla bitacora = new Tabla(new String[]{"Momento", "Usuario", "Accion", "Detalle"});
+    private final Tabla bitacora = new Tabla(new String[]{"Momento", "Usuario", "Acción", "Detalle"});
 
     public TicketPantalla() {
         super("Consulta de Tickets",
@@ -46,7 +46,7 @@ public class TicketPantalla extends Pantalla {
         Grupo detalle = new Grupo("Ficha del ticket");
         detalle.add(ficha, BorderLayout.CENTER);
 
-        Grupo log = Grupo.ajustado("Bitacora");
+        Grupo log = Grupo.ajustado("Bitácora");
         log.add(bitacora.enScroll(), BorderLayout.CENTER);
         log.setPreferredSize(Ui.dim(420, 100));
 
@@ -109,14 +109,14 @@ public class TicketPantalla extends Pantalla {
         dato(datos, "Problema:", t.problema());
         dato(datos, "Prioridad:", t.prioridad().etiqueta());
         dato(datos, "Estado:", t.estado().etiqueta());
-        dato(datos, "Area:", t.area());
+        dato(datos, "Área:", t.area());
         dato(datos, "Especialista:", t.especialista());
         dato(datos, "Protocolo:", t.protocolo());
-        dato(datos, "Limite de atencion:",
+        dato(datos, "Límite de atención:",
                 t.limiteAtencion() == null ? "-" : t.limiteAtencion().format(RELOJ));
-        dato(datos, "Limite de impugnacion:",
+        dato(datos, "Límite de impugnación:",
                 t.limiteImpugnacion() == null ? "-" : t.limiteImpugnacion().format(RELOJ));
-        dato(datos, "Vencido:", t.vencido() ? "Si" : "No");
+        dato(datos, "Vencido:", t.vencido() ? "Sí" : "No");
 
         Grupo sustento = new Grupo("Sustento (documento del cliente, no es el ticket)",
                 new GridLayout(1, 4, Tema.ESP_MD, 0));
@@ -145,7 +145,7 @@ public class TicketPantalla extends Pantalla {
         p.add(Ui.etiqueta("Puede pasar a:"));
 
         if (t.estado().siguientes().isEmpty()) {
-            p.add(Ui.suave("ningun estado; el ticket esta cerrado"));
+            p.add(Ui.suave("ningún estado; el ticket está cerrado"));
             return p;
         }
         for (Dominio.Estado destino : t.estado().siguientes()) {
@@ -179,10 +179,10 @@ public class TicketPantalla extends Pantalla {
                 JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
         if (r != JOptionPane.OK_OPTION) return;
 
-        if (motivo.getText().isBlank()) { avisar("Indique el motivo de la impugnacion."); return; }
+        if (motivo.getText().isBlank()) { avisar("Indique el motivo de la impugnación."); return; }
         if (!t.impugnar(motivo.getText().trim(), "Cliente")) {
-            advertir("El ticket no admite impugnacion: el plazo vencio o ya esta en la "
-                    + "ultima instancia.");
+            advertir("El ticket no admite impugnación: el plazo venció o ya está en la "
+                    + "última instancia.");
             return;
         }
         Tickets.notificar();

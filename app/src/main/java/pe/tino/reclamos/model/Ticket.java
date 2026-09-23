@@ -127,7 +127,7 @@ public class Ticket {
         this.area = area;
         this.especialista = especialista;
         this.protocolo = protocolo;
-        anotar(usuario, "Asignacion", area + " / " + especialista + " / protocolo " + protocolo);
+        anotar(usuario, "Asignación", area + " / " + especialista + " / protocolo " + protocolo);
         if (estado == Estado.REGISTRADO || estado == Estado.IMPUGNADO) cambiarEstado(Estado.ASIGNADO, usuario, "");
     }
 
@@ -159,14 +159,14 @@ public class Ticket {
         area = instancia.resuelve();
         especialista = "Sin asignar";
         limiteImpugnacion = null;
-        anotar(usuario, "Impugnacion", "Pasa a " + instancia.etiqueta()
+        anotar(usuario, "Impugnación", "Pasa a " + instancia.etiqueta()
                 + " instancia, resuelve " + instancia.resuelve());
         return true;
     }
 
     public void reprogramar(LocalDateTime nuevoLimite, String usuario) {
         this.limiteAtencion = nuevoLimite;
-        anotar(usuario, "Reprogramacion", "Nuevo limite de atencion");
+        anotar(usuario, "Reprogramación", "Nuevo límite de atención");
     }
 
     public void anotar(String usuario, String accion, String detalle) {

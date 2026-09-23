@@ -169,7 +169,7 @@ public class Grafico extends JComponent {
     /* ---------------- tendencia ---------------- */
 
     private void pintarTendencia(Graphics2D g) {
-        if (puntos.isEmpty()) { vacioSinPintar(g, "Sin historico para graficar"); return; }
+        if (puntos.isEmpty()) { vacioSinPintar(g, "Sin histórico para graficar"); return; }
 
         FontMetrics fm = g.getFontMetrics();
         int m = escala(Tema.ESP_LG);
@@ -184,7 +184,7 @@ public class Grafico extends JComponent {
         int x0 = m + anchoEje;
         int arriba = m + alturaTexto + escala(Tema.ESP_SM);   // espacio para la leyenda
         int abajo = getHeight() - m - alturaTexto - escala(Tema.ESP_XS);
-        int derecha = getWidth() - m - fm.stringWidth("Proyeccion 000.0") / 2;
+        int derecha = getWidth() - m - fm.stringWidth("Proyección 000.0") / 2;
         int columnas = puntos.size() + 1;                        // meses cerrados + el actual
         double paso = (double) (derecha - x0) / Math.max(1, columnas - 1);
 
@@ -235,7 +235,7 @@ public class Grafico extends JComponent {
                     10f, new float[]{escala(5), escala(5)}, 0f));
             g.draw(new Line2D.Double(xUlt, yUlt, xAct, yP));
             marcador(g, xAct, yP, diametro, false);
-            etiquetaPunto(g, fm, "Proyeccion " + valor(proyeccion.valor()), xAct, yP, arriba);
+            etiquetaPunto(g, fm, "Proyección " + valor(proyeccion.valor()), xAct, yP, arriba);
             zona(xAct, yP, diametro, proyeccion.detalle());
         }
 
@@ -296,8 +296,8 @@ public class Grafico extends JComponent {
             g.drawLine(x, medio, x + largo, medio);
             x += largo + sep;
             g.setColor(Tema.TEXTO_SUAVE);
-            g.drawString("Proyeccion del mes", x, base);
-            x += fm.stringWidth("Proyeccion del mes") + bloque;
+            g.drawString("Proyección del mes", x, base);
+            x += fm.stringWidth("Proyección del mes") + bloque;
         }
         if (enCurso != null) {
             marcador(g, x + escala(4), medio, escala(8), false);

@@ -19,14 +19,14 @@ public class PoliticasPantalla extends Pantalla {
     private final JComboBox<String> catalogo1 = Ui.combo(Prototipo.CATALOGOS);
     private final JComboBox<String> catalogo2 = Ui.combo(Prototipo.CATALOGOS);
     private final Tabla politicas = new Tabla(new String[]{"Catalogo1", "Catalogo2"});
-    private final Tabla tipos = new Tabla(new String[]{"Producto", "Garantia", "Plazo (dias)", "Estado"});
+    private final Tabla tipos = new Tabla(new String[]{"Producto", "Garantía", "Plazo (días)", "Estado"});
     private final JComboBox<String> estado;
     private final List<String[]> filasPolitica = Prototipo.politicas();
     private final List<String[]> filasTipo = Prototipo.tiposDePolitica();
 
     public PoliticasPantalla() {
-        super("Catalogo de Politicas",
-                "Una politica cruza dos catalogos; abajo se habilitan sus tipos.");
+        super("Catálogo de Políticas",
+                "Una política cruza dos catálogos; abajo se habilitan sus tipos.");
 
         List<String> estados = new ArrayList<>(List.of(""));
         estados.addAll(Prototipo.ESTADO);
@@ -56,14 +56,14 @@ public class PoliticasPantalla extends Pantalla {
         agregar.addActionListener(e -> {
             String c1 = String.valueOf(catalogo1.getSelectedItem());
             String c2 = String.valueOf(catalogo2.getSelectedItem());
-            if (c1.equals(c2)) { avisar("Una politica cruza dos catalogos distintos."); return; }
+            if (c1.equals(c2)) { avisar("Una política cruza dos catálogos distintos."); return; }
             filasPolitica.add(new String[]{c1, c2});
             politicas.agregar(c1, c2);
         });
 
         Formulario f = new Formulario();
-        f.campo("Catalogo 1:", catalogo1)
-         .campo("Catalogo 2:", catalogo2);
+        f.campo("Catálogo 1:", catalogo1)
+         .campo("Catálogo 2:", catalogo2);
 
         JPanel pie = Ui.panel(new FlowLayout(FlowLayout.CENTER, 0, Tema.ESP_SM));
         pie.add(agregar);
@@ -76,14 +76,14 @@ public class PoliticasPantalla extends Pantalla {
     private JComponent grupoPoliticas() {
         JButton verTipos = Ui.boton("Tipos");
         verTipos.addActionListener(e -> {
-            if (politicas.filaModelo() < 0) { avisar("Seleccione una politica."); return; }
+            if (politicas.filaModelo() < 0) { avisar("Seleccione una política."); return; }
             refrescarTipos();
         });
         JButton eliminar = Ui.boton("Eliminar");
         eliminar.addActionListener(e -> {
             int i = politicas.filaModelo();
-            if (i < 0) { avisar("Seleccione la politica que desea eliminar."); return; }
-            if (!confirmar("Eliminar la politica seleccionada?")) return;
+            if (i < 0) { avisar("Seleccione la política que desea eliminar."); return; }
+            if (!confirmar("Eliminar la política seleccionada?")) return;
             filasPolitica.remove(i);
             politicas.limpiar();
             filasPolitica.forEach(f -> politicas.agregar((Object[]) f));
@@ -96,7 +96,7 @@ public class PoliticasPantalla extends Pantalla {
         botones.add(columna);
         botones.setBorder(Ui.relleno(0, 0, 0, Tema.ESP_MD));
 
-        Grupo g = new Grupo("Politicas");
+        Grupo g = new Grupo("Políticas");
         g.add(politicas.enScroll(), BorderLayout.CENTER);
         g.add(botones, BorderLayout.EAST);
         return g;
@@ -122,7 +122,7 @@ public class PoliticasPantalla extends Pantalla {
         filtro.add(izq, BorderLayout.WEST);
         filtro.setBorder(Ui.relleno(0, 0, Tema.ESP_SM, 0));
 
-        Grupo g = new Grupo("Tipos de Politicas");
+        Grupo g = new Grupo("Tipos de Políticas");
         g.add(filtro, BorderLayout.NORTH);
         g.add(tipos.enScroll(), BorderLayout.CENTER);
         g.add(botones, BorderLayout.EAST);
@@ -131,7 +131,7 @@ public class PoliticasPantalla extends Pantalla {
 
     private void cambiarEstado(String nuevo) {
         int i = tipos.filaModelo();
-        if (i < 0) { avisar("Seleccione un tipo de politica."); return; }
+        if (i < 0) { avisar("Seleccione un tipo de política."); return; }
         String producto = String.valueOf(tipos.modelo().getValueAt(i, 0));
         String garantia = String.valueOf(tipos.modelo().getValueAt(i, 1));
         filasTipo.stream()

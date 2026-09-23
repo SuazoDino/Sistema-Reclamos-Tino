@@ -98,8 +98,8 @@ public class MapaPantalla extends JPanel {
             Nodo.modulo("batch", "BATCH", Disposicion.FILA,
                     Nodo.modulo("APLICATIVO", Disposicion.APILADA,
                             Nodo.submodulo("ACT-BD"),
-                            Nodo.submodulo("ESTADISTICAS")),
-                    Nodo.modulo("TECNICO", Disposicion.APILADA,
+                            Nodo.submodulo("ESTADÍSTICAS")),
+                    Nodo.modulo("TÉCNICO", Disposicion.APILADA,
                             Nodo.submodulo("MANT-BD"),
                             Nodo.submodulo("CONTINGENCIA"))));
 
@@ -120,7 +120,7 @@ public class MapaPantalla extends JPanel {
         JButton ajustar = Ui.boton("Ajustar");
         alejar.setToolTipText("Alejar el diagrama");
         acercar.setToolTipText("Acercar el diagrama");
-        ajustar.setToolTipText("Volver al tamanio que llena la ventana");
+        ajustar.setToolTipText("Volver al tamaño que llena la ventana");
 
         Runnable actualizar = () -> nivel.setText(diagrama.porcentaje() + " %");
         alejar.addActionListener(e -> { diagrama.zoom(-0.15); actualizar.run(); });
@@ -148,7 +148,7 @@ public class MapaPantalla extends JPanel {
 
         JPanel pie = Ui.panel(new BorderLayout(Tema.ESP_MD, 0));
         pie.add(Ui.suave("Las cajas rosadas son las pantallas del prototipo. "
-                + "Los modulos sin pantalla no se pueden pulsar."), BorderLayout.WEST);
+                + "Los módulos sin pantalla no se pueden pulsar."), BorderLayout.WEST);
         pie.add(zoom, BorderLayout.EAST);
 
         add(titulo, BorderLayout.NORTH);

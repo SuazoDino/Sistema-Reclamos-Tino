@@ -31,7 +31,7 @@ public class SeguridadPantalla extends Pantalla {
 
     public SeguridadPantalla() {
         super("Seguridad - Perfiles y Accesos",
-                "Que modulos puede abrir cada perfil de usuario del sistema.");
+                "Qué módulos puede abrir cada perfil de usuario del sistema.");
 
         Estado.perfiles().forEach(modeloPerfiles::addElement);
         perfiles.setFont(Tema.cuerpo());

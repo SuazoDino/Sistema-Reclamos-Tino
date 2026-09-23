@@ -15,7 +15,7 @@ import java.util.List;
 public class ClientesPantalla extends Pantalla {
 
     public ClientesPantalla() {
-        super("Catalogo Clientes",
+        super("Catálogo Clientes",
                 "Tipos de cliente y las consideraciones asignadas a cada uno.");
 
         var clientes = Datos.catalogo("clientes");
@@ -65,14 +65,14 @@ public class ClientesPantalla extends Pantalla {
         JButton habilitar = Ui.boton("Habilitar");
         habilitar.addActionListener(e -> {
             String v = listaExist.getSelectedValue();
-            if (v == null) { avisar("Seleccione una consideracion existente."); return; }
-            if (mHab.contains(v)) { avisar("\"" + v + "\" ya esta habilitada."); return; }
+            if (v == null) { avisar("Seleccione una consideración existente."); return; }
+            if (mHab.contains(v)) { avisar("\"" + v + "\" ya está habilitada."); return; }
             mHab.addElement(v);
         });
         JButton deshabilitar = Ui.boton("Deshabilitar");
         deshabilitar.addActionListener(e -> {
             String v = listaHab.getSelectedValue();
-            if (v == null) { avisar("Seleccione una consideracion habilitada."); return; }
+            if (v == null) { avisar("Seleccione una consideración habilitada."); return; }
             mHab.removeElement(v);
         });
 

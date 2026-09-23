@@ -32,7 +32,7 @@ public class AreaReportePantalla extends Pantalla {
     private final JLabel resumen = Ui.fuerte("");
 
     public AreaReportePantalla() {
-        super("Reporte de Atencion", "Avances y detalle de los reclamos del usuario del area.");
+        super("Reporte de Atención", "Avances y detalle de los reclamos del usuario del área.");
 
         tabla.anchos(110, 130, 190, 180, 100, 120, 90);
         fecha.setText(LocalDate.now().format(FECHA));
@@ -44,7 +44,7 @@ public class AreaReportePantalla extends Pantalla {
         JPanel datos = Ui.panel(new GridLayout(2, 4, Tema.ESP_MD, Tema.ESP_SM));
         datos.add(Ui.etiqueta("ID Empleado:"));
         datos.add(Ui.fila(empleado, generar));
-        datos.add(Ui.etiqueta("Area:"));
+        datos.add(Ui.etiqueta("Área:"));
         datos.add(area);
         datos.add(Ui.etiqueta("Tipo Empleado:"));
         datos.add(tipoEmpleado);
@@ -82,7 +82,7 @@ public class AreaReportePantalla extends Pantalla {
         for (Ticket t : suyos) {
             tabla.agregar(t.numero(), t.apertura().format(RELOJ), t.nombreCliente(),
                     t.problema(), t.prioridad().etiqueta(), t.estado().etiqueta(),
-                    t.vencido() ? "Si" : "No");
+                    t.vencido() ? "Sí" : "No");
         }
 
         long cerrados = suyos.stream().filter(t -> !t.estado().abierto()).count();

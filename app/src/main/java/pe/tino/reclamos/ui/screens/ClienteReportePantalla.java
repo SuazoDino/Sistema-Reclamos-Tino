@@ -33,7 +33,7 @@ public class ClienteReportePantalla extends Pantalla {
     private final JTextField apellidos = Ui.soloLectura();
     private final Tabla tabla = new Tabla(new String[]{
             "Nro Ticket", "Objeto", "Tipo Problema", "Instancia",
-            "Estado", "Limite de atencion", "Tiempo restante"});
+            "Estado", "Límite de atención", "Tiempo restante"});
     private List<Ticket> visibles = List.of();
 
     public ClienteReportePantalla() {
@@ -74,8 +74,8 @@ public class ClienteReportePantalla extends Pantalla {
         if (p == null) {
             nombres.setText("");
             apellidos.setText("");
-            JOptionPane.showMessageDialog(this, "Su usuario no es valido.",
-                    "Validacion de Usuario", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Su usuario no es válido.",
+                    "Validación de Usuario", JOptionPane.WARNING_MESSAGE);
             return;
         }
         nombres.setText(p.nombres());
@@ -114,10 +114,10 @@ public class ClienteReportePantalla extends Pantalla {
         dato(datos, "Instancia:", t.instancia().etiqueta()
                 + " (" + t.instancia().resuelve() + ")");
         dato(datos, "Estado:", t.estado().etiqueta());
-        dato(datos, "Area a cargo:", t.area());
-        dato(datos, "Limite de atencion:",
+        dato(datos, "Área a cargo:", t.area());
+        dato(datos, "Límite de atención:",
                 t.limiteAtencion() == null ? "-" : t.limiteAtencion().format(RELOJ));
-        dato(datos, "Limite de impugnacion:",
+        dato(datos, "Límite de impugnación:",
                 t.limiteImpugnacion() == null ? "-" : t.limiteImpugnacion().format(RELOJ));
         dato(datos, "Sustento:",
                 t.comprobante().isBlank() ? "Sin comprobante" : "Comprobante " + t.comprobante());
@@ -146,21 +146,21 @@ public class ClienteReportePantalla extends Pantalla {
     private static String mensaje(Ticket t) {
         if (t.estado() == Estado.RECHAZADO) {
             if (!t.instancia().admiteImpugnacion()) {
-                return "Su reclamo fue rechazado en la ultima instancia. "
+                return "Su reclamo fue rechazado en la última instancia. "
                         + "No admite nuevas impugnaciones.";
             }
             if (!puedeImpugnar(t)) {
-                return "Su reclamo fue rechazado y el plazo de impugnacion de "
-                        + t.instancia().diasImpugnacion() + " dias expiro.";
+                return "Su reclamo fue rechazado y el plazo de impugnación de "
+                        + t.instancia().diasImpugnacion() + " días expiró.";
             }
             long dias = ChronoUnit.DAYS.between(LocalDateTime.now(), t.limiteImpugnacion());
             return "Su reclamo ha sido rechazado. Le quedan " + Math.max(dias, 0)
-                    + " dias para impugnar ante " + t.instancia().siguiente().resuelve() + ".";
+                    + " días para impugnar ante " + t.instancia().siguiente().resuelve() + ".";
         }
         if (t.estado() == Estado.CERRADO) return "Su reclamo fue atendido y cerrado.";
         if (t.estado() == Estado.RESUELTO) return "Su reclamo fue resuelto y espera la entrega.";
-        if (t.vencido()) return "Su reclamo esta en atencion y excedio el plazo comprometido.";
-        return "Su reclamo esta en atencion dentro del plazo comprometido.";
+        if (t.vencido()) return "Su reclamo está en atención y excedió el plazo comprometido.";
+        return "Su reclamo está en atención dentro del plazo comprometido.";
     }
 
     private static boolean puedeImpugnar(Ticket t) {
@@ -177,18 +177,18 @@ public class ClienteReportePantalla extends Pantalla {
          .campo("Motivo:", Ui.scroll(motivo));
         f.setBorder(Ui.relleno(Tema.ESP_MD));
 
-        int r = JOptionPane.showConfirmDialog(this, f, "Enviar Impugnacion",
+        int r = JOptionPane.showConfirmDialog(this, f, "Enviar Impugnación",
                 JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
         if (r != JOptionPane.OK_OPTION) return;
-        if (motivo.getText().isBlank()) { avisar("Indique el motivo de la impugnacion."); return; }
+        if (motivo.getText().isBlank()) { avisar("Indique el motivo de la impugnación."); return; }
 
         if (!t.impugnar(motivo.getText().trim(), "Cliente")) {
-            advertir("El ticket ya no admite impugnacion.");
+            advertir("El ticket ya no admite impugnación.");
             return;
         }
         Tickets.notificar();
         buscar();
-        avisar("Impugnacion enviada. El ticket pasa a " + t.instancia().etiqueta() + " instancia.");
+        avisar("Impugnación enviada. El ticket pasa a " + t.instancia().etiqueta() + " instancia.");
     }
 
     private static void dato(JPanel destino, String etiqueta, String valor) {

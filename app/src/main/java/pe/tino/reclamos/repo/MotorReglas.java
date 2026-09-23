@@ -32,21 +32,21 @@ public final class MotorReglas {
 
     private static final List<Variable> VARIABLES = new ArrayList<>(List.of(
             new Variable("Tiempo_Garantia", TipoDato.ENTERO,
-                    "Catalogo de Politicas: plazo de la garantia del producto", "Dias"),
+                    "Catálogo de Políticas: plazo de la garantía del producto", "Días"),
             new Variable("Tiempo_Transcurrido", TipoDato.ENTERO,
-                    "Ticket: dias entre la compra y la apertura del ticket", "Dias"),
+                    "Ticket: días entre la compra y la apertura del ticket", "Días"),
             new Variable("Tiempo_Atencion", TipoDato.ENTERO,
-                    "Parametros de Atencion: plazo comprometido segun el SLA", "Horas"),
+                    "Parámetros de Atención: plazo comprometido según el SLA", "Horas"),
             new Variable("Reparable", TipoDato.LOGICO,
-                    "Inspeccion del area: si el bien admite reparacion", ""),
+                    "Inspección del área: si el bien admite reparación", ""),
             new Variable("Stock", TipoDato.ENTERO,
-                    "Almacen: unidades disponibles para intercambio", "Unidades"),
+                    "Almacén: unidades disponibles para intercambio", "Unidades"),
             new Variable("Tiene_Comprobante", TipoDato.LOGICO,
-                    "Ticket: si el cliente presento comprobante", ""),
+                    "Ticket: si el cliente presentó comprobante", ""),
             new Variable("Tipo_Cliente", TipoDato.TEXTO,
-                    "Catalogo de Cliente: categoria del cliente", ""),
+                    "Catálogo de Cliente: categoría del cliente", ""),
             new Variable("Instancia", TipoDato.ENTERO,
-                    "Ticket: numero de instancia en la que esta", ""),
+                    "Ticket: número de instancia en la que está", ""),
             new Variable("Precio", TipoDato.DECIMAL,
                     "Comprobante: monto pagado por el bien o servicio", "Soles")
     ));
@@ -67,8 +67,8 @@ public final class MotorReglas {
     /** Las soluciones con las que puede terminar la cadena de condiciones. */
     public static final List<String> ACCIONES = List.of(
             "Reembolso Total", "Reembolso Parcial", "Intercambio Equipo",
-            "Intercambio Componente", "Reparacion Equipo", "Reparacion Componente",
-            "Pago Adicional", "Correccion", "Rechazo");
+            "Intercambio Componente", "Reparación Equipo", "Reparación Componente",
+            "Pago Adicional", "Corrección", "Rechazo");
 
     /* ---------------- condiciones ---------------- */
 
@@ -91,13 +91,13 @@ public final class MotorReglas {
             new Condicion("CND1", "Tiene_Comprobante", "EQ", "true",
                     new Salida(TipoSalida.CONDICION, "CND2"),
                     new Salida(TipoSalida.ACCION, "Rechazo"),
-                    "Sin comprobante no hay garantia que invocar"),
+                    "Sin comprobante no hay garantía que invocar"),
             new Condicion("CND2", "Tiempo_Transcurrido", "LE", "Tiempo_Garantia",
                     new Salida(TipoSalida.CONDICION, "CND3"),
                     new Salida(TipoSalida.ACCION, "Pago Adicional"),
-                    "Dentro de garantia continua; fuera de garantia el cliente asume el costo"),
+                    "Dentro de garantía continua; fuera de garantía el cliente asume el costo"),
             new Condicion("CND3", "Reparable", "EQ", "true",
-                    new Salida(TipoSalida.ACCION, "Reparacion Equipo"),
+                    new Salida(TipoSalida.ACCION, "Reparación Equipo"),
                     new Salida(TipoSalida.CONDICION, "CND4"),
                     "Si el bien se puede reparar, se repara"),
             new Condicion("CND4", "Stock", "GT", "0",
@@ -148,7 +148,7 @@ public final class MotorReglas {
 
             Condicion c = condicion(actual);
             if (c == null) {
-                return new Resultado(null, traza, "La condicion " + actual + " no existe");
+                return new Resultado(null, traza, "La condición " + actual + " no existe");
             }
 
             String izquierda = valores.getOrDefault(c.variable(), "");
@@ -221,7 +221,7 @@ public final class MotorReglas {
         for (Condicion c : CONDICIONES) {
             if (variable(c.variable()) == null) {
                 fallas.add(c.codigo() + ": la variable " + c.variable()
-                        + " no esta en el catalogo de variables");
+                        + " no está en el catálogo de variables");
             }
             revisarSalida(c, c.siVerdadero(), "si es verdadero", fallas);
             revisarSalida(c, c.siFalso(), "si es falso", fallas);
@@ -235,8 +235,8 @@ public final class MotorReglas {
                     + ", que no existe");
         }
         if (s.tipo() == TipoSalida.ACCION && !ACCIONES.contains(s.destino())) {
-            fallas.add(c.codigo() + " " + rama + ": la accion " + s.destino()
-                    + " no esta en el catalogo de acciones");
+            fallas.add(c.codigo() + " " + rama + ": la acción " + s.destino()
+                    + " no está en el catálogo de acciones");
         }
     }
 

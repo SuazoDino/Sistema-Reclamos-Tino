@@ -50,7 +50,7 @@ public class ProductosPantalla extends Pantalla {
                         "Producto", false)));
 
         contenido().add(FormularioCatalogo.armar(
-                FormularioCatalogo.cabecera(busqueda, "Resultado de Busqueda", tabla, 260),
+                FormularioCatalogo.cabecera(busqueda, "Resultado de Búsqueda", tabla, 260),
                 FormularioCatalogo.agregar(pestanias), 210), BorderLayout.CENTER);
     }
 

@@ -22,7 +22,7 @@ public class PanelBusqueda extends Grupo {
      * @param columnas cuantos filtros van por fila; el prototipo usa una o dos
      */
     public PanelBusqueda(int columnas, Map<String, List<String>> definicion) {
-        super("Busqueda");
+        super("Búsqueda");
 
         JPanel rejilla = Ui.panel(new GridBagLayout());
         GridBagConstraints gc = new GridBagConstraints();

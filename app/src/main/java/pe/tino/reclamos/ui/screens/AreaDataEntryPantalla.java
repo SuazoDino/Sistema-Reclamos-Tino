@@ -33,11 +33,11 @@ public class AreaDataEntryPantalla extends Pantalla {
 
     private final Tabla tabla = new Tabla(new String[]{
             "Nro Ticket", "Apertura", "Cliente", "Objeto", "Problema",
-            "Prioridad", "Estado", "Limite", "Vencido"});
+            "Prioridad", "Estado", "Límite", "Vencido"});
     private List<Ticket> visibles = new ArrayList<>();
 
     public AreaDataEntryPantalla() {
-        super("Atender Ticket", "Tickets abiertos asignados al usuario del area.");
+        super("Atender Ticket", "Tickets abiertos asignados al usuario del área.");
 
         tabla.anchos(110, 120, 180, 200, 160, 90, 110, 120, 80);
         fecha.setText(LocalDate.now().format(FECHA));
@@ -70,7 +70,7 @@ public class AreaDataEntryPantalla extends Pantalla {
         JPanel p = Ui.panel(new GridLayout(2, 4, Tema.ESP_MD, Tema.ESP_SM));
         p.add(Ui.etiqueta("ID Empleado:"));
         p.add(idEmpleado);
-        p.add(Ui.etiqueta("Area:"));
+        p.add(Ui.etiqueta("Área:"));
         p.add(area);
         p.add(Ui.etiqueta("Tipo Empleado:"));
         p.add(tipoEmpleado);
@@ -112,7 +112,7 @@ public class AreaDataEntryPantalla extends Pantalla {
             tabla.agregar(t.numero(), t.apertura().format(RELOJ), t.nombreCliente(),
                     t.objeto(), t.problema(), t.prioridad().etiqueta(), t.estado().etiqueta(),
                     t.limiteAtencion() == null ? "-" : t.limiteAtencion().format(RELOJ),
-                    t.vencido() ? "Si" : "No");
+                    t.vencido() ? "Sí" : "No");
         }
     }
 
@@ -140,12 +140,12 @@ public class AreaDataEntryPantalla extends Pantalla {
         if (t == null) { avisar("Seleccione un ticket de la cola."); return; }
         if (idEmpleado.getText().isBlank()) { avisar("Primero ingrese su ID de empleado."); return; }
         if (t.estado() == Estado.REGISTRADO) {
-            avisar("El ticket todavia no esta asignado. Use Asignarme primero.");
+            avisar("El ticket todavía no está asignado. Use Asignarme primero.");
             return;
         }
         if (Prototipo.accionesDe(t.protocolo()).isEmpty()) {
             advertir("El protocolo " + t.protocolo() + " no tiene acciones definidas "
-                    + "en el Catalogo de Protocolos.");
+                    + "en el Catálogo de Protocolos.");
             return;
         }
 
@@ -157,7 +157,7 @@ public class AreaDataEntryPantalla extends Pantalla {
         dato(datos, "Tipo Problema:", t.tipoProblema());
         dato(datos, "Problema:", t.problema());
         dato(datos, "Protocolo:", t.protocolo());
-        dato(datos, "Limite:", t.limiteAtencion() == null ? "-"
+        dato(datos, "Límite:", t.limiteAtencion() == null ? "-"
                 : t.limiteAtencion().format(RELOJ));
 
         Grupo grupoDatos = new Grupo("Datos del Ticket");
@@ -176,7 +176,7 @@ public class AreaDataEntryPantalla extends Pantalla {
 
         Grupo grupoProtocolo = new Grupo("Acciones del protocolo " + t.protocolo());
         grupoProtocolo.add(pasos, BorderLayout.NORTH);
-        grupoProtocolo.add(Ui.suave("Las acciones criticas no pueden omitirse para "
+        grupoProtocolo.add(Ui.suave("Las acciones críticas no pueden omitirse para "
                 + "dar el ticket por resuelto."), BorderLayout.SOUTH);
 
         JPanel cuerpo = Ui.panel(new BorderLayout(0, Tema.ESP_MD));
@@ -194,8 +194,8 @@ public class AreaDataEntryPantalla extends Pantalla {
 
     private void resolver(Ticket t, List<String[]> acciones, List<JCheckBox> casillas) {
         for (int i = 0; i < acciones.size(); i++) {
-            if ("Critico".equalsIgnoreCase(acciones.get(i)[3]) && !casillas.get(i).isSelected()) {
-                advertir("Falta la accion critica \"" + acciones.get(i)[0]
+            if ("Crítico".equalsIgnoreCase(acciones.get(i)[3]) && !casillas.get(i).isSelected()) {
+                advertir("Falta la acción crítica \"" + acciones.get(i)[0]
                         + "\". No se puede resolver el ticket.");
                 return;
             }
@@ -224,7 +224,7 @@ public class AreaDataEntryPantalla extends Pantalla {
         Tickets.notificar();
         refrescar();
         avisar("Ticket " + t.numero() + " rechazado. El cliente tiene "
-                + t.instancia().diasImpugnacion() + " dias para impugnar.");
+                + t.instancia().diasImpugnacion() + " días para impugnar.");
     }
 
     private static void dato(JPanel destino, String etiqueta, String valor) {

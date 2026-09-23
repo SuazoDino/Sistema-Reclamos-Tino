@@ -25,15 +25,15 @@ import java.util.Map;
 public class ReglasPantalla extends Pantalla {
 
     private final Tabla condiciones = new Tabla(new String[]{
-            "Condicion", "Variable", "Operador", "Valor", "Si es verdadero", "Si es falso",
-            "Descripcion"});
+            "Condición", "Variable", "Operador", "Valor", "Si es verdadero", "Si es falso",
+            "Descripción"});
     private final Map<String, JTextField> campos = new LinkedHashMap<>();
-    private final Tabla traza = new Tabla(new String[]{"Paso", "Comparacion", "Resultado", "Salida"});
+    private final Tabla traza = new Tabla(new String[]{"Paso", "Comparación", "Resultado", "Salida"});
     private final JLabel resultado = Ui.fuerte("");
 
     public ReglasPantalla() {
-        super("Catalogo de reglas",
-                "Condiciones encadenadas que deciden la solucion que se aplica a un reclamo.");
+        super("Catálogo de reglas",
+                "Condiciones encadenadas que deciden la solución que se aplica a un reclamo.");
 
         JTabbedPane pestanias = new JTabbedPane();
         pestanias.setFont(Tema.cuerpo());
@@ -57,7 +57,7 @@ public class ReglasPantalla extends Pantalla {
         JButton modificar = Ui.boton("Modificar");
         modificar.addActionListener(e -> {
             int i = condiciones.filaModelo();
-            if (i < 0) { avisar("Seleccione la condicion que desea modificar."); return; }
+            if (i < 0) { avisar("Seleccione la condición que desea modificar."); return; }
             editar(MotorReglas.condiciones().get(i));
         });
         JButton verificar = Ui.boton("Verificar cadena");
@@ -73,8 +73,8 @@ public class ReglasPantalla extends Pantalla {
 
         JPanel nota = Ui.panel(new BorderLayout());
         nota.setBorder(Ui.relleno(Tema.ESP_SM));
-        nota.add(Ui.suave("Cada salida dice si va a otra condicion (Ir a) o si termina en una "
-                + "solucion (Aplicar). Antes las dos cosas compartian la misma columna."),
+        nota.add(Ui.suave("Cada salida dice si va a otra condición (Ir a) o si termina en una "
+                + "solución (Aplicar). Antes las dos cosas compartian la misma columna."),
                 BorderLayout.WEST);
         g.add(nota, BorderLayout.SOUTH);
 
@@ -126,25 +126,25 @@ public class ReglasPantalla extends Pantalla {
         }
 
         Formulario f = new Formulario();
-        f.campo("Condicion:", codigo)
+        f.campo("Condición:", codigo)
          .campo("Variable:", variable)
          .campo("Operador:", operador)
-         .campo("Valor:", valor, "Un numero, true/false, o el nombre de otra variable")
+         .campo("Valor:", valor, "Un número, true/false, o el nombre de otra variable")
          .grupo("Si es verdadero")
          .campo("Salida:", tipoV)
          .campo("Destino:", destinoV)
          .grupo("Si es falso")
          .campo("Salida:", tipoF)
          .campo("Destino:", destinoF)
-         .grupo("Documentacion")
-         .campo("Descripcion:", descripcion);
+         .grupo("Documentación")
+         .campo("Descripción:", descripcion);
         f.setBorder(Ui.relleno(Tema.ESP_MD));
 
         int r = JOptionPane.showConfirmDialog(this, Ui.scrollVertical(f),
-                "Agregar/Modificar Condicion", JOptionPane.OK_CANCEL_OPTION,
+                "Agregar/Modificar Condición", JOptionPane.OK_CANCEL_OPTION,
                 JOptionPane.PLAIN_MESSAGE);
         if (r != JOptionPane.OK_OPTION) return;
-        if (codigo.getText().isBlank()) { avisar("Indique el codigo de la condicion."); return; }
+        if (codigo.getText().isBlank()) { avisar("Indique el código de la condición."); return; }
 
         Condicion nueva = new Condicion(codigo.getText().trim(),
                 String.valueOf(variable.getSelectedItem()),
@@ -173,8 +173,8 @@ public class ReglasPantalla extends Pantalla {
     private void verificar() {
         List<String> fallas = MotorReglas.problemas();
         if (fallas.isEmpty()) {
-            avisar("La cadena esta bien armada: todas las salidas existen y "
-                    + "todas las variables estan en el catalogo.");
+            avisar("La cadena está bien armada: todas las salidas existen y "
+                    + "todas las variables están en el catálogo.");
             return;
         }
         advertir("La cadena tiene problemas:\n\n" + String.join("\n", fallas));
@@ -183,7 +183,7 @@ public class ReglasPantalla extends Pantalla {
     /* ---------------- variables y acciones ---------------- */
 
     private JComponent panelVariables() {
-        Tabla t = new Tabla(new String[]{"Variable", "Tipo", "De donde sale", "Unidad"});
+        Tabla t = new Tabla(new String[]{"Variable", "Tipo", "De dónde sale", "Unidad"});
         MotorReglas.variables().forEach(v ->
                 t.agregar(v.nombre(), v.tipo().name(), v.origen(), v.unidad()));
         t.anchos(180, 110, 420, 110);
@@ -193,8 +193,8 @@ public class ReglasPantalla extends Pantalla {
 
         JPanel nota = Ui.panel(new BorderLayout());
         nota.setBorder(Ui.relleno(Tema.ESP_SM));
-        nota.add(Ui.suave("Una condicion solo puede comparar variables de esta lista. "
-                + "Antes el parametro era texto libre y no coincidia con nada."),
+        nota.add(Ui.suave("Una condición solo puede comparar variables de esta lista. "
+                + "Antes el parámetro era texto libre y no coincidía con nada."),
                 BorderLayout.WEST);
         g.add(nota, BorderLayout.SOUTH);
 
@@ -243,7 +243,7 @@ public class ReglasPantalla extends Pantalla {
         entradas.setPreferredSize(Ui.dim(430, 100));
 
         traza.anchos(90, 330, 110, 220);
-        Grupo salida = Grupo.ajustado("Como se llego a la solucion");
+        Grupo salida = Grupo.ajustado("Cómo se llegó a la solución");
         salida.add(traza.enScroll(), BorderLayout.CENTER);
 
         JPanel cabecera = Ui.panel(new BorderLayout());
@@ -268,7 +268,7 @@ public class ReglasPantalla extends Pantalla {
                 p.resultado() ? "Verdadero" : "Falso", p.salida()));
 
         resultado.setText(r.valido()
-                ? "Solucion que aplica el sistema: " + r.accion()
+                ? "Solución que aplica el sistema: " + r.accion()
                 : "La cadena no pudo resolverse: " + r.error());
     }
 
@@ -278,10 +278,10 @@ public class ReglasPantalla extends Pantalla {
         JPanel fila = Ui.panel(new GridLayout(2, 2, Tema.ESP_MD, Tema.ESP_SM));
         fila.add(Ui.etiqueta("Tipo de Reclamo:"));
         fila.add(Ui.combo(Prototipo.TIPO_PROBLEMA));
-        fila.add(Ui.etiqueta("Condicion inicial:"));
+        fila.add(Ui.etiqueta("Condición inicial:"));
         fila.add(Ui.combo(MotorReglas.codigos()));
 
-        Tabla asignadas = new Tabla(new String[]{"Tipo de Reclamo", "Condicion inicial"});
+        Tabla asignadas = new Tabla(new String[]{"Tipo de Reclamo", "Condición inicial"});
         asignadas.anchos(280, 280);
         List<String[]> asignaciones = new ArrayList<>(List.of(
                 new String[]{"Funcionamiento", "CND1"},
@@ -290,7 +290,7 @@ public class ReglasPantalla extends Pantalla {
         asignaciones.forEach(a -> asignadas.agregar((Object[]) a));
 
         JButton asignar = Ui.boton("Asignar");
-        asignar.addActionListener(e -> avisar("La cadena asignada arranca en la condicion elegida."));
+        asignar.addActionListener(e -> avisar("La cadena asignada arranca en la condición elegida."));
 
         JPanel pie = Ui.panel(new FlowLayout(FlowLayout.CENTER, 0, Tema.ESP_SM));
         pie.add(asignar);

@@ -25,22 +25,22 @@ public final class Catalogos {
      */
     public static List<String[]> servicios() {
         return new ArrayList<>(List.of(
-                new String[]{"Logistico", "Delivery", "Entrega", "Habilitado"},
-                new String[]{"Logistico", "Recojo en tienda", "Entrega", "Habilitado"},
-                new String[]{"Comercial", "Cobro", "Transaccion", "Habilitado"},
-                new String[]{"Comercial", "Facturacion", "Transaccion", "Habilitado"},
-                new String[]{"Tecnico", "Instalacion", "Visita", "Habilitado"},
-                new String[]{"Tecnico", "Mantenimiento", "Visita", "Habilitado"},
-                new String[]{"Tecnico", "Limpieza", "Visita", "Habilitado"},
-                new String[]{"Atencion", "Soporte telefonico", "Llamada", "Habilitado"},
-                new String[]{"Atencion", "Asesoria en tienda", "Visita", "Deshabilitado"}
+                new String[]{"Logístico", "Delivery", "Entrega", "Habilitado"},
+                new String[]{"Logístico", "Recojo en tienda", "Entrega", "Habilitado"},
+                new String[]{"Comercial", "Cobro", "Transacción", "Habilitado"},
+                new String[]{"Comercial", "Facturación", "Transacción", "Habilitado"},
+                new String[]{"Técnico", "Instalación", "Visita", "Habilitado"},
+                new String[]{"Técnico", "Mantenimiento", "Visita", "Habilitado"},
+                new String[]{"Técnico", "Limpieza", "Visita", "Habilitado"},
+                new String[]{"Atención", "Soporte telefónico", "Llamada", "Habilitado"},
+                new String[]{"Atención", "Asesoría en tienda", "Visita", "Deshabilitado"}
         ));
     }
 
     public static final List<String> TIPOS_SERVICIO =
-            List.of("Logistico", "Comercial", "Tecnico", "Atencion");
+            List.of("Logístico", "Comercial", "Técnico", "Atención");
     public static final List<String> UNIDADES_ATENCION =
-            List.of("Entrega", "Transaccion", "Visita", "Llamada");
+            List.of("Entrega", "Transacción", "Visita", "Llamada");
 
     /* ---------------- catalogo de canales ---------------- */
 
@@ -52,8 +52,8 @@ public final class Catalogos {
      */
     public static List<String[]> canales() {
         return new ArrayList<>(List.of(
-                new String[]{"Presencial", "Lunes a sabado 9:00 a 18:00", "Si", "Habilitado"},
-                new String[]{"Telefonico", "Lunes a viernes 8:00 a 20:00", "No", "Habilitado"},
+                new String[]{"Presencial", "Lunes a sábado 9:00 a 18:00", "Sí", "Habilitado"},
+                new String[]{"Telefónico", "Lunes a viernes 8:00 a 20:00", "No", "Habilitado"},
                 new String[]{"Internet", "24 horas", "No", "Habilitado"},
                 new String[]{"Web", "24 horas", "No", "Habilitado"}
         ));
@@ -72,7 +72,7 @@ public final class Catalogos {
         for (Instancia i : Instancia.values()) {
             filas.add(new String[]{i.etiqueta(), i.resuelve(),
                     String.valueOf(i.diasImpugnacion()),
-                    i.admiteImpugnacion() ? "Si" : "No"});
+                    i.admiteImpugnacion() ? "Sí" : "No"});
         }
         return filas;
     }
@@ -89,17 +89,17 @@ public final class Catalogos {
     public static List<String[]> tiemposAtencion() {
         return new ArrayList<>(List.of(
                 new String[]{"SuperVip", "Alta", "4", "Horas"},
-                new String[]{"SuperVip", "Media", "1", "Dias"},
-                new String[]{"SuperVip", "Baja", "3", "Dias"},
+                new String[]{"SuperVip", "Media", "1", "Días"},
+                new String[]{"SuperVip", "Baja", "3", "Días"},
                 new String[]{"Vip", "Alta", "8", "Horas"},
-                new String[]{"Vip", "Media", "2", "Dias"},
-                new String[]{"Vip", "Baja", "5", "Dias"},
-                new String[]{"Ordinario", "Alta", "1", "Dias"},
-                new String[]{"Ordinario", "Media", "3", "Dias"},
-                new String[]{"Ordinario", "Baja", "7", "Dias"},
-                new String[]{"Nuevo", "Alta", "1", "Dias"},
-                new String[]{"Nuevo", "Media", "4", "Dias"},
-                new String[]{"Nuevo", "Baja", "10", "Dias"}
+                new String[]{"Vip", "Media", "2", "Días"},
+                new String[]{"Vip", "Baja", "5", "Días"},
+                new String[]{"Ordinario", "Alta", "1", "Días"},
+                new String[]{"Ordinario", "Media", "3", "Días"},
+                new String[]{"Ordinario", "Baja", "7", "Días"},
+                new String[]{"Nuevo", "Alta", "1", "Días"},
+                new String[]{"Nuevo", "Media", "4", "Días"},
+                new String[]{"Nuevo", "Baja", "10", "Días"}
         ));
     }
 
@@ -110,7 +110,7 @@ public final class Catalogos {
                 long valor = Long.parseLong(f[2]);
                 return switch (f[3]) {
                     case "Horas" -> valor;
-                    case "Dias" -> valor * 24;
+                    case "Días" -> valor * 24;
                     case "Semanas" -> valor * 24 * 7;
                     default -> valor;
                 };
@@ -141,10 +141,10 @@ public final class Catalogos {
                 new String[]{"Entrega", "Vip", "Media"},
                 new String[]{"Entrega", "Ordinario", "Media"},
                 new String[]{"Entrega", "Nuevo", "Baja"},
-                new String[]{"Atencion", "SuperVip", "Media"},
-                new String[]{"Atencion", "Vip", "Baja"},
-                new String[]{"Atencion", "Ordinario", "Baja"},
-                new String[]{"Atencion", "Nuevo", "Baja"}
+                new String[]{"Atención", "SuperVip", "Media"},
+                new String[]{"Atención", "Vip", "Baja"},
+                new String[]{"Atención", "Ordinario", "Baja"},
+                new String[]{"Atención", "Nuevo", "Baja"}
         ));
     }
 
@@ -186,13 +186,13 @@ public final class Catalogos {
      */
     public static List<String[]> marcas() {
         return new ArrayList<>(List.of(
-                new String[]{"Telefono Movil", "Samsung", "Galaxy A54"},
-                new String[]{"Telefono Movil", "Huawei", "Nova 11"},
-                new String[]{"Telefono Movil", "Motorola", "Moto G84"},
-                new String[]{"Telefono Movil", "Azumi", "Nitro 5"},
+                new String[]{"Teléfono Móvil", "Samsung", "Galaxy A54"},
+                new String[]{"Teléfono Móvil", "Huawei", "Nova 11"},
+                new String[]{"Teléfono Móvil", "Motorola", "Moto G84"},
+                new String[]{"Teléfono Móvil", "Azumi", "Nitro 5"},
                 new String[]{"Computadores Notebook", "HP", "Omen 16"},
                 new String[]{"Computadores Notebook", "Lenovo", "IdeaPad 3"},
-                new String[]{"Monitores De Pantalla Tactil (Touch)", "Samsung", "T27"},
+                new String[]{"Monitores De Pantalla Táctil (Touch)", "Samsung", "T27"},
                 new String[]{"Impresoras Laser", "HP", "LaserJet M111"}
         ));
     }

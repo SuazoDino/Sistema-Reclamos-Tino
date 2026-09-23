@@ -22,7 +22,7 @@ public class ReclamosEventosPantalla extends Pantalla {
     private final Tabla eventos = new Tabla(new String[]{"Evento", "Estado"});
 
     public ReclamosEventosPantalla() {
-        super("Catalogo de Reclamos y Eventos General",
+        super("Catálogo de Reclamos y Eventos General",
                 "Tipos de reclamo y eventos del protocolo, con su estado.");
 
         JTabbedPane pestanias = new JTabbedPane();
@@ -59,7 +59,7 @@ public class ReclamosEventosPantalla extends Pantalla {
 
         JPanel arriba = Ui.panel(new BorderLayout(Tema.ESP_MD, 0));
         arriba.add(busqueda, BorderLayout.WEST);
-        arriba.add(resultados("Resultados de Busqueda", reclamos), BorderLayout.CENTER);
+        arriba.add(resultados("Resultados de Búsqueda", reclamos), BorderLayout.CENTER);
         arriba.setPreferredSize(Ui.dim(100, 200));
 
         JPanel p = Ui.panel(new BorderLayout(0, Tema.ESP_MD));
@@ -92,7 +92,7 @@ public class ReclamosEventosPantalla extends Pantalla {
 
         JPanel arriba = Ui.panel(new BorderLayout(Tema.ESP_MD, 0));
         arriba.add(busqueda, BorderLayout.WEST);
-        arriba.add(resultados("Resultados de Busqueda", eventos), BorderLayout.CENTER);
+        arriba.add(resultados("Resultados de Búsqueda", eventos), BorderLayout.CENTER);
         arriba.setPreferredSize(Ui.dim(100, 200));
 
         JPanel p = Ui.panel(new BorderLayout(0, Tema.ESP_MD));

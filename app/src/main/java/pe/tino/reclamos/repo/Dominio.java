@@ -19,13 +19,13 @@ public final class Dominio {
      * antes se llamaba "Pendiente", "En cola" o "Aceptado" en cada pantalla.
      */
     public enum Estado {
-        REGISTRADO("Registrado", "El ticket entro al sistema y espera asignacion"),
-        ASIGNADO("Asignado", "Tiene area y especialista responsables"),
-        EN_ATENCION("En atencion", "El especialista esta ejecutando el protocolo"),
-        RESUELTO("Resuelto", "El protocolo termino con una solucion"),
-        RECHAZADO("Rechazado", "No procede; admite impugnacion dentro del plazo"),
-        IMPUGNADO("Impugnado", "El cliente impugno; pasa a la siguiente instancia"),
-        CERRADO("Cerrado", "Entregado y conforme; no admite mas movimientos");
+        REGISTRADO("Registrado", "El ticket entró al sistema y espera asignación"),
+        ASIGNADO("Asignado", "Tiene área y especialista responsables"),
+        EN_ATENCION("En atención", "El especialista está ejecutando el protocolo"),
+        RESUELTO("Resuelto", "El protocolo terminó con una solución"),
+        RECHAZADO("Rechazado", "No procede; admite impugnación dentro del plazo"),
+        IMPUGNADO("Impugnado", "El cliente impugnó; pasa a la siguiente instancia"),
+        CERRADO("Cerrado", "Entregado y conforme; no admite más movimientos");
 
         private final String etiqueta;
         private final String descripcion;
@@ -75,7 +75,7 @@ public final class Dominio {
 
     /** Criticidad de una accion del protocolo: si puede omitirse o no. */
     public enum CriticidadAccion {
-        CRITICA("Critica"), NO_CRITICA("No critica");
+        CRITICA("Crítica"), NO_CRITICA("No crítica");
 
         private final String etiqueta;
         CriticidadAccion(String etiqueta) { this.etiqueta = etiqueta; }
@@ -91,8 +91,8 @@ public final class Dominio {
      * pantalla sin tener origen.
      */
     public enum Instancia {
-        PRIMERA("Primera", 15, "Area responsable"),
-        SEGUNDA("Segunda", 10, "Area especializada"),
+        PRIMERA("Primera", 15, "Área responsable"),
+        SEGUNDA("Segunda", 10, "Área especializada"),
         TERCERA("Tercera", 0, "Gerencia de PostVenta");
 
         private final String etiqueta;
@@ -137,7 +137,7 @@ public final class Dominio {
     /* ---------------- canal ---------------- */
 
     public enum Canal {
-        PRESENCIAL("Presencial"), TELEFONICO("Telefonico"),
+        PRESENCIAL("Presencial"), TELEFONICO("Telefónico"),
         INTERNET("Internet"), WEB("Web");
 
         private final String etiqueta;
@@ -147,5 +147,5 @@ public final class Dominio {
     }
 
     public static final List<String> UNIDADES_TIEMPO =
-            List.of("Minutos", "Horas", "Dias", "Semanas", "Meses");
+            List.of("Minutos", "Horas", "Días", "Semanas", "Meses");
 }

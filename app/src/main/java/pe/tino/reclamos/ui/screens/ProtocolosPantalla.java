@@ -28,7 +28,7 @@ public class ProtocolosPantalla extends Pantalla {
 
     private final Tabla resultados = new Tabla(new String[]{"Producto", "Problema"});
     private final Tabla acciones = new Tabla(new String[]{
-            "Accion", "Tiempo Maximo(s)", "Tipo Operario", "Criticidad"});
+            "Acción", "Tiempo Máximo(s)", "Tipo Operario", "Criticidad"});
 
     private final JTextField accion = Ui.texto();
     private final JTextField tiempoMaximo = Ui.texto();
@@ -38,7 +38,7 @@ public class ProtocolosPantalla extends Pantalla {
     private List<String[]> filas = Prototipo.accionesDe("PR-FUNC-01");
 
     public ProtocolosPantalla() {
-        super("Catalogo de Protocolos",
+        super("Catálogo de Protocolos",
                 "Acciones que componen el protocolo de cada evento.");
 
         resultados.anchos(300, 380);
@@ -58,7 +58,7 @@ public class ProtocolosPantalla extends Pantalla {
 
     /** Grupos "Busqueda" y "Resultados de Busqueda", con el evento debajo. */
     private JComponent cabecera() {
-        Grupo busqueda = new Grupo("Busqueda", new GridLayout(2, 4, Tema.ESP_MD, Tema.ESP_XS));
+        Grupo busqueda = new Grupo("Búsqueda", new GridLayout(2, 4, Tema.ESP_MD, Tema.ESP_XS));
         busqueda.add(Ui.etiqueta("Tipo Problema:"));
         busqueda.add(tipoProblema);
         busqueda.add(Ui.etiqueta("Criticidad"));
@@ -89,7 +89,7 @@ public class ProtocolosPantalla extends Pantalla {
         filaEvento.add(Ui.filaDerecha(verProtocolo), BorderLayout.EAST);
         filaEvento.setBorder(Ui.relleno(Tema.ESP_SM, 0, 0, 0));
 
-        Grupo grupoResultados = new Grupo("Resultados de Busqueda");
+        Grupo grupoResultados = new Grupo("Resultados de Búsqueda");
         grupoResultados.add(resultados.enScroll(), BorderLayout.CENTER);
         grupoResultados.add(filaEvento, BorderLayout.SOUTH);
 
@@ -104,13 +104,13 @@ public class ProtocolosPantalla extends Pantalla {
         Grupo g = new Grupo("Acciones del protocolo");
 
         JPanel campos = Ui.panel(new GridLayout(2, 4, Tema.ESP_MD, Tema.ESP_SM));
-        campos.add(Ui.etiqueta("Accion:"));
+        campos.add(Ui.etiqueta("Acción:"));
         campos.add(accion);
         campos.add(Ui.etiqueta("Tipo Operario:"));
         campos.add(tipoOperario);
-        campos.add(Ui.etiqueta("Tiempo Maximo:"));
+        campos.add(Ui.etiqueta("Tiempo Máximo:"));
         campos.add(tiempoMaximo);
-        campos.add(Ui.etiqueta("Criticidad de Accion:"));
+        campos.add(Ui.etiqueta("Criticidad de Acción:"));
         campos.add(criticidadAccion);
         campos.setBorder(Ui.relleno(0, 0, Tema.ESP_MD, 0));
 
@@ -139,7 +139,7 @@ public class ProtocolosPantalla extends Pantalla {
     }
 
     private void agregar() {
-        if (accion.getText().isBlank()) { avisar("Indique la accion."); return; }
+        if (accion.getText().isBlank()) { avisar("Indique la acción."); return; }
         filas.add(new String[]{accion.getText().trim(), tiempoMaximo.getText().trim(),
                 String.valueOf(tipoOperario.getSelectedItem()),
                 String.valueOf(criticidadAccion.getSelectedItem())});
@@ -149,7 +149,7 @@ public class ProtocolosPantalla extends Pantalla {
 
     private void modificar() {
         int i = acciones.filaModelo();
-        if (i < 0) { avisar("Seleccione la accion que desea modificar."); return; }
+        if (i < 0) { avisar("Seleccione la acción que desea modificar."); return; }
         filas.set(i, new String[]{accion.getText().trim(), tiempoMaximo.getText().trim(),
                 String.valueOf(tipoOperario.getSelectedItem()),
                 String.valueOf(criticidadAccion.getSelectedItem())});
@@ -158,8 +158,8 @@ public class ProtocolosPantalla extends Pantalla {
 
     private void eliminar() {
         int i = acciones.filaModelo();
-        if (i < 0) { avisar("Seleccione la accion que desea eliminar."); return; }
-        if (!confirmar("Eliminar la accion seleccionada?")) return;
+        if (i < 0) { avisar("Seleccione la acción que desea eliminar."); return; }
+        if (!confirmar("Eliminar la acción seleccionada?")) return;
         filas.remove(i);
         refrescar();
         limpiar();
