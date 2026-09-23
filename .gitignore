@@ -1,0 +1,24 @@
+# Maven
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+
+# Eclipse / VS Code
+.classpath
+.project
+.settings/
+.vscode/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Temporales de Office
+~$*.xls*
+~$*.doc*
