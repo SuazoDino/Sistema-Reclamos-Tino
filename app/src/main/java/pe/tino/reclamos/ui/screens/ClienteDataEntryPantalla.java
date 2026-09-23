@@ -1,61 +1,92 @@
 package pe.tino.reclamos.ui.screens;
 
-import pe.tino.reclamos.repo.Prototipo;
+import pe.tino.reclamos.model.Ticket;
+import pe.tino.reclamos.repo.*;
+import pe.tino.reclamos.repo.Dominio.*;
 import pe.tino.reclamos.repo.Prototipo.Persona;
 import pe.tino.reclamos.ui.components.*;
 import pe.tino.reclamos.ui.theme.Tema;
 
 import javax.swing.*;
 import java.awt.*;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Formulario Reclamo (Cliente - Data Entry), como en las capturas: primero
- * los datos personales con el boton Validar, despues las compras del cliente
- * y los reclamos que arma sobre los productos comprados.
+ * Formulario Reclamo (Cliente - Data Entry). Registrar un reclamo abre un
+ * ticket, que es lo que el sistema numera y controla.
+ *
+ * El comprobante de compra va aparte, en su propio grupo y como dato
+ * opcional, porque es el sustento de la garantia y no el ticket: hay
+ * reclamos por atencion o por servicio donde no hay comprobante, y una misma
+ * compra puede originar varios tickets.
  */
 public class ClienteDataEntryPantalla extends Pantalla {
 
+    private static final DateTimeFormatter RELOJ = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
+    /* datos del cliente */
     private final JTextField documento = Ui.texto(16);
     private final JTextField nombre = Ui.soloLectura();
     private final JTextField apellido = Ui.soloLectura();
     private final JTextField correo = Ui.soloLectura();
-    private final JTextField direccion = Ui.soloLectura();
     private final JTextField telefono = Ui.soloLectura();
+    private final JTextField tipoCliente = Ui.soloLectura();
 
-    private final Tabla compras = new Tabla(new String[]{"Cod. Compra", "Fecha", "Monto"});
-    private final JComboBox<String> producto = Ui.combo(Prototipo.PRODUCTOS_COMPRA);
+    /* datos del reclamo */
+    private final JComboBox<Canal> canal = Ui.combo(List.of(Canal.values()));
+    private final JComboBox<String> local;
+    private final JRadioButton esProducto = new JRadioButton("Producto", true);
+    private final JRadioButton esServicio = new JRadioButton("Servicio");
+    private final JComboBox<String> objeto = new JComboBox<>();
     private final JComboBox<String> tipoProblema = Ui.combo(Prototipo.tiposDeProblema());
     private final JComboBox<String> problema = new JComboBox<>();
-    private final Tabla reclamos = new Tabla(new String[]{"Producto", "Tipo Problema", "Problema"});
 
-    private final JPanel paso2 = Ui.panel(new BorderLayout(0, Tema.ESP_MD));
-    private final List<String[]> lineas = new ArrayList<>();
+    /* sustento */
+    private final JCheckBox tieneComprobante = new JCheckBox("El cliente presenta comprobante de compra");
+    private final JTextField comprobante = Ui.texto(14);
+    private final JTextField fechaComprobante = Ui.texto(12);
+
+    private final JPanel reclamo = Ui.panel(new BorderLayout(0, Tema.ESP_MD));
     private Persona persona;
 
     public ClienteDataEntryPantalla() {
-        super("Formulario Reclamo", "Registro del reclamo del cliente sobre una compra.");
+        super("Formulario Reclamo",
+                "Registrar un reclamo abre un ticket. El comprobante es el sustento, no el ticket.");
+
+        local = Ui.combo(Datos.catalogo("locales").habilitados());
+
+        ButtonGroup grupo = new ButtonGroup();
+        grupo.add(esProducto);
+        grupo.add(esServicio);
+        esProducto.setOpaque(false);
+        esServicio.setOpaque(false);
+        esProducto.setFont(Tema.cuerpo());
+        esServicio.setFont(Tema.cuerpo());
+        esProducto.addActionListener(e -> recargarObjetos());
+        esServicio.addActionListener(e -> recargarObjetos());
 
         tipoProblema.addActionListener(e -> recargarProblemas());
+        recargarObjetos();
         recargarProblemas();
 
-        compras.anchos(160, 180, 160);
-        reclamos.anchos(200, 200, 260);
+        tieneComprobante.setOpaque(false);
+        tieneComprobante.setFont(Tema.cuerpo());
+        tieneComprobante.addActionListener(e -> habilitarComprobante());
+        habilitarComprobante();
 
-        armarPaso2();
-        paso2.setVisible(false);
+        armarReclamo();
+        reclamo.setVisible(false);
 
         JPanel raiz = Ui.panel(new BorderLayout(0, Tema.ESP_MD));
         raiz.add(datosPersonales(), BorderLayout.NORTH);
-        raiz.add(paso2, BorderLayout.CENTER);
+        raiz.add(reclamo, BorderLayout.CENTER);
 
-        Grupo registrar = new Grupo("Registrar Reclamo");
-        registrar.add(raiz, BorderLayout.CENTER);
-        contenido().add(registrar, BorderLayout.CENTER);
+        contenido().add(Ui.scrollVertical(raiz), BorderLayout.CENTER);
     }
 
-    /* ---------------- paso 1: datos personales ---------------- */
+    /* ---------------- datos del cliente ---------------- */
 
     private JComponent datosPersonales() {
         JButton validar = Ui.boton("Validar");
@@ -64,35 +95,23 @@ public class ClienteDataEntryPantalla extends Pantalla {
 
         Formulario f = new Formulario();
         f.campo("DNI/RUC:", Ui.fila(documento, validar))
-         .campo("NOMBRE:", nombre)
-         .campo("APELLIDO:", apellido)
-         .campo("Correo Electronico:", correo)
-         .campo("Direccion:", direccion)
-         .campo("Telefono:", telefono);
+         .campo("Nombre:", nombre)
+         .campo("Apellido:", apellido)
+         .campo("Correo electronico:", correo)
+         .campo("Telefono:", telefono)
+         .campo("Tipo de cliente:", tipoCliente);
 
-        JButton aceptar = Ui.boton("Aceptar");
-        aceptar.addActionListener(e -> aceptar());
-        JButton cancelar = Ui.boton("Cancelar");
-        cancelar.addActionListener(e -> limpiar());
-
-        JPanel pie = Ui.panel(new FlowLayout(FlowLayout.CENTER, Tema.ESP_LG * 3, Tema.ESP_SM));
-        pie.add(aceptar);
-        pie.add(cancelar);
-
-        Grupo g = new Grupo("Datos Personales");
+        Grupo g = new Grupo("Datos del Cliente");
         g.add(f, BorderLayout.CENTER);
-        g.add(pie, BorderLayout.SOUTH);
         return g;
     }
 
     private void validar() {
         persona = Prototipo.PERSONAS.get(documento.getText().trim());
         if (persona == null) {
-            nombre.setText("");
-            apellido.setText("");
-            correo.setText("");
-            direccion.setText("");
-            telefono.setText("");
+            List.of(nombre, apellido, correo, telefono, tipoCliente)
+                    .forEach(c -> c.setText(""));
+            reclamo.setVisible(false);
             JOptionPane.showMessageDialog(this, "Su usuario no es valido.",
                     "Validacion de Usuario", JOptionPane.WARNING_MESSAGE);
             return;
@@ -100,61 +119,82 @@ public class ClienteDataEntryPantalla extends Pantalla {
         nombre.setText(persona.nombres());
         apellido.setText(persona.apellidos());
         correo.setText(persona.correo());
-        direccion.setText(persona.direccion());
         telefono.setText(persona.telefono());
-        JOptionPane.showMessageDialog(this, "Su usuario es valido!",
-                "Validacion de Usuario", JOptionPane.INFORMATION_MESSAGE);
+        tipoCliente.setText(categoriaDe(persona.documento()));
+        reclamo.setVisible(true);
+        reclamo.revalidate();
     }
 
-    private void aceptar() {
-        if (persona == null) { avisar("Primero valide el documento del cliente."); return; }
-        compras.limpiar();
-        Prototipo.comprasDe(persona.documento()).forEach(f -> compras.agregar((Object[]) f));
-        paso2.setVisible(true);
-        paso2.revalidate();
+    /** La categoria sale del catalogo de clientes; define prioridad y plazo. */
+    private static String categoriaDe(String documento) {
+        return Datos.CLIENTES.stream()
+                .filter(c -> c.documento().equals(documento))
+                .map(c -> c.tipo().etiqueta())
+                .findFirst().orElse("Nuevo");
     }
 
-    /* ---------------- paso 2: compras y reclamo ---------------- */
+    /* ---------------- datos del reclamo ---------------- */
 
-    private void armarPaso2() {
-        Grupo gCompras = Grupo.ajustado("Compras");
-        gCompras.add(compras.enScroll(), BorderLayout.CENTER);
-        gCompras.setPreferredSize(new Dimension(100, 160));
-
-        JButton agregar = Ui.boton("Agregar");
-        agregar.addActionListener(e -> agregarLinea());
-
+    private void armarReclamo() {
         Formulario f = new Formulario();
-        f.campo("Producto:", producto)
-         .campo("Tipo de Problema:", tipoProblema)
+        f.campo("Canal de ingreso:", canal)
+         .campo("Local:", local)
+         .campo("Reclama sobre:", Ui.fila(esProducto, esServicio))
+         .campo("Producto o servicio:", objeto)
+         .campo("Tipo de problema:", tipoProblema)
          .campo("Problema:", problema);
 
-        JPanel pieAlta = Ui.panel(new FlowLayout(FlowLayout.CENTER, 0, Tema.ESP_SM));
-        pieAlta.add(agregar);
+        Grupo gReclamo = new Grupo("Datos del Reclamo");
+        gReclamo.add(f, BorderLayout.CENTER);
 
-        Grupo gDatos = new Grupo("Datos de Reclamo");
-        gDatos.add(f, BorderLayout.CENTER);
-        gDatos.add(pieAlta, BorderLayout.SOUTH);
-
-        Grupo gLista = Grupo.ajustado("Reclamos a registrar");
-        gLista.add(reclamos.enScroll(), BorderLayout.CENTER);
-
-        JPanel medio = Ui.panel(new GridLayout(1, 2, Tema.ESP_MD, 0));
-        medio.add(gDatos);
-        medio.add(gLista);
-
-        JButton confirmar = Ui.boton("Confirmar");
-        confirmar.addActionListener(e -> confirmarReclamo());
+        JButton generar = Ui.boton("Generar Ticket");
+        generar.addActionListener(e -> generar());
         JButton cancelar = Ui.boton("Cancelar");
         cancelar.addActionListener(e -> limpiar());
 
         JPanel pie = Ui.panel(new FlowLayout(FlowLayout.CENTER, Tema.ESP_LG * 3, Tema.ESP_MD));
-        pie.add(confirmar);
+        pie.add(generar);
         pie.add(cancelar);
 
-        paso2.add(gCompras, BorderLayout.NORTH);
-        paso2.add(medio, BorderLayout.CENTER);
-        paso2.add(pie, BorderLayout.SOUTH);
+        reclamo.add(gReclamo, BorderLayout.NORTH);
+        reclamo.add(sustento(), BorderLayout.CENTER);
+        reclamo.add(pie, BorderLayout.SOUTH);
+    }
+
+    private JComponent sustento() {
+        Formulario f = new Formulario();
+        f.campo("Nro de comprobante:", comprobante)
+         .campo("Fecha del comprobante:", fechaComprobante);
+
+        JPanel nota = Ui.panel(new BorderLayout(0, Tema.ESP_XS));
+        nota.add(tieneComprobante, BorderLayout.NORTH);
+        nota.add(Ui.suave("El comprobante solo prueba la garantia. No es el ticket: una misma "
+                + "compra puede originar varios tickets, y hay reclamos de atencion o de "
+                + "servicio que no tienen comprobante."), BorderLayout.SOUTH);
+        nota.setBorder(Ui.relleno(0, 0, Tema.ESP_SM, 0));
+
+        Grupo g = new Grupo("Sustento de la garantia");
+        g.add(nota, BorderLayout.NORTH);
+        g.add(f, BorderLayout.CENTER);
+        return g;
+    }
+
+    private void habilitarComprobante() {
+        comprobante.setEnabled(tieneComprobante.isSelected());
+        fechaComprobante.setEnabled(tieneComprobante.isSelected());
+    }
+
+    private void recargarObjetos() {
+        List<String> valores = new ArrayList<>();
+        if (esProducto.isSelected()) {
+            Catalogos.marcas().forEach(m -> valores.add(m[0] + " " + m[1] + " " + m[2]));
+        } else {
+            Catalogos.servicios().stream()
+                    .filter(s -> "Habilitado".equals(s[3]))
+                    .forEach(s -> valores.add(s[1]));
+        }
+        objeto.setModel(new DefaultComboBoxModel<>(valores.toArray(new String[0])));
+        objeto.setFont(Tema.cuerpo());
     }
 
     private void recargarProblemas() {
@@ -163,50 +203,69 @@ public class ClienteDataEntryPantalla extends Pantalla {
         problema.setFont(Tema.cuerpo());
     }
 
-    private void agregarLinea() {
-        if (compras.filaModelo() < 0) { avisar("Seleccione la compra del listado."); return; }
-        String[] linea = {String.valueOf(producto.getSelectedItem()),
-                String.valueOf(tipoProblema.getSelectedItem()),
-                String.valueOf(problema.getSelectedItem())};
-        lineas.add(linea);
-        reclamos.agregar((Object[]) linea);
-    }
+    /* ---------------- generacion del ticket ---------------- */
 
-    private void confirmarReclamo() {
-        if (lineas.isEmpty()) { avisar("Agregue al menos un reclamo."); return; }
-        if (!confirmar("Confirma el registro de " + lineas.size() + " reclamo(s)?")) return;
-        mostrarResumen();
+    private void generar() {
+        if (persona == null) { avisar("Primero valide el documento del cliente."); return; }
+        if (tieneComprobante.isSelected() && comprobante.getText().isBlank()) {
+            avisar("Indique el numero de comprobante o desmarque la casilla.");
+            return;
+        }
+        if (!confirmar("Confirma el registro del reclamo?")) return;
+
+        Ticket t = Tickets.abrir(
+                (Canal) canal.getSelectedItem(),
+                String.valueOf(local.getSelectedItem()),
+                persona.documento(),
+                persona.nombres() + " " + persona.apellidos(),
+                tipoCliente.getText(),
+                esProducto.isSelected() ? TipoObjeto.PRODUCTO : TipoObjeto.SERVICIO,
+                String.valueOf(objeto.getSelectedItem()),
+                String.valueOf(tipoProblema.getSelectedItem()),
+                String.valueOf(problema.getSelectedItem()),
+                tieneComprobante.isSelected() ? comprobante.getText().trim() : "",
+                tieneComprobante.isSelected() ? fechaComprobante.getText().trim() : "");
+
+        mostrarTicket(t);
         limpiar();
     }
 
-    /** El cuadro resumen que el prototipo muestra al final. */
-    private void mostrarResumen() {
-        Tabla resumen = new Tabla(new String[]{"Producto", "Tipo Problema", "Problema", "Estado"});
-        resumen.anchos(180, 170, 230, 130);
-        lineas.forEach(l -> resumen.agregar(l[0], l[1], l[2], "Registrado"));
+    /** El comprobante de apertura que se le entrega al cliente. */
+    private void mostrarTicket(Ticket t) {
+        Tabla resumen = new Tabla(new String[]{"Campo", "Valor"});
+        resumen.anchos(220, 420);
+        resumen.agregar("Nro de ticket", t.numero());
+        resumen.agregar("Apertura", t.apertura().format(RELOJ));
+        resumen.agregar("Canal", t.canal().etiqueta());
+        resumen.agregar("Local", t.local());
+        resumen.agregar("Cliente", t.nombreCliente());
+        resumen.agregar("Tipo de cliente", t.tipoCliente());
+        resumen.agregar("Reclama sobre", t.tipoObjeto().etiqueta() + ": " + t.objeto());
+        resumen.agregar("Problema", t.tipoProblema() + " - " + t.problema());
+        resumen.agregar("Instancia", t.instancia().etiqueta());
+        resumen.agregar("Prioridad", t.prioridad().etiqueta());
+        resumen.agregar("Estado", t.estado().etiqueta());
+        resumen.agregar("Limite de atencion", t.limiteAtencion().format(RELOJ));
+        resumen.agregar("Sustento",
+                t.comprobante().isBlank() ? "Sin comprobante" : "Comprobante " + t.comprobante());
 
         JPanel p = Ui.panel(new BorderLayout(0, Tema.ESP_SM));
-        p.add(Ui.fuerte("Reclamos registrados a nombre de " + persona.nombres()
-                + " " + persona.apellidos()), BorderLayout.NORTH);
+        p.add(Ui.fuerte("Ticket " + t.numero() + " generado."), BorderLayout.NORTH);
         p.add(resumen.enScroll(), BorderLayout.CENTER);
-        p.setPreferredSize(new Dimension(740, 220));
+        p.setPreferredSize(new Dimension(680, 330));
 
-        JOptionPane.showMessageDialog(this, p, "Resumen del Reclamo",
-                JOptionPane.PLAIN_MESSAGE);
+        JOptionPane.showMessageDialog(this, p, "Ticket Generado", JOptionPane.PLAIN_MESSAGE);
     }
 
     private void limpiar() {
         documento.setText("");
-        nombre.setText("");
-        apellido.setText("");
-        correo.setText("");
-        direccion.setText("");
-        telefono.setText("");
-        compras.limpiar();
-        reclamos.limpiar();
-        lineas.clear();
+        List.of(nombre, apellido, correo, telefono, tipoCliente).forEach(c -> c.setText(""));
+        comprobante.setText("");
+        fechaComprobante.setText("");
+        tieneComprobante.setSelected(false);
+        habilitarComprobante();
         persona = null;
-        paso2.setVisible(false);
+        reclamo.setVisible(false);
         documento.requestFocusInWindow();
     }
 }

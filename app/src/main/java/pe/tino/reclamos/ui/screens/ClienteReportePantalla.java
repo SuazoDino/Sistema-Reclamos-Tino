@@ -1,37 +1,48 @@
 package pe.tino.reclamos.ui.screens;
 
+import pe.tino.reclamos.model.Ticket;
+import pe.tino.reclamos.repo.Dominio.Estado;
 import pe.tino.reclamos.repo.Prototipo;
-import pe.tino.reclamos.repo.Prototipo.Detalle;
 import pe.tino.reclamos.repo.Prototipo.Persona;
+import pe.tino.reclamos.repo.Tickets;
 import pe.tino.reclamos.ui.components.*;
 import pe.tino.reclamos.ui.theme.Tema;
 
 import javax.swing.*;
 import java.awt.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 /**
- * Estado de Reclamo (Cliente - Reportes), como en las capturas: se identifica
- * al cliente, se elige el reclamo y al ver el detalle aparecen los tres casos
- * del informe segun el estado y el plazo de impugnacion.
+ * Estado de Reclamo (Cliente - Reportes): el cliente consulta sus tickets y
+ * ve el tiempo que le queda.
+ *
+ * El detalle resuelve los tres casos del informe, pero ahora el plazo de
+ * impugnacion sale del catalogo de instancias en vez de ser un parametro
+ * suelto en pantalla.
  */
 public class ClienteReportePantalla extends Pantalla {
+
+    private static final DateTimeFormatter RELOJ = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     private final JTextField documento = Ui.texto(14);
     private final JTextField nombres = Ui.soloLectura();
     private final JTextField apellidos = Ui.soloLectura();
-    private final JComboBox<String> idReclamo = Ui.combo(List.of("R001", "R002", "R003", "R004"));
     private final Tabla tabla = new Tabla(new String[]{
-            "Productos", "Tipo Problema", "Fecha Limite", "Estado Reclamo"});
+            "Nro Ticket", "Objeto", "Tipo Problema", "Instancia",
+            "Estado", "Limite de atencion", "Tiempo restante"});
+    private List<Ticket> visibles = List.of();
 
     public ClienteReportePantalla() {
-        super("Estado de Reclamo", "Seguimiento del estado del reclamo del cliente.");
+        super("Estado de Reclamo",
+                "Seguimiento del estado y del tiempo restante de los tickets del cliente.");
 
-        tabla.anchos(230, 220, 180, 200);
-        idReclamo.addActionListener(e -> seleccionarPorId());
+        tabla.anchos(110, 210, 160, 100, 120, 140, 140);
 
-        JButton buscar = Ui.boton("Aceptar");
-        buscar.addActionListener(e -> buscar());
+        JButton aceptar = Ui.boton("Aceptar");
+        aceptar.addActionListener(e -> buscar());
         documento.addActionListener(e -> buscar());
 
         JButton detalle = Ui.boton("Detalle");
@@ -41,10 +52,9 @@ public class ClienteReportePantalla extends Pantalla {
         pie.add(detalle);
 
         Formulario f = new Formulario();
-        f.campo("DNI/RUC:", Ui.fila(documento, buscar))
+        f.campo("DNI/RUC:", Ui.fila(documento, aceptar))
          .campo("Nombres:", nombres)
-         .campo("Apellidos:", apellidos)
-         .campo("ID Reclamo:", idReclamo);
+         .campo("Apellidos:", apellidos);
 
         Grupo g = new Grupo("Estado de Reclamo");
         g.add(f, BorderLayout.NORTH);
@@ -52,11 +62,13 @@ public class ClienteReportePantalla extends Pantalla {
         g.add(pie, BorderLayout.SOUTH);
 
         contenido().add(g, BorderLayout.CENTER);
+        Tickets.alCambiar(t -> { if (!visibles.isEmpty()) buscar(); });
     }
 
     private void buscar() {
         Persona p = Prototipo.PERSONAS.get(documento.getText().trim());
         tabla.limpiar();
+        visibles = List.of();
 
         if (p == null) {
             nombres.setText("");
@@ -67,102 +79,119 @@ public class ClienteReportePantalla extends Pantalla {
         }
         nombres.setText(p.nombres());
         apellidos.setText(p.apellidos());
-        Prototipo.estadoDeReclamos().forEach(fila -> tabla.agregar((Object[]) fila));
+        visibles = Tickets.de(p.documento());
+
+        for (Ticket t : visibles) {
+            tabla.agregar(t.numero(), t.objeto(), t.tipoProblema(), t.instancia().etiqueta(),
+                    t.estado().etiqueta(),
+                    t.limiteAtencion() == null ? "-" : t.limiteAtencion().format(RELOJ),
+                    restante(t));
+        }
+        if (visibles.isEmpty()) avisar("El cliente no tiene tickets registrados.");
     }
 
-    /** El combo de ID selecciona la fila correspondiente, como en la captura. */
-    private void seleccionarPorId() {
-        int i = idReclamo.getSelectedIndex();
-        if (i >= 0 && i < tabla.getRowCount()) tabla.setRowSelectionInterval(i, i);
+    /** Tiempo que le queda al area para atender, o el estado si ya cerro. */
+    private static String restante(Ticket t) {
+        if (!t.estado().abierto()) return "Cerrado";
+        if (t.limiteAtencion() == null) return "-";
+        long horas = ChronoUnit.HOURS.between(LocalDateTime.now(), t.limiteAtencion());
+        if (horas < 0) return "Vencido hace " + (-horas) + " h";
+        return horas + " h";
     }
 
-    /** La ventana "Detalle del Reclamo" con sus tres casos. */
     private void mostrarDetalle() {
         int i = tabla.filaModelo();
-        if (i < 0) { avisar("Seleccione el reclamo que desea visualizar."); return; }
+        if (i < 0 || i >= visibles.size()) { avisar("Seleccione el ticket que desea ver."); return; }
+        Ticket t = visibles.get(i);
 
-        Detalle d = Prototipo.detalleDe(i);
-        JPanel datos = Ui.panel(new GridLayout(0, 1, 0, Tema.ESP_XS));
-        datos.add(Ui.etiqueta("ID Reclamo: " + d.id()));
-        datos.add(Ui.etiqueta("Producto: " + d.producto()));
-        datos.add(Ui.etiqueta("Marca : " + d.marca()));
-        datos.add(Ui.etiqueta("Tipo Problema: " + d.tipoProblema()));
-        datos.add(Ui.etiqueta("Problema: " + d.problema()));
-        datos.add(Ui.etiqueta("Fecha de Emision: " + d.emision()));
-        datos.add(Ui.etiqueta("Fecha de Respuesta: " + d.respuesta()));
-        datos.add(Ui.etiqueta("Fecha Limite de Impugnacion : " + d.limite()));
-        datos.add(new JLabel("<html><body style='width:380px'>Descripcion: "
-                + d.descripcion() + "</body></html>"));
+        JPanel datos = Ui.panel(new GridLayout(0, 2, Tema.ESP_MD, Tema.ESP_XS));
+        dato(datos, "Nro Ticket:", t.numero());
+        dato(datos, "Apertura:", t.apertura().format(RELOJ));
+        dato(datos, "Reclama sobre:", t.tipoObjeto().etiqueta() + ": " + t.objeto());
+        dato(datos, "Tipo Problema:", t.tipoProblema());
+        dato(datos, "Problema:", t.problema());
+        dato(datos, "Instancia:", t.instancia().etiqueta()
+                + " (" + t.instancia().resuelve() + ")");
+        dato(datos, "Estado:", t.estado().etiqueta());
+        dato(datos, "Area a cargo:", t.area());
+        dato(datos, "Limite de atencion:",
+                t.limiteAtencion() == null ? "-" : t.limiteAtencion().format(RELOJ));
+        dato(datos, "Limite de impugnacion:",
+                t.limiteImpugnacion() == null ? "-" : t.limiteImpugnacion().format(RELOJ));
+        dato(datos, "Sustento:",
+                t.comprobante().isBlank() ? "Sin comprobante" : "Comprobante " + t.comprobante());
 
         JPanel p = Ui.panel(new BorderLayout(0, Tema.ESP_MD));
         p.add(datos, BorderLayout.NORTH);
-        p.setPreferredSize(new Dimension(440, 300));
+        p.add(new JLabel("<html><body style='width:420px'>" + mensaje(t) + "</body></html>"),
+                BorderLayout.CENTER);
+        p.setPreferredSize(new Dimension(480, 340));
 
-        switch (d.estado()) {
-            case "Rechazado" -> casoRechazado(p, d);
-            case "Aceptado" -> {
-                p.add(Ui.fuerte("Su reclamo ha sido aceptado."), BorderLayout.CENTER);
-                JOptionPane.showMessageDialog(this, p, "Detalle del Reclamo",
-                        JOptionPane.PLAIN_MESSAGE);
-            }
-            default -> {
-                p.add(Ui.fuerte("Su reclamo se encuentra pendiente de respuesta."),
-                        BorderLayout.CENTER);
-                JOptionPane.showMessageDialog(this, p, "Detalle del Reclamo",
-                        JOptionPane.PLAIN_MESSAGE);
-            }
-        }
-    }
-
-    /**
-     * Caso 1 y caso 2 del informe: si el plazo sigue vigente se ofrece
-     * impugnar; si expiro, solo la advertencia.
-     */
-    private void casoRechazado(JPanel p, Detalle d) {
-        if (!vigente(d.limite())) {
-            p.add(Ui.fuerte("El tiempo de impugnacion expiro. El reclamo no admite "
-                    + "nuevas instancias."), BorderLayout.CENTER);
-            JOptionPane.showMessageDialog(this, p, "Detalle del Reclamo",
-                    JOptionPane.WARNING_MESSAGE);
+        if (t.estado() != Estado.RECHAZADO) {
+            JOptionPane.showMessageDialog(this, p, "Detalle del Reclamo", JOptionPane.PLAIN_MESSAGE);
             return;
         }
-        p.add(Ui.fuerte("Su reclamo ha sido rechazado. Desea impugnar esta respuesta?"),
-                BorderLayout.CENTER);
-
+        if (!puedeImpugnar(t)) {
+            JOptionPane.showMessageDialog(this, p, "Detalle del Reclamo", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
         Object[] opciones = {"Impugnar", "Cancelar"};
         int r = JOptionPane.showOptionDialog(this, p, "Detalle del Reclamo",
                 JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, opciones, opciones[0]);
-        if (r == 0) impugnar(d);
+        if (r == 0) impugnar(t);
     }
 
-    /** El formulario de impugnacion que el informe describe para el caso 1. */
-    private void impugnar(Detalle d) {
-        JTextArea motivo = Ui.area(4);
-        JComboBox<String> instancia = Ui.combo(List.of("Segunda instancia", "Area especializada",
-                "Gerencia de PostVenta"));
+    /** Los tres casos del informe, ahora resueltos con datos del ticket. */
+    private static String mensaje(Ticket t) {
+        if (t.estado() == Estado.RECHAZADO) {
+            if (!t.instancia().admiteImpugnacion()) {
+                return "Su reclamo fue rechazado en la ultima instancia. "
+                        + "No admite nuevas impugnaciones.";
+            }
+            if (!puedeImpugnar(t)) {
+                return "Su reclamo fue rechazado y el plazo de impugnacion de "
+                        + t.instancia().diasImpugnacion() + " dias expiro.";
+            }
+            long dias = ChronoUnit.DAYS.between(LocalDateTime.now(), t.limiteImpugnacion());
+            return "Su reclamo ha sido rechazado. Le quedan " + Math.max(dias, 0)
+                    + " dias para impugnar ante " + t.instancia().siguiente().resuelve() + ".";
+        }
+        if (t.estado() == Estado.CERRADO) return "Su reclamo fue atendido y cerrado.";
+        if (t.estado() == Estado.RESUELTO) return "Su reclamo fue resuelto y espera la entrega.";
+        if (t.vencido()) return "Su reclamo esta en atencion y excedio el plazo comprometido.";
+        return "Su reclamo esta en atencion dentro del plazo comprometido.";
+    }
 
+    private static boolean puedeImpugnar(Ticket t) {
+        return t.instancia().admiteImpugnacion() && t.limiteImpugnacion() != null
+                && !LocalDateTime.now().isAfter(t.limiteImpugnacion());
+    }
+
+    private void impugnar(Ticket t) {
+        JTextArea motivo = Ui.area(4);
         Formulario f = new Formulario();
-        f.campo("Reclamo:", Ui.fuerte(d.id() + " - " + d.problema()))
-         .campo("Instancia:", instancia)
+        f.campo("Ticket:", Ui.fuerte(t.numero()))
+         .campo("Pasa a:", Ui.fuerte(t.instancia().siguiente().etiqueta()
+                 + " - " + t.instancia().siguiente().resuelve()))
          .campo("Motivo:", Ui.scroll(motivo));
         f.setBorder(Ui.relleno(Tema.ESP_MD));
 
         int r = JOptionPane.showConfirmDialog(this, f, "Enviar Impugnacion",
                 JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
         if (r != JOptionPane.OK_OPTION) return;
-
         if (motivo.getText().isBlank()) { avisar("Indique el motivo de la impugnacion."); return; }
-        avisar("Impugnacion enviada a " + instancia.getSelectedItem() + ".");
+
+        if (!t.impugnar(motivo.getText().trim(), "Cliente")) {
+            advertir("El ticket ya no admite impugnacion.");
+            return;
+        }
+        Tickets.notificar();
+        buscar();
+        avisar("Impugnacion enviada. El ticket pasa a " + t.instancia().etiqueta() + " instancia.");
     }
 
-    /** La fecha limite del prototipo esta en dd/MM/yyyy. */
-    private static boolean vigente(String limite) {
-        try {
-            var fecha = java.time.LocalDate.parse(limite,
-                    java.time.format.DateTimeFormatter.ofPattern("d/MM/yyyy"));
-            return !java.time.LocalDate.now().isAfter(fecha);
-        } catch (java.time.format.DateTimeParseException e) {
-            return false;
-        }
+    private static void dato(JPanel destino, String etiqueta, String valor) {
+        destino.add(Ui.etiqueta(etiqueta));
+        destino.add(Ui.fuerte(valor));
     }
 }
