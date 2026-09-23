@@ -40,9 +40,15 @@ configura el módulo solo. La clase de arranque es `pe.tino.reclamos.app.Main`.
 
 ## Cómo se navega
 
-La aplicación abre en el **mapa conceptual**: el árbol completo del diseño
-arquitectónico, con cada catálogo como un botón. No hay barra lateral ni menús:
+La aplicación abre en el **mapa conceptual**: el árbol del diseño
+arquitectónico dibujado como organigrama, con la raíz arriba y las ramas
+abriéndose hacia abajo. Cada hoja es un botón. No hay barra lateral ni menús:
 se entra por el mapa y se vuelve con **Volver** o **Mapa**.
+
+El diagrama se arma solo a partir del árbol declarado en `MapaPantalla`: una
+rama reparte a sus hijos en horizontal y se centra sobre ellos; un nodo cuyos
+hijos son todos hojas las cuelga en vertical con una espina a la izquierda. Así
+los ocho catálogos entran sin que el diagrama se desborde a lo ancho.
 
 ```
 SISTEMA DE RECLAMOS
