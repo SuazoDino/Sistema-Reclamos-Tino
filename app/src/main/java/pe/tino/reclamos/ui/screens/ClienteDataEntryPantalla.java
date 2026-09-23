@@ -3,7 +3,7 @@ package pe.tino.reclamos.ui.screens;
 import pe.tino.reclamos.model.Ticket;
 import pe.tino.reclamos.repo.*;
 import pe.tino.reclamos.repo.Dominio.*;
-import pe.tino.reclamos.repo.Prototipo.Persona;
+import pe.tino.reclamos.model.Modelo.Cliente;
 import pe.tino.reclamos.ui.components.*;
 import pe.tino.reclamos.ui.theme.Tema;
 
@@ -49,7 +49,7 @@ public class ClienteDataEntryPantalla extends Pantalla {
     private final JTextField fechaComprobante = Ui.texto(12);
 
     private final JPanel reclamo = Ui.panel(new BorderLayout(0, Tema.ESP_MD));
-    private Persona persona;
+    private Cliente cliente;
 
     public ClienteDataEntryPantalla() {
         super("Formulario Reclamo",
@@ -107,8 +107,8 @@ public class ClienteDataEntryPantalla extends Pantalla {
     }
 
     private void validar() {
-        persona = Prototipo.PERSONAS.get(documento.getText().trim());
-        if (persona == null) {
+        cliente = Datos.clientePorDocumento(documento.getText());
+        if (cliente == null) {
             List.of(nombre, apellido, correo, telefono, tipoCliente)
                     .forEach(c -> c.setText(""));
             reclamo.setVisible(false);
@@ -116,21 +116,13 @@ public class ClienteDataEntryPantalla extends Pantalla {
                     "Validacion de Usuario", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        nombre.setText(persona.nombres());
-        apellido.setText(persona.apellidos());
-        correo.setText(persona.correo());
-        telefono.setText(persona.telefono());
-        tipoCliente.setText(categoriaDe(persona.documento()));
+        nombre.setText(cliente.nombres());
+        apellido.setText(cliente.apellidos());
+        correo.setText(cliente.correo());
+        telefono.setText(cliente.telefono());
+        tipoCliente.setText(cliente.tipo().etiqueta());
         reclamo.setVisible(true);
         reclamo.revalidate();
-    }
-
-    /** La categoria sale del catalogo de clientes; define prioridad y plazo. */
-    private static String categoriaDe(String documento) {
-        return Datos.CLIENTES.stream()
-                .filter(c -> c.documento().equals(documento))
-                .map(c -> c.tipo().etiqueta())
-                .findFirst().orElse("Nuevo");
     }
 
     /* ---------------- datos del reclamo ---------------- */
@@ -206,7 +198,7 @@ public class ClienteDataEntryPantalla extends Pantalla {
     /* ---------------- generacion del ticket ---------------- */
 
     private void generar() {
-        if (persona == null) { avisar("Primero valide el documento del cliente."); return; }
+        if (cliente == null) { avisar("Primero valide el documento del cliente."); return; }
         if (tieneComprobante.isSelected() && comprobante.getText().isBlank()) {
             avisar("Indique el numero de comprobante o desmarque la casilla.");
             return;
@@ -216,8 +208,8 @@ public class ClienteDataEntryPantalla extends Pantalla {
         Ticket t = Tickets.abrir(
                 (Canal) canal.getSelectedItem(),
                 String.valueOf(local.getSelectedItem()),
-                persona.documento(),
-                persona.nombres() + " " + persona.apellidos(),
+                cliente.documento(),
+                cliente.nombreCompleto(),
                 tipoCliente.getText(),
                 esProducto.isSelected() ? TipoObjeto.PRODUCTO : TipoObjeto.SERVICIO,
                 String.valueOf(objeto.getSelectedItem()),
@@ -264,7 +256,7 @@ public class ClienteDataEntryPantalla extends Pantalla {
         fechaComprobante.setText("");
         tieneComprobante.setSelected(false);
         habilitarComprobante();
-        persona = null;
+        cliente = null;
         reclamo.setVisible(false);
         documento.requestFocusInWindow();
     }

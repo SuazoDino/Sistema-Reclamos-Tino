@@ -35,9 +35,18 @@ public final class Modelo {
     /** Canal de ingreso del reclamo (hoja Hoja1 - Tipo_Canal). */
     public enum Canal { PRESENCIAL, TELEFONICO, INTERNET, WEB }
 
-    public record Cliente(String id, String documento, String nombre, String correo,
+    /**
+     * Cliente del sistema. Es la unica fuente de datos del cliente: antes
+     * habia una lista de clientes con su categoria y otra de personas con sus
+     * datos de contacto, y una pantalla usaba una y otra la otra.
+     */
+    public record Cliente(String id, String documento, String nombres, String apellidos,
+                          String correo, String direccion, String telefono,
                           TipoCliente tipo, String sector) {
-        @Override public String toString() { return nombre + "  (" + documento + ")"; }
+
+        public String nombreCompleto() { return nombres + " " + apellidos; }
+
+        @Override public String toString() { return nombreCompleto() + "  (" + documento + ")"; }
     }
 
     /** Jerarquia del catalogo: Segmento > Familia > Clase > Bien > Producto. */

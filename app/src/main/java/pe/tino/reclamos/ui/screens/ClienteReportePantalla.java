@@ -3,7 +3,8 @@ package pe.tino.reclamos.ui.screens;
 import pe.tino.reclamos.model.Ticket;
 import pe.tino.reclamos.repo.Dominio.Estado;
 import pe.tino.reclamos.repo.Prototipo;
-import pe.tino.reclamos.repo.Prototipo.Persona;
+import pe.tino.reclamos.model.Modelo.Cliente;
+import pe.tino.reclamos.repo.Datos;
 import pe.tino.reclamos.repo.Tickets;
 import pe.tino.reclamos.ui.components.*;
 import pe.tino.reclamos.ui.theme.Tema;
@@ -66,7 +67,7 @@ public class ClienteReportePantalla extends Pantalla {
     }
 
     private void buscar() {
-        Persona p = Prototipo.PERSONAS.get(documento.getText().trim());
+        Cliente p = Datos.clientePorDocumento(documento.getText());
         tabla.limpiar();
         visibles = List.of();
 

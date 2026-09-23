@@ -128,20 +128,10 @@ public class AreaDataEntryPantalla extends Pantalla {
         if (idEmpleado.getText().isBlank()) { avisar("Primero ingrese su ID de empleado."); return; }
 
         t.asignar(area.getText(), idEmpleado.getText(),
-                protocoloDe(t.tipoProblema()), idEmpleado.getText());
+                Prototipo.protocoloDe(t.tipoProblema()), idEmpleado.getText());
         Tickets.notificar();
         refrescar();
         avisar("Ticket " + t.numero() + " asignado a " + idEmpleado.getText() + ".");
-    }
-
-    /** El protocolo se elige por tipo de problema; es el del catalogo. */
-    private static String protocoloDe(String tipoProblema) {
-        return switch (tipoProblema) {
-            case "Funcionamiento" -> "PR-FUNC-01";
-            case "Entrega" -> "PR-ENTR-01";
-            case "Cobranza" -> "PR-COBR-01";
-            default -> "PR-ATEN-01";
-        };
     }
 
     /** La ventana de inspeccion: ejecuta las acciones del protocolo. */
@@ -151,6 +141,11 @@ public class AreaDataEntryPantalla extends Pantalla {
         if (idEmpleado.getText().isBlank()) { avisar("Primero ingrese su ID de empleado."); return; }
         if (t.estado() == Estado.REGISTRADO) {
             avisar("El ticket todavia no esta asignado. Use Asignarme primero.");
+            return;
+        }
+        if (Prototipo.accionesDe(t.protocolo()).isEmpty()) {
+            advertir("El protocolo " + t.protocolo() + " no tiene acciones definidas "
+                    + "en el Catalogo de Protocolos.");
             return;
         }
 
@@ -170,7 +165,7 @@ public class AreaDataEntryPantalla extends Pantalla {
 
         JPanel pasos = Ui.panel(new GridLayout(0, 1, 0, Tema.ESP_XS));
         List<JCheckBox> casillas = new ArrayList<>();
-        List<String[]> acciones = Prototipo.accionesProtocolo();
+        List<String[]> acciones = Prototipo.accionesDe(t.protocolo());
         for (String[] a : acciones) {
             JCheckBox c = new JCheckBox(a[0] + "   (" + a[1] + " s, " + a[2] + ", " + a[3] + ")");
             c.setFont(Tema.cuerpo());

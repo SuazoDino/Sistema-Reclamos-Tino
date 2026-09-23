@@ -1,7 +1,9 @@
 package pe.tino.reclamos.ui.screens;
 
+import pe.tino.reclamos.model.Ticket;
 import pe.tino.reclamos.repo.Prototipo;
 import pe.tino.reclamos.repo.Prototipo.Empleado;
+import pe.tino.reclamos.repo.Tickets;
 import pe.tino.reclamos.ui.components.*;
 import pe.tino.reclamos.ui.theme.Tema;
 
@@ -19,19 +21,20 @@ import java.util.List;
 public class AreaReportePantalla extends Pantalla {
 
     private static final DateTimeFormatter FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private static final DateTimeFormatter RELOJ = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     private final JComboBox<String> empleado = Ui.combo(List.copyOf(Prototipo.EMPLEADOS.keySet()));
     private final JTextField tipoEmpleado = Ui.soloLectura();
     private final JTextField area = Ui.soloLectura();
     private final JTextField fecha = Ui.soloLectura();
     private final Tabla tabla = new Tabla(new String[]{
-            "IdReclamo", "Fecha de emision", "Fecha de Atencion", "Hora de Atencion", "Estado"});
+            "Nro Ticket", "Apertura", "Cliente", "Problema", "Prioridad", "Estado", "Vencido"});
     private final JLabel resumen = Ui.fuerte("");
 
     public AreaReportePantalla() {
         super("Reporte de Atencion", "Avances y detalle de los reclamos del usuario del area.");
 
-        tabla.anchos(110, 160, 160, 160, 140);
+        tabla.anchos(110, 130, 190, 180, 100, 120, 90);
         fecha.setText(LocalDate.now().format(FECHA));
         empleado.addActionListener(e -> generar());
 
@@ -60,6 +63,7 @@ public class AreaReportePantalla extends Pantalla {
 
         contenido().add(g, BorderLayout.CENTER);
         generar();
+        Tickets.alCambiar(t -> generar());
     }
 
     private void generar() {
@@ -68,12 +72,23 @@ public class AreaReportePantalla extends Pantalla {
         tipoEmpleado.setText(e.tipo());
         area.setText(e.area());
 
-        List<String[]> filas = Prototipo.reclamosDelArea();
-        tabla.limpiar();
-        filas.forEach(f -> tabla.agregar((Object[]) f));
+        // el reporte se arma sobre los tickets asignados al usuario, no sobre
+        // una lista aparte: si no, Data Entry y Reportes muestran cosas distintas
+        List<Ticket> suyos = Tickets.todos().stream()
+                .filter(t -> e.id().equals(t.especialista()))
+                .toList();
 
-        long atendidos = filas.stream().filter(f -> "Atendido".equals(f[4])).count();
-        resumen.setText(filas.size() + " reclamos registrados  -  " + atendidos
-                + " atendidos  -  " + (filas.size() - atendidos) + " pendientes");
+        tabla.limpiar();
+        for (Ticket t : suyos) {
+            tabla.agregar(t.numero(), t.apertura().format(RELOJ), t.nombreCliente(),
+                    t.problema(), t.prioridad().etiqueta(), t.estado().etiqueta(),
+                    t.vencido() ? "Si" : "No");
+        }
+
+        long cerrados = suyos.stream().filter(t -> !t.estado().abierto()).count();
+        long vencidos = suyos.stream().filter(Ticket::vencido).count();
+        resumen.setText(suyos.size() + " tickets asignados  -  " + cerrados
+                + " cerrados  -  " + (suyos.size() - cerrados) + " abiertos  -  "
+                + vencidos + " fuera de plazo");
     }
 }

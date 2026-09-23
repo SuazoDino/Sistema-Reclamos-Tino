@@ -75,14 +75,53 @@ public final class Prototipo {
     public static final List<String> TIPO_OPERARIO = List.of("Tecnico", "Especialista", "Asistente");
     public static final List<String> CRITICIDAD_ACCION = List.of("No Critico", "Critico");
 
-    /** Accion | Tiempo Maximo(s) | Tipo Operario | Criticidad. */
-    public static List<String[]> accionesProtocolo() {
+    /**
+     * Protocolo | Tipo de problema | Evento. El ticket guarda este codigo, asi
+     * que el protocolo que se le asigna existe de verdad en el catalogo.
+     */
+    public static List<String[]> protocolos() {
         return new ArrayList<>(List.of(
-                new String[]{"Reiniciar celular", "120", "Tecnico", "No Critico"},
-                new String[]{"Abrir aplicacion de camara", "60", "Tecnico", "No Critico"},
-                new String[]{"Tomar foto", "20", "Tecnico", "No Critico"}
+                new String[]{"PR-FUNC-01", "Funcionamiento", "Inspeccion"},
+                new String[]{"PR-FUNC-02", "Funcionamiento", "Solucion del Reclamo"},
+                new String[]{"PR-ENTR-01", "Entrega", "Inspeccion"},
+                new String[]{"PR-COBR-01", "Cobranza", "Solucion del Reclamo"},
+                new String[]{"PR-ATEN-01", "Atencion", "Seguimiento de Reclamo"}
         ));
     }
+
+    /** El protocolo que corresponde a un tipo de problema. */
+    public static String protocoloDe(String tipoProblema) {
+        return protocolos().stream()
+                .filter(f -> f[1].equalsIgnoreCase(tipoProblema))
+                .map(f -> f[0])
+                .findFirst().orElse("PR-ATEN-01");
+    }
+
+    /** Protocolo | Accion | Tiempo Maximo(s) | Tipo Operario | Criticidad. */
+    public static List<String[]> accionesDeProtocolo() {
+        return new ArrayList<>(List.of(
+                new String[]{"PR-FUNC-01", "Reiniciar equipo", "120", "Tecnico", "No Critico"},
+                new String[]{"PR-FUNC-01", "Abrir aplicacion de camara", "60", "Tecnico", "No Critico"},
+                new String[]{"PR-FUNC-01", "Tomar foto de prueba", "20", "Tecnico", "Critico"},
+                new String[]{"PR-FUNC-02", "Reemplazar componente", "600", "Especialista", "Critico"},
+                new String[]{"PR-ENTR-01", "Verificar empaque", "90", "Asistente", "Critico"},
+                new String[]{"PR-ENTR-01", "Contrastar guia de remision", "120", "Asistente", "No Critico"},
+                new String[]{"PR-COBR-01", "Revisar comprobantes emitidos", "180", "Asistente", "Critico"},
+                new String[]{"PR-COBR-01", "Solicitar nota de credito", "300", "Especialista", "No Critico"},
+                new String[]{"PR-ATEN-01", "Registrar descargo del area", "120", "Asistente", "Critico"}
+        ));
+    }
+
+    /** Las acciones de un protocolo, en el orden en que se ejecutan. */
+    public static List<String[]> accionesDe(String protocolo) {
+        return accionesDeProtocolo().stream()
+                .filter(f -> f[0].equals(protocolo))
+                .map(f -> new String[]{f[1], f[2], f[3], f[4]})
+                .collect(java.util.stream.Collectors.toCollection(ArrayList::new));
+    }
+
+    /** Compatibilidad: las acciones del protocolo de funcionamiento. */
+    public static List<String[]> accionesProtocolo() { return accionesDe("PR-FUNC-01"); }
 
     /* ---------------- catalogo de politicas ---------------- */
 
@@ -97,18 +136,31 @@ public final class Prototipo {
         ));
     }
 
-    /** Producto | Garantia | Estado: los tipos de la politica seleccionada. */
+    /**
+     * Producto | Garantia | Plazo (dias) | Estado.
+     *
+     * El plazo es el que el motor de reglas lee como Tiempo_Garantia: sin el,
+     * la condicion CND2 no tenia contra que comparar.
+     */
     public static List<String[]> tiposDePolitica() {
         return new ArrayList<>(List.of(
-                new String[]{"Prod001", "Legal", "Habilitado"},
-                new String[]{"Prod001", "Comercial", "Habilitado"},
-                new String[]{"Prod002", "Legal", "Habilitado"},
-                new String[]{"Prod002", "Comercial", "Deshabilitado"},
-                new String[]{"Prod003", "Legal", "Habilitado"},
-                new String[]{"Prod003", "Comercial", "Habilitado"},
-                new String[]{"Prod004", "Legal", "Habilitado"},
-                new String[]{"Prod004", "Comercial", "Habilitado"}
+                new String[]{"Prod001", "Legal", "365", "Habilitado"},
+                new String[]{"Prod001", "Comercial", "180", "Habilitado"},
+                new String[]{"Prod002", "Legal", "365", "Habilitado"},
+                new String[]{"Prod002", "Comercial", "90", "Deshabilitado"},
+                new String[]{"Prod003", "Legal", "730", "Habilitado"},
+                new String[]{"Prod003", "Comercial", "365", "Habilitado"},
+                new String[]{"Prod004", "Legal", "365", "Habilitado"},
+                new String[]{"Prod004", "Comercial", "180", "Habilitado"}
         ));
+    }
+
+    /** Plazo de garantia vigente de un producto, en dias. */
+    public static int plazoDeGarantia(String producto) {
+        return tiposDePolitica().stream()
+                .filter(f -> f[0].equals(producto) && "Habilitado".equals(f[3]))
+                .mapToInt(f -> Integer.parseInt(f[2]))
+                .max().orElse(0);
     }
 
     /* ---------------- parametros generales ---------------- */
@@ -157,17 +209,6 @@ public final class Prototipo {
     }
 
     /* ---------------- cliente: registrar reclamo ---------------- */
-
-    public record Persona(String documento, String nombres, String apellidos,
-                          String correo, String direccion, String telefono) {}
-
-    public static final Map<String, Persona> PERSONAS = new LinkedHashMap<>();
-    static {
-        PERSONAS.put("72119474", new Persona("72119474", "Alexander", "Rodriguez Camacho",
-                "arodriguez@correo.pe", "Av. Los Alamos 123", "987654321"));
-        PERSONAS.put("10112387203", new Persona("10112387203", "Michael Skinner",
-                "Brito Calero", "michaelbc.141@gmail.com", "Jr. Union 456", "912345678"));
-    }
 
     /** Cod. Compra | Fecha | Monto. */
     public static List<String[]> comprasDe(String documento) {

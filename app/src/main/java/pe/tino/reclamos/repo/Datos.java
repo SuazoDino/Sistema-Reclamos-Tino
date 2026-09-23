@@ -138,11 +138,26 @@ public final class Datos {
     /* ---------------- clientes, productos y reclamos de muestra ---------------- */
 
     public static final List<Cliente> CLIENTES = List.of(
-            new Cliente("CLIEN001", "10112387203", "Michael Skinner Brito Calero", "michaelbc.141@gmail.com", TipoCliente.VIP, "Lima"),
-            new Cliente("CLIEN002", "70775031", "Juan Jose Moreno Guadamur", "jmoreno@correo.pe", TipoCliente.ORDINARIO, "Lima y Provincias"),
-            new Cliente("CLIEN003", "76729288", "Ana Lucia Ramirez Soto", "aramirez@correo.pe", TipoCliente.NUEVO, "Lima"),
-            new Cliente("CLIEN004", "20548712341", "Corporacion Andina SAC", "contacto@andina.com.pe", TipoCliente.SUPER_VIP, "Lima y Provincias")
+            new Cliente("CLIEN001", "72119474", "Alexander", "Rodriguez Camacho",
+                    "arodriguez@correo.pe", "Av. Los Alamos 123", "987654321",
+                    TipoCliente.VIP, "Lima"),
+            new Cliente("CLIEN002", "10112387203", "Michael Skinner", "Brito Calero",
+                    "michaelbc.141@gmail.com", "Jr. Union 456", "912345678",
+                    TipoCliente.ORDINARIO, "Lima"),
+            new Cliente("CLIEN003", "70775031", "Juan Jose", "Moreno Guadamur",
+                    "jmoreno@correo.pe", "Av. Brasil 789", "956781234",
+                    TipoCliente.NUEVO, "Lima y Provincias"),
+            new Cliente("CLIEN004", "20548712341", "Corporacion Andina", "SAC",
+                    "contacto@andina.com.pe", "Av. Javier Prado 2020", "013456789",
+                    TipoCliente.SUPER_VIP, "Lima y Provincias")
     );
+
+    /** Busca al cliente por su documento; es el unico punto de validacion. */
+    public static Cliente clientePorDocumento(String documento) {
+        return CLIENTES.stream()
+                .filter(c -> c.documento().equals(documento.trim()))
+                .findFirst().orElse(null);
+    }
 
     public static final List<Producto> PRODUCTOS = List.of(
             new Producto("PROD007", "Difusion De Tecnologias De Informacion Y Telecomunicaciones", "Dispositivos De Comunicaciones Y Accesorios", "Dispositivos De Comunicacion Personal", "Telefono Movil", "LG", "G5"),
@@ -287,9 +302,12 @@ public final class Datos {
 
     /** Los accesos que enumera la hoja, en su mismo orden. */
     public static final List<String> ACCESOS = List.of(
-            "Catalogo de Productos", "Catalogo de Bienes", "Catalogo de Politicas",
-            "Catalogo de Problemas", "Catalogo de Protocolos", "Catalogo de Reglas",
-            "Seguridad", "Estadisticas", "Reportes", "General", "Categorizacion Cliente");
+            "Parametro General", "Catalogo de Reclamo", "Catalogo de Producto",
+            "Catalogo de Servicios", "Catalogo de Problemas", "Catalogo de Cliente",
+            "Catalogo de Protocolos", "Catalogo de Reglas", "Catalogo de Politicas",
+            "Catalogo de Atencion", "Consulta de Tickets", "Consulta de Indicadores",
+            "Area - Data Entry", "Area - Reportes", "Cliente - Data Entry",
+            "Cliente - Reportes", "Seguridad", "Modulo BATCH");
 
     /** Los permisos que enumera la hoja. */
     public static final List<String> PERMISOS = List.of(
@@ -307,8 +325,9 @@ public final class Datos {
                 new Perfil("Administrador de Seguridad", List.of()),
                 new Perfil("Cliente", List.of()),
                 new Perfil("Especialista", List.of()),
-                new Perfil("Gerente General", List.of("General", "Catalogo de Bienes",
-                        "Catalogo de Problemas", "Categorizacion Cliente"))
+                new Perfil("Gerente General", List.of("Parametro General",
+                        "Catalogo de Problemas", "Catalogo de Cliente",
+                        "Consulta de Tickets", "Consulta de Indicadores"))
         ));
     }
 

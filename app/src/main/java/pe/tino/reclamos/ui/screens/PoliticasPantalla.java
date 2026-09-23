@@ -19,7 +19,7 @@ public class PoliticasPantalla extends Pantalla {
     private final JComboBox<String> catalogo1 = Ui.combo(Prototipo.CATALOGOS);
     private final JComboBox<String> catalogo2 = Ui.combo(Prototipo.CATALOGOS);
     private final Tabla politicas = new Tabla(new String[]{"Catalogo1", "Catalogo2"});
-    private final Tabla tipos = new Tabla(new String[]{"Producto", "Garantia", "Estado"});
+    private final Tabla tipos = new Tabla(new String[]{"Producto", "Garantia", "Plazo (dias)", "Estado"});
     private final JComboBox<String> estado;
     private final List<String[]> filasPolitica = Prototipo.politicas();
     private final List<String[]> filasTipo = Prototipo.tiposDePolitica();
@@ -36,7 +36,7 @@ public class PoliticasPantalla extends Pantalla {
         politicas.anchos(240, 240);
         filasPolitica.forEach(f -> politicas.agregar((Object[]) f));
 
-        tipos.anchos(230, 230, 200);
+        tipos.anchos(190, 190, 150, 170).centrar(2);
         refrescarTipos();
 
         JPanel arriba = Ui.panel(new BorderLayout(Tema.ESP_MD, 0));
@@ -136,7 +136,7 @@ public class PoliticasPantalla extends Pantalla {
         String garantia = String.valueOf(tipos.modelo().getValueAt(i, 1));
         filasTipo.stream()
                 .filter(f -> f[0].equals(producto) && f[1].equals(garantia))
-                .forEach(f -> f[2] = nuevo);
+                .forEach(f -> f[3] = nuevo);
         refrescarTipos();
     }
 
@@ -144,7 +144,7 @@ public class PoliticasPantalla extends Pantalla {
         String filtro = estado == null ? "" : String.valueOf(estado.getSelectedItem());
         tipos.limpiar();
         filasTipo.stream()
-                .filter(f -> filtro == null || filtro.isBlank() || filtro.equals(f[2]))
+                .filter(f -> filtro == null || filtro.isBlank() || filtro.equals(f[3]))
                 .forEach(f -> tipos.agregar((Object[]) f));
     }
 }

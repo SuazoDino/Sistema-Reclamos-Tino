@@ -23,6 +23,8 @@ public class ProtocolosPantalla extends Pantalla {
     private final JComboBox<String> criticidad = Ui.combo(Prototipo.CRITICIDAD);
     private final JComboBox<String> familia = Ui.combo(familias());
     private final JComboBox<String> evento = Ui.combo(Prototipo.EVENTOS_EXISTENTES);
+    private final JComboBox<String> protocolo = Ui.combo(
+            Prototipo.protocolos().stream().map(f -> f[0]).toList());
 
     private final Tabla resultados = new Tabla(new String[]{"Producto", "Problema"});
     private final Tabla acciones = new Tabla(new String[]{
@@ -33,7 +35,7 @@ public class ProtocolosPantalla extends Pantalla {
     private final JComboBox<String> tipoOperario = Ui.combo(Prototipo.TIPO_OPERARIO);
     private final JComboBox<String> criticidadAccion = Ui.combo(Prototipo.CRITICIDAD_ACCION);
 
-    private final List<String[]> filas = Prototipo.accionesProtocolo();
+    private List<String[]> filas = Prototipo.accionesDe("PR-FUNC-01");
 
     public ProtocolosPantalla() {
         super("Catalogo de Protocolos",
@@ -72,10 +74,17 @@ public class ProtocolosPantalla extends Pantalla {
             refrescar();
         });
 
+        protocolo.addActionListener(e -> {
+            filas = Prototipo.accionesDe(String.valueOf(protocolo.getSelectedItem()));
+            refrescar();
+        });
+
         JPanel filaEvento = Ui.panel(new BorderLayout(Tema.ESP_MD, 0));
         JPanel izq = Ui.panel(new FlowLayout(FlowLayout.LEFT, Tema.ESP_MD, 0));
         izq.add(Ui.etiqueta("Evento"));
         izq.add(evento);
+        izq.add(Ui.etiqueta("   Protocolo"));
+        izq.add(protocolo);
         filaEvento.add(izq, BorderLayout.WEST);
         filaEvento.add(Ui.filaDerecha(verProtocolo), BorderLayout.EAST);
         filaEvento.setBorder(Ui.relleno(Tema.ESP_SM, 0, 0, 0));
@@ -92,7 +101,7 @@ public class ProtocolosPantalla extends Pantalla {
     }
 
     private JComponent grupoProtocolo() {
-        Grupo g = new Grupo("Protocolo");
+        Grupo g = new Grupo("Acciones del protocolo");
 
         JPanel campos = Ui.panel(new GridLayout(2, 4, Tema.ESP_MD, Tema.ESP_SM));
         campos.add(Ui.etiqueta("Accion:"));
