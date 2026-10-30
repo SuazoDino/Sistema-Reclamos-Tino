@@ -1,8 +1,15 @@
 package pe.tino.reclamos.ui.screens;
 
+import pe.tino.reclamos.repo.Asignacion;
+import pe.tino.reclamos.repo.Auditoria;
+import pe.tino.reclamos.repo.Catalogos;
+import pe.tino.reclamos.repo.Integridad;
 import pe.tino.reclamos.repo.Datos;
+import pe.tino.reclamos.repo.Parametros;
 import pe.tino.reclamos.repo.Prototipo;
+import pe.tino.reclamos.repo.Prototipo.Empleado;
 import pe.tino.reclamos.ui.components.Grupo;
+import pe.tino.reclamos.ui.components.Tabla;
 import pe.tino.reclamos.ui.components.Ui;
 import pe.tino.reclamos.ui.theme.Tema;
 
@@ -11,188 +18,104 @@ import java.awt.*;
 import java.util.List;
 
 /**
- * Parametro General, como en la captura del informe: dos bloques grandes,
- * "Generalidades Empresa" con Areas y Especialistas por Area, y
- * "Generalidades Sistema" con Magnitud e Idioma.
+ * Parametro General: generalidades de la empresa (areas y especialistas) y
+ * del sistema (jornada, plazo legal, muestra de calidad, garantia).
+ *
+ * Todo lo que hay aqui lo lee el flujo. Magnitud e Idioma se quitaron: el
+ * libro trata la magnitud como una caracteristica del perfil del sistema que
+ * se decide al disenarlo, y ningun proceso usaba el idioma.
  */
 public class ParametrosPantalla extends Pantalla {
 
+    private final Tabla areas = new Tabla(new String[]{"Área", "Estado", "La usa"});
+    private final Tabla especialistas = new Tabla(new String[]{"Código", "Tipo de operario", "Área", "Estado"});
+    private final Tabla parametros = new Tabla(new String[]{"Parámetro", "Valor", "Unidad", "Qué cambia en el sistema"});
+    private List<Empleado> listaEspecialistas = List.of();
+
     public ParametrosPantalla() {
-        super("General", "Generalidades de la empresa y del sistema.");
+        super("Parámetro General", "Generalidades de la empresa y del sistema.");
 
-        JPanel raiz = Ui.panel(new BorderLayout(0, Tema.ESP_MD));
-        raiz.add(generalidadesEmpresa(), BorderLayout.NORTH);
-        raiz.add(generalidadesSistema(), BorderLayout.CENTER);
-        contenido().add(raiz, BorderLayout.CENTER);
+        areas.anchos(300, 120, 360);
+        especialistas.anchos(90, 140, 320, 120);
+        parametros.anchos(200, 90, 110, 520);
+
+        JPanel empresa = Ui.panel(new GridLayout(1, 2, Tema.ESP_MD, 0));
+        empresa.add(grupo("Áreas", areas, this::estadoArea));
+        empresa.add(grupo("Especialistas por área", especialistas, this::estadoEspecialista));
+        empresa.setPreferredSize(Ui.dim(100, 280));
+
+        JButton cambiar = Ui.boton("Cambiar valor");
+        cambiar.addActionListener(e -> cambiarParametro());
+        Grupo sistema = new Grupo("Generalidades del sistema");
+        sistema.add(parametros.enScroll(), BorderLayout.CENTER);
+        sistema.add(Ui.filaDerecha(cambiar), BorderLayout.SOUTH);
+
+        contenido().add(empresa, BorderLayout.NORTH);
+        contenido().add(sistema, BorderLayout.CENTER);
+        refrescar();
     }
 
-    /* ---------------- generalidades de la empresa ---------------- */
+    private interface CambioEstado { void aplicar(int fila, boolean habilitar); }
 
-    private JComponent generalidadesEmpresa() {
-        Grupo g = new Grupo("Generalidades Empresa", new GridLayout(1, 2, Tema.ESP_MD, 0));
-        g.add(areas());
-        g.add(especialistas());
-        g.setPreferredSize(Ui.dim(100, 250));
+    private JComponent grupo(String titulo, Tabla tabla, CambioEstado cambio) {
+        JButton habilitar = Ui.boton("Habilitar");
+        JButton deshabilitar = Ui.boton("Deshabilitar");
+        habilitar.addActionListener(e -> cambiar(tabla, cambio, true));
+        deshabilitar.addActionListener(e -> cambiar(tabla, cambio, false));
+        Grupo g = new Grupo(titulo);
+        g.add(tabla.enScroll(), BorderLayout.CENTER);
+        g.add(Ui.filaDerecha(habilitar, deshabilitar), BorderLayout.SOUTH);
         return g;
     }
 
-    private JComponent areas() {
-        Grupo g = new Grupo("Áreas");
+    private void cambiar(Tabla tabla, CambioEstado cambio, boolean si) {
+        int i = tabla.filaModelo();
+        if (i < 0) { avisar("Seleccione una fila."); return; }
+        try {
+            cambio.aplicar(i, si);
+        } catch (IllegalArgumentException ex) {
+            advertir(ex.getMessage());
+        }
+        refrescar();
+    }
+
+    private void estadoArea(int fila, boolean si) {
+        String area = Datos.catalogo("areas").existentes().get(fila);
+        Integridad.aplicar(Auditoria.SIN_SESION, "Parámetro General", (si ? "Habilitar " : "Deshabilitar ") + area,
+                () -> { Catalogos.habilitarArea(area, si); return area + (si ? " habilitada." : " deshabilitada."); });
+    }
+
+    private void estadoEspecialista(int fila, boolean si) {
+        avisar(Asignacion.cambiarEstado(listaEspecialistas.get(fila).id(), si, Auditoria.SIN_SESION));
+    }
+
+    private void cambiarParametro() {
+        int i = parametros.filaModelo();
+        if (i < 0) { avisar("Seleccione el parámetro que desea cambiar."); return; }
+        String[] p = Parametros.lista().get(i);
+        String valor = JOptionPane.showInputDialog(this, p[0] + " (" + p[2] + "):", p[1]);
+        if (valor == null) return;
+        try {
+            Integridad.aplicar(Auditoria.SIN_SESION, "Generalidades del sistema", "Cambiar " + p[0],
+                    () -> { Parametros.cambiar(p[0], valor); return p[0] + " = " + valor.trim() + "."; });
+        } catch (IllegalArgumentException ex) {
+            advertir(ex.getMessage());
+        }
+        refrescar();
+    }
+
+    private void refrescar() {
         var cat = Datos.catalogo("areas");
-        g.add(alta("Ingresar Área:", Ui.texto(14)), BorderLayout.NORTH);
-        g.add(dobleLista("Áreas Existentes", cat.existentes(),
-                "Áreas Habilitadas", cat.habilitados()), BorderLayout.CENTER);
-        return g;
-    }
+        areas.limpiar();
+        cat.existentes().forEach(a -> areas.agregar(a,
+                cat.habilitados().contains(a) ? "Habilitado" : "Deshabilitado", Catalogos.usoDeArea(a)));
 
-    private JComponent especialistas() {
-        Grupo g = new Grupo("Especialistas Áreas");
-        var areas = Datos.catalogo("areas").habilitados();
-        var empleados = Datos.catalogo("empleados");
+        listaEspecialistas = Prototipo.EMPLEADOS.values().stream().filter(e -> !e.esSupervisor()).toList();
+        especialistas.limpiar();
+        listaEspecialistas.forEach(e -> especialistas.agregar(e.id(), e.tipo(), e.area(),
+                Prototipo.habilitado(e.id()) ? "Habilitado" : "Deshabilitado"));
 
-        JPanel alta = Ui.panel(new GridBagLayout());
-        GridBagConstraints gc = new GridBagConstraints();
-        gc.insets = new Insets(Tema.ESP_XS, 0, Tema.ESP_XS, Tema.ESP_SM);
-        gc.fill = GridBagConstraints.HORIZONTAL;
-        gc.anchor = GridBagConstraints.LINE_START;
-
-        gc.gridx = 0; gc.gridy = 0; gc.weightx = 0;
-        alta.add(Ui.etiqueta("Área:"), gc);
-        gc.gridx = 1; gc.weightx = 1;
-        alta.add(Ui.combo(areas), gc);
-        gc.gridx = 2; gc.weightx = 0;
-        alta.add(Ui.boton("Ingresar"), gc);
-
-        gc.gridx = 0; gc.gridy = 1; gc.weightx = 0;
-        alta.add(Ui.etiqueta("Ingresar Especialista:"), gc);
-        gc.gridx = 1; gc.weightx = 1;
-        alta.add(Ui.texto(10), gc);
-
-        alta.setBorder(Ui.relleno(0, 0, Tema.ESP_SM, 0));
-
-        g.add(alta, BorderLayout.NORTH);
-        g.add(dobleLista("Especialistas Existentes", empleados.existentes(),
-                "Especialistas Habilitados", empleados.habilitados()), BorderLayout.CENTER);
-        return g;
-    }
-
-    /* ---------------- generalidades del sistema ---------------- */
-
-    private JComponent generalidadesSistema() {
-        Grupo g = new Grupo("Generalidades Sistema", new GridLayout(1, 2, Tema.ESP_MD, 0));
-        g.add(magnitud());
-        g.add(idioma());
-        return g;
-    }
-
-    private JComponent magnitud() {
-        Grupo g = new Grupo("Magnitud");
-
-        JPanel alta = Ui.panel(new BorderLayout(Tema.ESP_SM, 0));
-        alta.add(Ui.etiqueta("Ingresar Magnitud:"), BorderLayout.WEST);
-        alta.add(Ui.combo(Prototipo.MAGNITUDES), BorderLayout.CENTER);
-        alta.add(Ui.boton("Ingresar"), BorderLayout.EAST);
-        alta.setBorder(Ui.relleno(0, 0, Tema.ESP_MD, 0));
-
-        DefaultListModel<String> modelo = new DefaultListModel<>();
-        Prototipo.MAGNITUD_EXISTENTE.forEach(modelo::addElement);
-        JList<String> lista = new JList<>(modelo);
-        lista.setFont(Tema.cuerpo());
-
-        JButton eliminar = Ui.boton("Eliminar");
-        eliminar.addActionListener(e -> {
-            String v = lista.getSelectedValue();
-            if (v == null) { avisar("Seleccione la magnitud que desea eliminar."); return; }
-            if (confirmar("¿Eliminar la magnitud \"" + v + "\"?")) modelo.removeElement(v);
-        });
-
-        JPanel botones = Ui.panel(new GridBagLayout());
-        botones.add(eliminar);
-        botones.setBorder(Ui.relleno(0, 0, 0, Tema.ESP_MD));
-
-        JPanel centro = Ui.panel(new BorderLayout(Tema.ESP_MD, 0));
-        centro.add(Ui.etiqueta("Magnitud Existente"), BorderLayout.NORTH);
-        centro.add(Ui.scroll(lista), BorderLayout.CENTER);
-        centro.add(botones, BorderLayout.EAST);
-
-        g.add(alta, BorderLayout.NORTH);
-        g.add(centro, BorderLayout.CENTER);
-        return g;
-    }
-
-    private JComponent idioma() {
-        Grupo g = new Grupo("Idioma");
-        g.add(alta("Ingresar Idioma:", Ui.texto(12)), BorderLayout.NORTH);
-        g.add(dobleLista("Idiomas Existentes", Prototipo.IDIOMAS_EXISTENTES,
-                "Idiomas Habilitadas", Prototipo.IDIOMAS_HABILITADOS), BorderLayout.CENTER);
-        return g;
-    }
-
-    /* ---------------- piezas comunes ---------------- */
-
-    /** Campo de alta con su boton Ingresar, como en la captura. */
-    private JComponent alta(String etiqueta, JTextField campo) {
-        JPanel p = Ui.panel(new BorderLayout(Tema.ESP_SM, 0));
-        p.add(Ui.etiqueta(etiqueta), BorderLayout.WEST);
-        p.add(campo, BorderLayout.CENTER);
-        p.add(Ui.boton("Ingresar"), BorderLayout.EAST);
-        p.setBorder(Ui.relleno(0, 0, Tema.ESP_MD, 0));
-        return p;
-    }
-
-    /**
-     * Las dos listas enfrentadas con los botones ">" y "<" en el medio, que es
-     * como el prototipo mueve un valor de existente a habilitado.
-     */
-    private JComponent dobleLista(String tituloIzq, List<String> valoresIzq,
-                                  String tituloDer, List<String> valoresDer) {
-        DefaultListModel<String> mIzq = new DefaultListModel<>();
-        DefaultListModel<String> mDer = new DefaultListModel<>();
-        valoresIzq.forEach(mIzq::addElement);
-        valoresDer.forEach(mDer::addElement);
-
-        JList<String> izq = new JList<>(mIzq);
-        JList<String> der = new JList<>(mDer);
-        izq.setFont(Tema.cuerpo());
-        der.setFont(Tema.cuerpo());
-
-        JButton pasar = Ui.boton(">");
-        pasar.addActionListener(e -> {
-            String v = izq.getSelectedValue();
-            if (v == null) { avisar("Seleccione un valor de la lista de existentes."); return; }
-            if (mDer.contains(v)) { avisar("\"" + v + "\" ya está habilitado."); return; }
-            mDer.addElement(v);
-        });
-        JButton quitar = Ui.boton("<");
-        quitar.addActionListener(e -> {
-            String v = der.getSelectedValue();
-            if (v == null) { avisar("Seleccione un valor habilitado."); return; }
-            mDer.removeElement(v);
-        });
-
-        JPanel botones = Ui.panel(new GridBagLayout());
-        JPanel columna = Ui.panel(new GridLayout(2, 1, 0, Tema.ESP_SM));
-        columna.add(pasar);
-        columna.add(quitar);
-        botones.add(columna);
-        botones.setBorder(Ui.relleno(0, Tema.ESP_SM, 0, Tema.ESP_SM));
-
-        JPanel pIzq = Ui.panel(new BorderLayout(0, Tema.ESP_XS));
-        pIzq.add(Ui.etiqueta(tituloIzq), BorderLayout.NORTH);
-        pIzq.add(Ui.scroll(izq), BorderLayout.CENTER);
-
-        JPanel pDer = Ui.panel(new BorderLayout(0, Tema.ESP_XS));
-        pDer.add(Ui.etiqueta(tituloDer), BorderLayout.NORTH);
-        pDer.add(Ui.scroll(der), BorderLayout.CENTER);
-
-        JPanel p = Ui.panel(new GridBagLayout());
-        GridBagConstraints gc = new GridBagConstraints();
-        gc.fill = GridBagConstraints.BOTH;
-        gc.weighty = 1;
-        gc.gridy = 0;
-        gc.gridx = 0; gc.weightx = 1; p.add(pIzq, gc);
-        gc.gridx = 1; gc.weightx = 0; p.add(botones, gc);
-        gc.gridx = 2; gc.weightx = 1; p.add(pDer, gc);
-        return p;
+        parametros.limpiar();
+        Parametros.lista().forEach(f -> parametros.agregar((Object[]) f));
     }
 }

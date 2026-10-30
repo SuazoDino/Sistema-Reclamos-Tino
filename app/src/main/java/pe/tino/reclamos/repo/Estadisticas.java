@@ -9,7 +9,7 @@ import java.util.List;
  * (proceso BAT-04) deja elaborado para que la consulta gerencial solo lo lea.
  *
  * El libro pide que la consulta gerencial muestre tendencia y la proyecte
- * extrapolando; sin historia no hay tendencia. Los tickets de la sesion son
+ * extrapolando; sin historia no hay tendencia. Los reclamos de la sesion son
  * todos del mes en curso, asi que los meses anteriores salen de aqui.
  */
 public final class Estadisticas {

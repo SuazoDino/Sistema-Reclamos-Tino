@@ -1,0 +1,135 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1625" height="782" viewBox="0 0 1625 782" font-family="Arial, Helvetica, sans-serif">
+<defs><marker id="f" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#000"/></marker></defs>
+<rect width="1625" height="782" fill="#ffffff"/>
+<polyline points="845.0,48.0 845.0,79.0 740.0,79.0" fill="none" stroke="#000" stroke-width="1" marker-end="url(#f)"/>
+<polyline points="620.0,79.0 600.0,79.0" fill="none" stroke="#000" stroke-width="1" marker-end="url(#f)"/>
+<polyline points="845.0,48.0 845.0,112.0 470.0,112.0 470.0,130.0" fill="none" stroke="#000" stroke-width="1" marker-end="url(#f)"/>
+<polyline points="845.0,48.0 845.0,112.0 1260.0,112.0 1260.0,130.0" fill="none" stroke="#000" stroke-width="1" marker-end="url(#f)"/>
+<polyline points="470.0,156.0 470.0,175.5 250.0,175.5 250.0,195.0" fill="none" stroke="#000" stroke-width="1" marker-end="url(#f)"/>
+<polyline points="470.0,156.0 470.0,175.5 690.0,175.5 690.0,195.0" fill="none" stroke="#000" stroke-width="1" marker-end="url(#f)"/>
+<polyline points="190.0,208.0 106.0,208.0 106.0,263.0 120.0,263.0" fill="none" stroke="#000" stroke-width="1" marker-end="url(#f)"/>
+<polyline points="134.0,276.0 134.0,304.0 160.0,304.0" fill="none" stroke="#000" stroke-width="1" marker-end="url(#f)"/>
+<polyline points="134.0,276.0 134.0,336.0 160.0,336.0" fill="none" stroke="#000" stroke-width="1" marker-end="url(#f)"/>
+<polyline points="134.0,276.0 134.0,368.0 160.0,368.0" fill="none" stroke="#000" stroke-width="1" marker-end="url(#f)"/>
+<polyline points="134.0,276.0 134.0,400.0 160.0,400.0" fill="none" stroke="#000" stroke-width="1" marker-end="url(#f)"/>
+<polyline points="134.0,276.0 134.0,432.0 160.0,432.0" fill="none" stroke="#000" stroke-width="1" marker-end="url(#f)"/>
+<polyline points="134.0,276.0 134.0,464.0 160.0,464.0" fill="none" stroke="#000" stroke-width="1" marker-end="url(#f)"/>
+<polyline points="134.0,276.0 134.0,496.0 160.0,496.0" fill="none" stroke="#000" stroke-width="1" marker-end="url(#f)"/>
+<polyline points="134.0,276.0 134.0,528.0 160.0,528.0" fill="none" stroke="#000" stroke-width="1" marker-end="url(#f)"/>
+<polyline points="134.0,276.0 134.0,560.0 160.0,560.0" fill="none" stroke="#000" stroke-width="1" marker-end="url(#f)"/>
+<polyline points="134.0,276.0 134.0,592.0 160.0,592.0" fill="none" stroke="#000" stroke-width="1" marker-end="url(#f)"/>
+<polyline points="190.0,208.0 106.0,208.0 106.0,635.0 120.0,635.0" fill="none" stroke="#000" stroke-width="1" marker-end="url(#f)"/>
+<polyline points="134.0,648.0 134.0,676.0 160.0,676.0" fill="none" stroke="#000" stroke-width="1" marker-end="url(#f)"/>
+<polyline points="134.0,648.0 134.0,708.0 160.0,708.0" fill="none" stroke="#000" stroke-width="1" marker-end="url(#f)"/>
+<polyline points="134.0,648.0 134.0,740.0 160.0,740.0" fill="none" stroke="#000" stroke-width="1" marker-end="url(#f)"/>
+<polyline points="690.0,221.0 690.0,235.5 595.0,235.5 595.0,250.0" fill="none" stroke="#000" stroke-width="1" marker-end="url(#f)"/>
+<polyline points="690.0,221.0 690.0,235.5 815.0,235.5 815.0,250.0" fill="none" stroke="#000" stroke-width="1" marker-end="url(#f)"/>
+<polyline points="554.0,276.0 554.0,312.0 570.0,312.0" fill="none" stroke="#000" stroke-width="1" marker-end="url(#f)"/>
+<polyline points="554.0,276.0 554.0,360.0 570.0,360.0" fill="none" stroke="#000" stroke-width="1" marker-end="url(#f)"/>
+<polyline points="554.0,276.0 554.0,408.0 570.0,408.0" fill="none" stroke="#000" stroke-width="1" marker-end="url(#f)"/>
+<polyline points="774.0,276.0 774.0,312.0 790.0,312.0" fill="none" stroke="#000" stroke-width="1" marker-end="url(#f)"/>
+<polyline points="774.0,276.0 774.0,360.0 790.0,360.0" fill="none" stroke="#000" stroke-width="1" marker-end="url(#f)"/>
+<polyline points="1260.0,156.0 1260.0,175.5 1090.0,175.5 1090.0,195.0" fill="none" stroke="#000" stroke-width="1" marker-end="url(#f)"/>
+<polyline points="1260.0,156.0 1260.0,175.5 1430.0,175.5 1430.0,195.0" fill="none" stroke="#000" stroke-width="1" marker-end="url(#f)"/>
+<polyline points="1030.0,208.0 986.0,208.0 986.0,263.0 1000.0,263.0" fill="none" stroke="#000" stroke-width="1" marker-end="url(#f)"/>
+<polyline points="1014.0,276.0 1014.0,304.0 1040.0,304.0" fill="none" stroke="#000" stroke-width="1" marker-end="url(#f)"/>
+<polyline points="1014.0,276.0 1014.0,336.0 1040.0,336.0" fill="none" stroke="#000" stroke-width="1" marker-end="url(#f)"/>
+<polyline points="1014.0,276.0 1014.0,368.0 1040.0,368.0" fill="none" stroke="#000" stroke-width="1" marker-end="url(#f)"/>
+<polyline points="1014.0,276.0 1014.0,400.0 1040.0,400.0" fill="none" stroke="#000" stroke-width="1" marker-end="url(#f)"/>
+<polyline points="1030.0,208.0 986.0,208.0 986.0,443.0 1000.0,443.0" fill="none" stroke="#000" stroke-width="1" marker-end="url(#f)"/>
+<polyline points="1014.0,456.0 1014.0,484.0 1040.0,484.0" fill="none" stroke="#000" stroke-width="1" marker-end="url(#f)"/>
+<polyline points="1370.0,208.0 1326.0,208.0 1326.0,263.0 1340.0,263.0" fill="none" stroke="#000" stroke-width="1" marker-end="url(#f)"/>
+<polyline points="1354.0,276.0 1354.0,304.0 1380.0,304.0" fill="none" stroke="#000" stroke-width="1" marker-end="url(#f)"/>
+<polyline points="1370.0,208.0 1326.0,208.0 1326.0,349.0 1340.0,349.0" fill="none" stroke="#000" stroke-width="1" marker-end="url(#f)"/>
+<polyline points="1354.0,362.0 1354.0,390.0 1380.0,390.0" fill="none" stroke="#000" stroke-width="1" marker-end="url(#f)"/>
+<polyline points="1354.0,362.0 1354.0,422.0 1380.0,422.0" fill="none" stroke="#000" stroke-width="1" marker-end="url(#f)"/>
+<rect x="760" y="20" width="170" height="28" rx="4" fill="#dae8fc" stroke="#6c8ebf" stroke-width="1.2"/>
+<text x="845.0" y="37.9" font-size="11" font-weight="bold" text-anchor="middle" fill="#000">SISTEMA DE RECLAMOS</text>
+<rect x="620" y="66" width="120" height="26" rx="4" fill="#dae8fc" stroke="#6c8ebf" stroke-width="1.2"/>
+<text x="680.0" y="82.8" font-size="11" font-weight="bold" text-anchor="middle" fill="#000">SEGURIDAD</text>
+<rect x="470" y="66" width="130" height="26" rx="4" fill="#f8cecc" stroke="#b85450" stroke-width="1.2"/>
+<text x="535.0" y="82.8" font-size="11" font-weight="normal" text-anchor="middle" fill="#000">Perfiles y Accesos</text>
+<rect x="410" y="130" width="120" height="26" rx="4" fill="#dae8fc" stroke="#6c8ebf" stroke-width="1.2"/>
+<text x="470.0" y="146.8" font-size="11" font-weight="bold" text-anchor="middle" fill="#000">ONLINE</text>
+<rect x="1200" y="130" width="120" height="26" rx="4" fill="#dae8fc" stroke="#6c8ebf" stroke-width="1.2"/>
+<text x="1260.0" y="146.8" font-size="11" font-weight="bold" text-anchor="middle" fill="#000">BATCH</text>
+<rect x="190" y="195" width="120" height="26" rx="4" fill="#dae8fc" stroke="#6c8ebf" stroke-width="1.2"/>
+<text x="250.0" y="211.8" font-size="11" font-weight="bold" text-anchor="middle" fill="#000">GERENCIAL</text>
+<rect x="630" y="195" width="120" height="26" rx="4" fill="#dae8fc" stroke="#6c8ebf" stroke-width="1.2"/>
+<text x="690.0" y="211.8" font-size="11" font-weight="bold" text-anchor="middle" fill="#000">OPERATIVO</text>
+<rect x="120" y="250" width="120" height="26" rx="4" fill="#fff2cc" stroke="#d6b656" stroke-width="1.2"/>
+<text x="180.0" y="266.9" font-size="11" font-weight="bold" text-anchor="middle" fill="#000">MANT-PARAM</text>
+<rect x="160" y="292" width="190" height="24" rx="4" fill="#f8cecc" stroke="#b85450" stroke-width="1.2"/>
+<text x="255.0" y="307.9" font-size="11" font-weight="normal" text-anchor="middle" fill="#000">Parámetro General</text>
+<rect x="160" y="324" width="190" height="24" rx="4" fill="#f8cecc" stroke="#b85450" stroke-width="1.2"/>
+<text x="255.0" y="339.9" font-size="11" font-weight="normal" text-anchor="middle" fill="#000">Catálogo de Reclamo y Eventos</text>
+<rect x="160" y="356" width="190" height="24" rx="4" fill="#f8cecc" stroke="#b85450" stroke-width="1.2"/>
+<text x="255.0" y="371.9" font-size="11" font-weight="normal" text-anchor="middle" fill="#000">Catálogo de Producto</text>
+<rect x="160" y="388" width="190" height="24" rx="4" fill="#f8cecc" stroke="#b85450" stroke-width="1.2"/>
+<text x="255.0" y="403.9" font-size="11" font-weight="normal" text-anchor="middle" fill="#000">Catálogo de Servicios</text>
+<rect x="160" y="420" width="190" height="24" rx="4" fill="#f8cecc" stroke="#b85450" stroke-width="1.2"/>
+<text x="255.0" y="435.9" font-size="11" font-weight="normal" text-anchor="middle" fill="#000">Catálogo de Problemas</text>
+<rect x="160" y="452" width="190" height="24" rx="4" fill="#f8cecc" stroke="#b85450" stroke-width="1.2"/>
+<text x="255.0" y="467.9" font-size="11" font-weight="normal" text-anchor="middle" fill="#000">Catálogo de Cliente</text>
+<rect x="160" y="484" width="190" height="24" rx="4" fill="#f8cecc" stroke="#b85450" stroke-width="1.2"/>
+<text x="255.0" y="499.9" font-size="11" font-weight="normal" text-anchor="middle" fill="#000">Catálogo de Protocolos</text>
+<rect x="160" y="516" width="190" height="24" rx="4" fill="#f8cecc" stroke="#b85450" stroke-width="1.2"/>
+<text x="255.0" y="531.9" font-size="11" font-weight="normal" text-anchor="middle" fill="#000">Catálogo de Reglas</text>
+<rect x="160" y="548" width="190" height="24" rx="4" fill="#f8cecc" stroke="#b85450" stroke-width="1.2"/>
+<text x="255.0" y="563.9" font-size="11" font-weight="normal" text-anchor="middle" fill="#000">Catálogo de Políticas</text>
+<rect x="160" y="580" width="190" height="24" rx="4" fill="#f8cecc" stroke="#b85450" stroke-width="1.2"/>
+<text x="255.0" y="595.9" font-size="11" font-weight="normal" text-anchor="middle" fill="#000">Parámetros de Atención</text>
+<rect x="120" y="622" width="120" height="26" rx="4" fill="#fff2cc" stroke="#d6b656" stroke-width="1.2"/>
+<text x="180.0" y="638.9" font-size="11" font-weight="bold" text-anchor="middle" fill="#000">CONSULTA</text>
+<rect x="160" y="664" width="190" height="24" rx="4" fill="#f8cecc" stroke="#b85450" stroke-width="1.2"/>
+<text x="255.0" y="679.9" font-size="11" font-weight="normal" text-anchor="middle" fill="#000">Consulta de Reclamos</text>
+<rect x="160" y="696" width="190" height="24" rx="4" fill="#f8cecc" stroke="#b85450" stroke-width="1.2"/>
+<text x="255.0" y="711.9" font-size="11" font-weight="normal" text-anchor="middle" fill="#000">Parque de Tickets</text>
+<rect x="160" y="728" width="190" height="24" rx="4" fill="#f8cecc" stroke="#b85450" stroke-width="1.2"/>
+<text x="255.0" y="743.9" font-size="11" font-weight="normal" text-anchor="middle" fill="#000">Consulta de Indicadores</text>
+<rect x="540" y="250" width="110" height="26" rx="4" fill="#fff2cc" stroke="#d6b656" stroke-width="1.2"/>
+<text x="595.0" y="266.9" font-size="11" font-weight="bold" text-anchor="middle" fill="#000">ÁREA</text>
+<rect x="760" y="250" width="110" height="26" rx="4" fill="#fff2cc" stroke="#d6b656" stroke-width="1.2"/>
+<text x="815.0" y="266.9" font-size="11" font-weight="bold" text-anchor="middle" fill="#000">CLIENTE</text>
+<rect x="570" y="294" width="150" height="36" rx="4" fill="#f8cecc" stroke="#b85450" stroke-width="1.2"/>
+<text x="645.0" y="309.2" font-size="11" font-weight="normal" text-anchor="middle" fill="#000">DATA ENTRY</text>
+<text x="645.0" y="322.4" font-size="11" font-weight="normal" text-anchor="middle" fill="#000">(Atender Reclamo)</text>
+<rect x="570" y="342" width="150" height="36" rx="4" fill="#f8cecc" stroke="#b85450" stroke-width="1.2"/>
+<text x="645.0" y="363.9" font-size="11" font-weight="normal" text-anchor="middle" fill="#000">REVISIÓN DE CALIDAD</text>
+<rect x="570" y="390" width="150" height="36" rx="4" fill="#f8cecc" stroke="#b85450" stroke-width="1.2"/>
+<text x="645.0" y="411.9" font-size="11" font-weight="normal" text-anchor="middle" fill="#000">REPORTES</text>
+<rect x="790" y="294" width="150" height="36" rx="4" fill="#f8cecc" stroke="#b85450" stroke-width="1.2"/>
+<text x="865.0" y="309.2" font-size="11" font-weight="normal" text-anchor="middle" fill="#000">DATA ENTRY</text>
+<text x="865.0" y="322.4" font-size="11" font-weight="normal" text-anchor="middle" fill="#000">(Registrar Reclamo)</text>
+<rect x="790" y="342" width="150" height="36" rx="4" fill="#f8cecc" stroke="#b85450" stroke-width="1.2"/>
+<text x="865.0" y="357.2" font-size="11" font-weight="normal" text-anchor="middle" fill="#000">REPORTES</text>
+<text x="865.0" y="370.4" font-size="11" font-weight="normal" text-anchor="middle" fill="#000">(Estado de Reclamo)</text>
+<rect x="1030" y="195" width="120" height="26" rx="4" fill="#dae8fc" stroke="#6c8ebf" stroke-width="1.2"/>
+<text x="1090.0" y="211.8" font-size="11" font-weight="bold" text-anchor="middle" fill="#000">APLICATIVO</text>
+<rect x="1370" y="195" width="120" height="26" rx="4" fill="#dae8fc" stroke="#6c8ebf" stroke-width="1.2"/>
+<text x="1430.0" y="211.8" font-size="11" font-weight="bold" text-anchor="middle" fill="#000">TÉCNICO</text>
+<rect x="1000" y="250" width="110" height="26" rx="4" fill="#fff2cc" stroke="#d6b656" stroke-width="1.2"/>
+<text x="1055.0" y="266.9" font-size="11" font-weight="bold" text-anchor="middle" fill="#000">ACT-BD</text>
+<rect x="1040" y="292" width="215" height="24" rx="4" fill="#f8cecc" stroke="#b85450" stroke-width="1.2"/>
+<text x="1147.5" y="307.9" font-size="11" font-weight="normal" text-anchor="middle" fill="#000">Carga de Compras</text>
+<rect x="1040" y="324" width="215" height="24" rx="4" fill="#f8cecc" stroke="#b85450" stroke-width="1.2"/>
+<text x="1147.5" y="339.9" font-size="11" font-weight="normal" text-anchor="middle" fill="#000">Generación del Parque de Tickets</text>
+<rect x="1040" y="356" width="215" height="24" rx="4" fill="#f8cecc" stroke="#b85450" stroke-width="1.2"/>
+<text x="1147.5" y="371.9" font-size="11" font-weight="normal" text-anchor="middle" fill="#000">Acumulación de Movimientos</text>
+<rect x="1040" y="388" width="215" height="24" rx="4" fill="#f8cecc" stroke="#b85450" stroke-width="1.2"/>
+<text x="1147.5" y="403.9" font-size="11" font-weight="normal" text-anchor="middle" fill="#000">Actualización de Maestra Operarios</text>
+<rect x="1000" y="430" width="110" height="26" rx="4" fill="#fff2cc" stroke="#d6b656" stroke-width="1.2"/>
+<text x="1055.0" y="446.9" font-size="11" font-weight="bold" text-anchor="middle" fill="#000">ESTADÍSTICAS</text>
+<rect x="1040" y="472" width="215" height="24" rx="4" fill="#f8cecc" stroke="#b85450" stroke-width="1.2"/>
+<text x="1147.5" y="487.9" font-size="11" font-weight="normal" text-anchor="middle" fill="#000">Cálculo de Indicadores</text>
+<rect x="1340" y="250" width="110" height="26" rx="4" fill="#fff2cc" stroke="#d6b656" stroke-width="1.2"/>
+<text x="1395.0" y="266.9" font-size="11" font-weight="bold" text-anchor="middle" fill="#000">MANT-BD</text>
+<rect x="1380" y="292" width="215" height="24" rx="4" fill="#f8cecc" stroke="#b85450" stroke-width="1.2"/>
+<text x="1487.5" y="307.9" font-size="11" font-weight="normal" text-anchor="middle" fill="#000">Respaldo de Maestras</text>
+<rect x="1340" y="336" width="110" height="26" rx="4" fill="#fff2cc" stroke="#d6b656" stroke-width="1.2"/>
+<text x="1395.0" y="352.9" font-size="11" font-weight="bold" text-anchor="middle" fill="#000">CONTINGENCIA</text>
+<rect x="1380" y="378" width="215" height="24" rx="4" fill="#f8cecc" stroke="#b85450" stroke-width="1.2"/>
+<text x="1487.5" y="393.9" font-size="11" font-weight="normal" text-anchor="middle" fill="#000">Checkpoint</text>
+<rect x="1380" y="410" width="215" height="24" rx="4" fill="#f8cecc" stroke="#b85450" stroke-width="1.2"/>
+<text x="1487.5" y="425.9" font-size="11" font-weight="normal" text-anchor="middle" fill="#000">Recuperación de Maestra Reclamos</text>
+</svg>

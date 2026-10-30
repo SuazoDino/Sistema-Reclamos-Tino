@@ -1,9 +1,9 @@
 package pe.tino.reclamos.ui.screens;
 
-import pe.tino.reclamos.model.Ticket;
+import pe.tino.reclamos.model.Reclamo;
 import pe.tino.reclamos.repo.Prototipo;
 import pe.tino.reclamos.repo.Prototipo.Empleado;
-import pe.tino.reclamos.repo.Tickets;
+import pe.tino.reclamos.repo.Reclamos;
 import pe.tino.reclamos.ui.components.*;
 import pe.tino.reclamos.ui.theme.Tema;
 
@@ -28,7 +28,7 @@ public class AreaReportePantalla extends Pantalla {
     private final JTextField area = Ui.soloLectura();
     private final JTextField fecha = Ui.soloLectura();
     private final Tabla tabla = new Tabla(new String[]{
-            "Nro Ticket", "Apertura", "Cliente", "Problema", "Prioridad", "Estado", "Vencido"});
+            "Nro Reclamo", "Apertura", "Cliente", "Problema", "Prioridad", "Estado", "Vencido"});
     private final JLabel resumen = Ui.fuerte("");
 
     public AreaReportePantalla() {
@@ -63,7 +63,7 @@ public class AreaReportePantalla extends Pantalla {
 
         contenido().add(g, BorderLayout.CENTER);
         generar();
-        Tickets.alCambiar(t -> generar());
+        Reclamos.alCambiar(t -> generar());
     }
 
     private void generar() {
@@ -72,22 +72,22 @@ public class AreaReportePantalla extends Pantalla {
         tipoEmpleado.setText(e.tipo());
         area.setText(e.area());
 
-        // el reporte se arma sobre los tickets asignados al usuario, no sobre
+        // el reporte se arma sobre los reclamos asignados al usuario, no sobre
         // una lista aparte: si no, Data Entry y Reportes muestran cosas distintas
-        List<Ticket> suyos = Tickets.todos().stream()
+        List<Reclamo> suyos = Reclamos.todos().stream()
                 .filter(t -> e.id().equals(t.especialista()))
                 .toList();
 
         tabla.limpiar();
-        for (Ticket t : suyos) {
+        for (Reclamo t : suyos) {
             tabla.agregar(t.numero(), t.apertura().format(RELOJ), t.nombreCliente(),
                     t.problema(), t.prioridad().etiqueta(), t.estado().etiqueta(),
                     t.vencido() ? "Sí" : "No");
         }
 
         long cerrados = suyos.stream().filter(t -> !t.estado().abierto()).count();
-        long vencidos = suyos.stream().filter(Ticket::vencido).count();
-        resumen.setText(suyos.size() + " tickets asignados  -  " + cerrados
+        long vencidos = suyos.stream().filter(Reclamo::vencido).count();
+        resumen.setText(suyos.size() + " reclamos asignados  -  " + cerrados
                 + " cerrados  -  " + (suyos.size() - cerrados) + " abiertos  -  "
                 + vencidos + " fuera de plazo");
     }

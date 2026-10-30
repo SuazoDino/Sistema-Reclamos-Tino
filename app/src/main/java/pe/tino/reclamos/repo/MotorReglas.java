@@ -24,7 +24,7 @@ public final class MotorReglas {
     public enum TipoDato { ENTERO, DECIMAL, LOGICO, TEXTO }
 
     /**
-     * Una variable es un dato del ticket que el motor puede leer. Antes se
+     * Una variable es un dato del reclamo que el motor puede leer. Antes se
      * declaraban unas (Tgarantia, Precio) y se usaban otras (Tiempo_Garantia,
      * Reparable), asi que ninguna regla podia resolverse sola.
      */
@@ -34,7 +34,7 @@ public final class MotorReglas {
             new Variable("Tiempo_Garantia", TipoDato.ENTERO,
                     "Catálogo de Políticas: plazo de la garantía del producto", "Días"),
             new Variable("Tiempo_Transcurrido", TipoDato.ENTERO,
-                    "Ticket: días entre la compra y la apertura del ticket", "Días"),
+                    "Reclamo: días entre la compra y la apertura del reclamo", "Días"),
             new Variable("Tiempo_Atencion", TipoDato.ENTERO,
                     "Parámetros de Atención: plazo comprometido según el SLA", "Horas"),
             new Variable("Reparable", TipoDato.LOGICO,
@@ -42,11 +42,11 @@ public final class MotorReglas {
             new Variable("Stock", TipoDato.ENTERO,
                     "Almacén: unidades disponibles para intercambio", "Unidades"),
             new Variable("Tiene_Comprobante", TipoDato.LOGICO,
-                    "Ticket: si el cliente presentó comprobante", ""),
+                    "Reclamo: si el cliente presentó comprobante", ""),
             new Variable("Tipo_Cliente", TipoDato.TEXTO,
                     "Catálogo de Cliente: categoría del cliente", ""),
             new Variable("Instancia", TipoDato.ENTERO,
-                    "Ticket: número de instancia en la que está", ""),
+                    "Reclamo: número de instancia en la que está", ""),
             new Variable("Precio", TipoDato.DECIMAL,
                     "Comprobante: monto pagado por el bien o servicio", "Soles")
     ));
@@ -127,17 +127,43 @@ public final class MotorReglas {
         public boolean valido() { return error == null; }
     }
 
+    /* ---------------- asignacion de reglas ---------------- */
+
     /**
-     * Corre la cadena desde la primera condicion con los valores dados.
+     * Tipo de problema | Condicion inicial. Decide que tipos de reclamo pasan
+     * por el motor y desde donde arranca la cadena. Un tipo sin asignacion no
+     * usa el motor: su solucion la decide el area (por ejemplo, una nota de
+     * credito en Cobranza).
+     */
+    private static final Map<String, String> ASIGNADAS = new LinkedHashMap<>(Map.of("Funcionamiento", "CND1"));
+
+    public static Map<String, String> asignadas() { return ASIGNADAS; }
+
+    /** La condicion con la que arranca el motor para ese tipo, o null si no lo usa. */
+    public static String condicionInicial(String tipoProblema) { return ASIGNADAS.get(tipoProblema); }
+
+    public static void asignar(String tipoProblema, String condicion) {
+        if (condicion == null || condicion.isBlank()) { ASIGNADAS.remove(tipoProblema); return; }
+        if (condicion(condicion) == null) throw new IllegalArgumentException("No existe la condición " + condicion + ".");
+        ASIGNADAS.put(tipoProblema, condicion);
+    }
+
+    /** Corre la cadena desde la primera condicion. */
+    public static Resultado evaluar(Map<String, String> valores) {
+        return evaluar(valores, CONDICIONES.isEmpty() ? null : CONDICIONES.get(0).codigo());
+    }
+
+    /**
+     * Corre la cadena desde {@code inicio} con los valores dados.
      * Corta si una condicion se repite, para que un encadenamiento mal
      * configurado no deje al motor girando en circulos.
      */
-    public static Resultado evaluar(Map<String, String> valores) {
+    public static Resultado evaluar(Map<String, String> valores, String inicio) {
         List<Paso> traza = new ArrayList<>();
-        if (CONDICIONES.isEmpty()) return new Resultado(null, traza, "No hay condiciones definidas");
+        if (CONDICIONES.isEmpty() || inicio == null) return new Resultado(null, traza, "No hay condiciones definidas");
 
         List<String> visitadas = new ArrayList<>();
-        String actual = CONDICIONES.get(0).codigo();
+        String actual = inicio;
 
         while (true) {
             if (visitadas.contains(actual)) {

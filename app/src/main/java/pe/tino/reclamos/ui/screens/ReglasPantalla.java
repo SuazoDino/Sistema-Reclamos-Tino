@@ -275,30 +275,45 @@ public class ReglasPantalla extends Pantalla {
     /* ---------------- asignar regla ---------------- */
 
     private JComponent panelAsignar() {
+        JComboBox<String> tipo = Ui.combo(Prototipo.tiposDeProblema());
+        JComboBox<String> inicio = Ui.combo(MotorReglas.codigos());
         JPanel fila = Ui.panel(new GridLayout(2, 2, Tema.ESP_MD, Tema.ESP_SM));
         fila.add(Ui.etiqueta("Tipo de Reclamo:"));
-        fila.add(Ui.combo(Prototipo.TIPO_PROBLEMA));
+        fila.add(tipo);
         fila.add(Ui.etiqueta("Condición inicial:"));
-        fila.add(Ui.combo(MotorReglas.codigos()));
+        fila.add(inicio);
 
         Tabla asignadas = new Tabla(new String[]{"Tipo de Reclamo", "Condición inicial"});
         asignadas.anchos(280, 280);
-        List<String[]> asignaciones = new ArrayList<>(List.of(
-                new String[]{"Funcionamiento", "CND1"},
-                new String[]{"Entrega", "CND1"},
-                new String[]{"Cobranza", "CND2"}));
-        asignaciones.forEach(a -> asignadas.agregar((Object[]) a));
+        Runnable refrescar = () -> {
+            asignadas.limpiar();
+            MotorReglas.asignadas().forEach(asignadas::agregar);
+        };
+        refrescar.run();
 
         JButton asignar = Ui.boton("Asignar");
-        asignar.addActionListener(e -> avisar("La cadena asignada arranca en la condición elegida."));
+        asignar.addActionListener(e -> {
+            MotorReglas.asignar((String) tipo.getSelectedItem(), (String) inicio.getSelectedItem());
+            refrescar.run();
+        });
+        JButton quitar = Ui.boton("Quitar");
+        quitar.addActionListener(e -> {
+            MotorReglas.asignar((String) tipo.getSelectedItem(), null);
+            refrescar.run();
+        });
 
-        JPanel pie = Ui.panel(new FlowLayout(FlowLayout.CENTER, 0, Tema.ESP_SM));
+        JPanel pie = Ui.panel(new FlowLayout(FlowLayout.CENTER, Tema.ESP_MD, Tema.ESP_SM));
         pie.add(asignar);
+        pie.add(quitar);
 
         Grupo g = new Grupo("Asignar Regla");
         g.add(fila, BorderLayout.NORTH);
         g.add(asignadas.enScroll(), BorderLayout.CENTER);
-        g.add(pie, BorderLayout.SOUTH);
+        JPanel abajo = Ui.panel(new BorderLayout());
+        abajo.add(Ui.suave("Solo los tipos de esta tabla pasan por el motor, y la cadena arranca en su condición inicial."),
+                BorderLayout.NORTH);
+        abajo.add(pie, BorderLayout.SOUTH);
+        g.add(abajo, BorderLayout.SOUTH);
 
         JPanel p = Ui.panel(new BorderLayout());
         p.setBorder(Ui.relleno(Tema.ESP_MD));

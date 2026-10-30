@@ -22,14 +22,14 @@ public class BatchPantalla extends Pantalla {
     /** Proceso | Que hace | Por que es batch | Frecuencia | Ventana. */
     private static final List<String[]> PROCESOS = List.of(
             new String[]{"BAT-01", "Vencimiento de plazos de atención",
-                    "Recorre los tickets abiertos y marca los que pasaron su límite "
+                    "Recorre los reclamos abiertos y marca los que pasaron su límite "
                             + "de atención, para que el área los priorice.",
-                    "Toca todos los tickets abiertos a la vez; ningún usuario espera el "
+                    "Toca todos los reclamos abiertos a la vez; ningún usuario espera el "
                             + "resultado, pero el área lo necesita antes de abrir.",
                     "Diaria", "00:30 - 01:00"},
 
             new String[]{"BAT-02", "Cierre de plazos de impugnación",
-                    "Los tickets rechazados cuyo plazo de impugnación expiró pasan a "
+                    "Los reclamos rechazados cuyo plazo de impugnación expiró pasan a "
                             + "Cerrado, porque ya no admiten nueva instancia.",
                     "Es una transición de estado masiva que depende del paso del tiempo, "
                             + "no de una acción del usuario.",
@@ -45,19 +45,19 @@ public class BatchPantalla extends Pantalla {
             new String[]{"BAT-04", "Cálculo de indicadores",
                     "Calcula los once indicadores de gestión y deja el resultado listo "
                             + "para que Consulta de Indicadores solo lo lea.",
-                    "Son agregaciones sobre todos los tickets del periodo. Calcularlas "
+                    "Son agregaciones sobre todos los reclamos del periodo. Calcularlas "
                             + "en línea haría esperar al gerente varios minutos.",
                     "Mensual", "Día 1, 04:00 - 05:00"},
 
-            new String[]{"BAT-05", "Depuración de tickets cerrados",
-                    "Mueve al histórico los tickets cerrados con más de un año y libera "
+            new String[]{"BAT-05", "Depuración de reclamos cerrados",
+                    "Mueve al histórico los reclamos cerrados con más de un año y libera "
                             + "espacio en las tablas de operación.",
                     "Es una actualización masiva que degrada el tiempo de respuesta de "
                             + "todas las consultas si se hace en horario de atención.",
                     "Mensual", "Día 1, 05:00 - 06:00"},
 
-            new String[]{"BAT-06", "Alerta de tickets por vencer",
-                    "Notifica al área los tickets cuyo plazo vence dentro del día, "
+            new String[]{"BAT-06", "Alerta de reclamos por vencer",
+                    "Notifica al área los reclamos cuyo plazo vence dentro del día, "
                             + "según el SLA de Parámetros de Atención.",
                     "Barre toda la cola y emite avisos en lote; corre antes de que "
                             + "empiece la atención.",
@@ -104,7 +104,7 @@ public class BatchPantalla extends Pantalla {
         t.agregar("BAT-04", "BAT-03",
                 "Los indicadores por tipo de cliente usan la categoría que BAT-03 recalcula");
         t.agregar("BAT-05", "BAT-04",
-                "No se depura un ticket antes de que entre en el cálculo del periodo");
+                "No se depura un reclamo antes de que entre en el cálculo del periodo");
         t.agregar("BAT-06", "BAT-01",
                 "La alerta se arma sobre los plazos que BAT-01 dejó marcados");
         t.anchos(110, 260, 560);

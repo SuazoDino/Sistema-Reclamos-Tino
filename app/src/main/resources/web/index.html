@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sistema de Reclamos</title>
+  <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+  <header class="cabecera">
+    <div class="marca">
+      <span class="logo" aria-hidden="true">SR</span>
+      <div>
+        <strong>Sistema de Reclamos</strong>
+        <small>Reclamo → protocolo → eventos → tickets → movimientos</small>
+      </div>
+    </div>
+  </header>
+
+  <div class="marco">
+    <!-- el menu sigue el diseno arquitectonico: Seguridad, y Online con Gerencial y Operativo -->
+    <nav class="menu" aria-label="Pantallas">
+      <div class="modulo">
+        <span class="nombre-modulo">Seguridad</span>
+        <a href="#seguridad">Perfiles y accesos</a>
+        <a href="#diario">Diario de operaciones</a>
+      </div>
+      <div class="modulo">
+        <span class="nombre-modulo">Gerencial</span>
+        <span class="submodulo">Mantenimiento de parámetros</span>
+        <a href="#general">Parámetro general</a>
+        <a href="#reclamos-eventos">Catálogo de reclamos y eventos</a>
+        <a href="#productos">Catálogo de producto</a>
+        <a href="#servicios">Catálogo de servicios</a>
+        <a href="#problemas">Catálogo de problemas</a>
+        <a href="#clientes">Catálogo de cliente</a>
+        <a href="#protocolos">Catálogo de protocolos</a>
+        <a href="#reglas">Catálogo de reglas</a>
+        <a href="#politicas">Catálogo de políticas</a>
+        <a href="#atencion">Parámetros de atención</a>
+        <span class="submodulo">Consulta</span>
+        <a href="#consulta">Consulta de reclamos</a>
+        <a href="#indicadores">Consulta de indicadores</a>
+        <a href="#parque">Parque de tickets</a>
+      </div>
+      <div class="modulo">
+        <span class="nombre-modulo">Operativo</span>
+        <span class="submodulo">Área</span>
+        <a href="#atender">Data entry · Atender reclamo</a>
+        <a href="#reporte">Reportes · Reporte de atención</a>
+        <a href="#revision">Revisión de calidad</a>
+        <span class="submodulo">Cliente</span>
+        <a href="#registrar">Data entry · Formulario de reclamo</a>
+        <a href="#estado">Reportes · Estado de reclamo</a>
+      </div>
+    </nav>
+
+    <main id="vista" class="contenedor" tabindex="-1"></main>
+  </div>
+
+  <dialog id="dialogo">
+    <form method="dialog" class="dialogo-cuerpo">
+      <h2 id="dialogo-titulo"></h2>
+      <div id="dialogo-contenido"></div>
+      <div class="acciones"><button class="primario" value="ok">Aceptar</button></div>
+    </form>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>

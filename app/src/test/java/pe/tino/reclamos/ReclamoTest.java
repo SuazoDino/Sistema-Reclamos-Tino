@@ -1,7 +1,7 @@
 package pe.tino.reclamos;
 
 import org.junit.jupiter.api.Test;
-import pe.tino.reclamos.model.Ticket;
+import pe.tino.reclamos.model.Reclamo;
 import pe.tino.reclamos.repo.Catalogos;
 import pe.tino.reclamos.repo.Dominio.*;
 
@@ -9,13 +9,13 @@ import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/** Las reglas del ticket: prioridad, plazo, maquina de estados e impugnacion. */
-class TicketTest {
+/** Las reglas del reclamo: prioridad, plazo, maquina de estados e impugnacion. */
+class ReclamoTest {
 
-    private static Ticket nuevo(String tipoProblema, String tipoCliente) {
+    private static Reclamo nuevo(String tipoProblema, String tipoCliente) {
         Prioridad p = Catalogos.prioridadDe(tipoProblema, tipoCliente);
         long horas = Catalogos.horasDeAtencion(tipoCliente, p);
-        return new Ticket("TK-TEST-0001", LocalDateTime.now(), Canal.WEB, "Loc01",
+        return new Reclamo("RC-TEST-0001", LocalDateTime.now(), Canal.WEB, "Loc01",
                 "72119474", "Cliente de prueba", tipoCliente,
                 TipoObjeto.PRODUCTO, "Teléfono Móvil", tipoProblema, "No enciende",
                 "", "", p, LocalDateTime.now().plusHours(horas));
@@ -52,7 +52,7 @@ class TicketTest {
 
     @Test
     void elTicketNaceRegistradoYEnPrimeraInstancia() {
-        Ticket t = nuevo("Funcionamiento", "Vip");
+        Reclamo t = nuevo("Funcionamiento", "Vip");
         assertEquals(Estado.REGISTRADO, t.estado());
         assertEquals(Instancia.PRIMERA, t.instancia());
         assertFalse(t.vencido());
@@ -61,25 +61,28 @@ class TicketTest {
 
     @Test
     void laMaquinaDeEstadosRechazaUnSaltoInvalido() {
-        Ticket t = nuevo("Funcionamiento", "Vip");
+        Reclamo t = nuevo("Funcionamiento", "Vip");
         assertFalse(t.cambiarEstado(Estado.CERRADO, "E01", ""),
-                "un ticket recién registrado no puede cerrarse de golpe");
+                "un reclamo recién registrado no puede cerrarse de golpe");
         assertEquals(Estado.REGISTRADO, t.estado());
     }
 
     @Test
     void elCaminoNormalLlegaHastaCerrado() {
-        Ticket t = nuevo("Funcionamiento", "Vip");
+        Reclamo t = nuevo("Funcionamiento", "Vip");
         assertTrue(t.cambiarEstado(Estado.ASIGNADO, "E01", ""));
         assertTrue(t.cambiarEstado(Estado.EN_ATENCION, "E01", ""));
         assertTrue(t.cambiarEstado(Estado.RESUELTO, "E01", ""));
-        assertTrue(t.cambiarEstado(Estado.CERRADO, "E01", ""));
+        assertFalse(t.cambiarEstado(Estado.CERRADO, "E01", ""),
+                "un resuelto no se cierra sin pasar por control de calidad");
+        assertTrue(t.cambiarEstado(Estado.EN_REVISION, "Control de calidad", ""));
+        assertTrue(t.cambiarEstado(Estado.CERRADO, "S01", ""));
         assertFalse(t.estado().abierto());
     }
 
     @Test
     void alRechazarSeAbreElPlazoDeImpugnacion() {
-        Ticket t = nuevo("Funcionamiento", "Vip");
+        Reclamo t = nuevo("Funcionamiento", "Vip");
         t.cambiarEstado(Estado.RECHAZADO, "E01", "no cumple garantía");
 
         assertNotNull(t.limiteImpugnacion(), "el rechazo debería fijar la fecha límite");
@@ -88,7 +91,7 @@ class TicketTest {
 
     @Test
     void impugnarSubeDeInstanciaYCambiaElAreaQueResuelve() {
-        Ticket t = nuevo("Funcionamiento", "Vip");
+        Reclamo t = nuevo("Funcionamiento", "Vip");
         t.cambiarEstado(Estado.RECHAZADO, "E01", "no cumple garantía");
 
         assertTrue(t.impugnar("No estoy de acuerdo", "Cliente"));
@@ -98,7 +101,7 @@ class TicketTest {
 
     @Test
     void soloSePuedeImpugnarUnTicketRechazado() {
-        Ticket t = nuevo("Funcionamiento", "Vip");
+        Reclamo t = nuevo("Funcionamiento", "Vip");
         assertFalse(t.impugnar("sin motivo", "Cliente"));
     }
 

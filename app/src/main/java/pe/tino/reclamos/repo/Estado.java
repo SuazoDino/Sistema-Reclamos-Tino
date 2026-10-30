@@ -13,42 +13,42 @@ import java.util.function.Consumer;
  */
 public final class Estado {
 
-    private static final List<Reclamo> RECLAMOS = new ArrayList<>(Datos.reclamosDemo());
+    private static final List<ReclamoPrototipo> RECLAMOS = new ArrayList<>(Datos.reclamosDemo());
     private static final List<Protocolo> PROTOCOLOS = Datos.protocolos();
     private static final List<Regla> REGLAS = Datos.reglas();
     private static final List<Perfil> PERFILES = Datos.perfiles();
-    private static final List<Consumer<List<Reclamo>>> OYENTES = new ArrayList<>();
+    private static final List<Consumer<List<ReclamoPrototipo>>> OYENTES = new ArrayList<>();
 
     private Estado() {}
 
-    public static List<Reclamo> reclamos()   { return RECLAMOS; }
+    public static List<ReclamoPrototipo> reclamos()   { return RECLAMOS; }
     public static List<Protocolo> protocolos() { return PROTOCOLOS; }
     public static List<Regla> reglas()       { return REGLAS; }
     public static List<Perfil> perfiles()    { return PERFILES; }
 
-    public static void alCambiarReclamos(Consumer<List<Reclamo>> oyente) {
+    public static void alCambiarReclamos(Consumer<List<ReclamoPrototipo>> oyente) {
         OYENTES.add(oyente);
     }
 
-    public static void agregar(Reclamo r) {
+    public static void agregar(ReclamoPrototipo r) {
         RECLAMOS.add(0, r);
         notificar();
     }
 
-    public static void reemplazar(Reclamo viejo, Reclamo nuevo) {
+    public static void reemplazar(ReclamoPrototipo viejo, ReclamoPrototipo nuevo) {
         int i = RECLAMOS.indexOf(viejo);
         if (i >= 0) RECLAMOS.set(i, nuevo); else RECLAMOS.add(0, nuevo);
         notificar();
     }
 
     private static void notificar() {
-        for (Consumer<List<Reclamo>> o : List.copyOf(OYENTES)) o.accept(RECLAMOS);
+        for (Consumer<List<ReclamoPrototipo>> o : List.copyOf(OYENTES)) o.accept(RECLAMOS);
     }
 
     /** Siguiente codigo correlativo de reclamo (R008, R009, ...). */
     public static String siguienteCodigo() {
         int max = 0;
-        for (Reclamo r : RECLAMOS) {
+        for (ReclamoPrototipo r : RECLAMOS) {
             try { max = Math.max(max, Integer.parseInt(r.id().substring(1))); }
             catch (NumberFormatException ignorado) { /* codigos no correlativos */ }
         }

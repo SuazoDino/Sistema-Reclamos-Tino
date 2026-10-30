@@ -2,12 +2,13 @@ package pe.tino.reclamos;
 
 import org.junit.jupiter.api.Test;
 import pe.tino.reclamos.model.Modelo.Cliente;
-import pe.tino.reclamos.model.Ticket;
+import pe.tino.reclamos.model.Reclamo;
+import pe.tino.reclamos.repo.Atencion;
 import pe.tino.reclamos.repo.Catalogos;
 import pe.tino.reclamos.repo.Datos;
 import pe.tino.reclamos.repo.MotorReglas;
 import pe.tino.reclamos.repo.Prototipo;
-import pe.tino.reclamos.repo.Tickets;
+import pe.tino.reclamos.repo.Reclamos;
 import pe.tino.reclamos.repo.Dominio.*;
 
 import java.util.LinkedHashMap;
@@ -57,20 +58,26 @@ class CoherenciaTest {
 
     @Test
     void todoProtocoloDelCatalogoTieneAccionesDefinidas() {
-        Prototipo.protocolos().forEach(f ->
-                assertFalse(Prototipo.accionesDe(f[0]).isEmpty(),
-                        "el protocolo " + f[0] + " no tiene acciones"));
+        Prototipo.protocolos().forEach(f -> {
+            assertFalse(Prototipo.eventosDelProtocolo(f[0]).isEmpty(), "el protocolo " + f[0] + " no tiene eventos");
+            for (String evento : Prototipo.eventosDelProtocolo(f[0])) {
+                assertFalse(Prototipo.pasosDe(f[0], evento).isEmpty(),
+                        "el evento " + evento + " del protocolo " + f[0] + " no tiene pasos");
+            }
+        });
     }
 
     @Test
     void lasAccionesDeclaranTiempoOperarioYCriticidad() {
-        Prototipo.accionesDeProtocolo().forEach(f -> {
-            assertEquals(5, f.length);
-            assertDoesNotThrow(() -> Integer.parseInt(f[2]),
-                    "el tiempo máximo de " + f[1] + " debería ser un número");
-            assertTrue(Prototipo.TIPO_OPERARIO.contains(f[3]), "operario desconocido: " + f[3]);
-            assertTrue(Prototipo.CRITICIDAD_ACCION.contains(f[4]),
-                    "criticidad desconocida: " + f[4]);
+        Prototipo.pasosDeProtocolo().forEach(f -> {
+            assertEquals(7, f.length);
+            assertTrue(Prototipo.eventosDelProtocolo(f[0]).contains(f[1]),
+                    "el paso " + f[3] + " es de un evento que no está en su protocolo");
+            assertDoesNotThrow(() -> Integer.parseInt(f[4]),
+                    "el tiempo máximo de " + f[3] + " debería ser un número");
+            assertTrue(Prototipo.TIPO_OPERARIO.contains(f[5]), "operario desconocido: " + f[5]);
+            assertTrue(Prototipo.CRITICIDAD_ACCION.contains(f[6]),
+                    "criticidad desconocida: " + f[6]);
         });
     }
 
@@ -94,8 +101,8 @@ class CoherenciaTest {
     void elCicloDelTicketCierraDePuntaAPunta() {
         Cliente c = Datos.clientePorDocumento("72119474");
 
-        // 1. el cliente abre el ticket
-        Ticket t = Tickets.abrir(Canal.PRESENCIAL, "Loc01", c.documento(), c.nombreCompleto(),
+        // 1. el cliente abre el reclamo
+        Reclamo t = Reclamos.abrir(Canal.PRESENCIAL, "Loc01", c.documento(), c.nombreCompleto(),
                 c.tipo().etiqueta(), TipoObjeto.PRODUCTO, "Teléfono Móvil Samsung",
                 "Funcionamiento", "La cámara no funciona", "25713", "12/01/2019");
 
@@ -103,11 +110,11 @@ class CoherenciaTest {
         assertEquals(Catalogos.prioridadDe("Funcionamiento", c.tipo().etiqueta()), t.prioridad());
         assertNotNull(t.limiteAtencion());
 
-        // 3. el area lo toma con el protocolo que le corresponde
-        String protocolo = Prototipo.protocoloDe(t.tipoProblema());
-        t.asignar("Área Técnica de Reparación e Inspección", "E01", protocolo, "E01");
+        // 3. el sistema lo asigna solo, con el protocolo que le corresponde
         assertEquals(Estado.ASIGNADO, t.estado());
-        assertFalse(Prototipo.accionesDe(t.protocolo()).isEmpty());
+        assertEquals("Área Técnica de Reparación e Inspección", t.area());
+        assertEquals(Prototipo.protocoloDe(t.tipoProblema()), t.protocolo());
+        assertFalse(Prototipo.pasosDe(t.protocolo(), t.eventoActual().evento()).isEmpty());
 
         // 4. avanza por la maquina de estados hasta rechazarse
         assertTrue(t.cambiarEstado(Estado.EN_ATENCION, "E01", ""));
@@ -115,9 +122,10 @@ class CoherenciaTest {
         assertNotNull(t.limiteImpugnacion(), "el rechazo abre el plazo de impugnación");
 
         // 5. el cliente impugna y sube de instancia
-        assertTrue(t.impugnar("No estoy de acuerdo", "Cliente"));
+        assertTrue(Atencion.impugnar(t, "No estoy de acuerdo"));
         assertEquals(Instancia.SEGUNDA, t.instancia());
         assertEquals(Instancia.SEGUNDA.resuelve(), t.area());
+        assertEquals(Estado.ASIGNADO, t.estado(), "la reasignación también es automática");
 
         // 6. todo el recorrido quedo en la bitacora
         assertTrue(t.bitacora().size() >= 6, "la bitácora debería registrar cada paso");
@@ -145,8 +153,9 @@ class CoherenciaTest {
         List<String> pantallas = List.of("Parámetro General", "Catálogo de Reclamo",
                 "Catálogo de Producto", "Catálogo de Servicios", "Catálogo de Problemas",
                 "Catálogo de Cliente", "Catálogo de Protocolos", "Catálogo de Reglas",
-                "Catálogo de Políticas", "Parámetros de Atención", "Consulta de Tickets",
+                "Catálogo de Políticas", "Parámetros de Atención", "Consulta de Reclamos",
                 "Consulta de Indicadores", "Área - Data Entry", "Área - Reportes",
+                "Área - Revisión de Calidad",
                 "Cliente - Data Entry", "Cliente - Reportes", "Seguridad", "Módulo BATCH");
         assertEquals(pantallas.size(), Datos.ACCESOS.size());
         assertTrue(Datos.ACCESOS.containsAll(pantallas));

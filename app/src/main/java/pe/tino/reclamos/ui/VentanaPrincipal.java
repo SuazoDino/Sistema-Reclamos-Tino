@@ -41,13 +41,14 @@ public class VentanaPrincipal extends JFrame {
         fabricas.put("param-atencion",     AtencionParamPantalla::new);
 
         // Gerencial - Consulta
-        fabricas.put("tickets",            TicketPantalla::new);
+        fabricas.put("reclamos",            TicketPantalla::new);
         fabricas.put("batch",              BatchPantalla::new);
         fabricas.put("indicadores",        IndicadoresPantalla::new);
 
         // Operativo
         fabricas.put("area-dataentry",     AreaDataEntryPantalla::new);
         fabricas.put("area-reportes",      AreaReportePantalla::new);
+        fabricas.put("area-revision",      RevisionPantalla::new);
         fabricas.put("cliente-dataentry",  ClienteDataEntryPantalla::new);
         fabricas.put("cliente-reportes",   ClienteReportePantalla::new);
 

@@ -1,5 +1,8 @@
 package pe.tino.reclamos.ui.screens;
 
+import pe.tino.reclamos.repo.Auditoria;
+import pe.tino.reclamos.repo.Integridad;
+
 import pe.tino.reclamos.ui.components.Formulario;
 import pe.tino.reclamos.ui.components.Grupo;
 import pe.tino.reclamos.ui.components.Tabla;
@@ -29,11 +32,13 @@ public class TablaCatalogo extends JPanel {
     private final List<String[]> filas;
     private final Tabla tabla;
     private final Component padre;
+    private final String titulo;
 
     public TablaCatalogo(Component padre, String titulo, List<Campo> campos,
                          List<String[]> filas, int[] anchos) {
         super(new BorderLayout(Tema.ESP_MD, Tema.ESP_MD));
         this.padre = padre;
+        this.titulo = titulo;
         this.campos = campos;
         this.filas = filas;
 
@@ -109,7 +114,16 @@ public class TablaCatalogo extends JPanel {
             return;
         }
         int i = tabla.filaModelo();
-        if (i < 0) filas.add(fila); else filas.set(i, fila);
+        try {
+            Integridad.aplicar(Auditoria.SIN_SESION, titulo, i < 0 ? "Agregar" : "Modificar " + fila[0], () -> {
+                if (i < 0) filas.add(fila); else filas.set(i, fila);
+                return String.join(" | ", fila);
+            });
+        } catch (IllegalArgumentException e) {
+            refrescar();
+            mensaje(e.getMessage());
+            return;
+        }
         refrescar();
         mensaje(i < 0 ? "Registro agregado." : "Registro actualizado.");
     }
@@ -120,7 +134,15 @@ public class TablaCatalogo extends JPanel {
         int r = JOptionPane.showConfirmDialog(padre, "¿Eliminar el registro seleccionado?",
                 "Confirmar", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
         if (r != JOptionPane.OK_OPTION) return;
-        filas.remove(i);
+        String quitado = filas.get(i)[0];
+        try {
+            Integridad.aplicar(Auditoria.SIN_SESION, titulo, "Eliminar " + quitado, () -> {
+                filas.remove(i);
+                return quitado + " eliminado.";
+            });
+        } catch (IllegalArgumentException e) {
+            mensaje(e.getMessage());
+        }
         refrescar();
         limpiar();
     }

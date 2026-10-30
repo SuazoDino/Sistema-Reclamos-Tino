@@ -12,20 +12,21 @@ public final class Dominio {
 
     private Dominio() {}
 
-    /* ---------------- estados del ticket ---------------- */
+    /* ---------------- estados del reclamo ---------------- */
 
     /**
-     * Estado del ticket. Es el unico dominio de estado del sistema: lo que
+     * Estado del reclamo. Es el unico dominio de estado del sistema: lo que
      * antes se llamaba "Pendiente", "En cola" o "Aceptado" en cada pantalla.
      */
     public enum Estado {
-        REGISTRADO("Registrado", "El ticket entró al sistema y espera asignación"),
+        REGISTRADO("Registrado", "El reclamo entró al sistema y espera asignación"),
         ASIGNADO("Asignado", "Tiene área y especialista responsables"),
         EN_ATENCION("En atención", "El especialista está ejecutando el protocolo"),
         RESUELTO("Resuelto", "El protocolo terminó con una solución"),
+        EN_REVISION("En revisión", "Control de calidad: revisión automática, supervisor y conformidad del cliente"),
         RECHAZADO("Rechazado", "No procede; admite impugnación dentro del plazo"),
         IMPUGNADO("Impugnado", "El cliente impugnó; pasa a la siguiente instancia"),
-        CERRADO("Cerrado", "Entregado y conforme; no admite más movimientos");
+        CERRADO("Cerrado", "Revisado y conforme; no admite más movimientos");
 
         private final String etiqueta;
         private final String descripcion;
@@ -39,13 +40,14 @@ public final class Dominio {
         public String descripcion() { return descripcion; }
         @Override public String toString() { return etiqueta; }
 
-        /** Los estados a los que puede pasar. Es la maquina de estados del ticket. */
+        /** Los estados a los que puede pasar. Es la maquina de estados del reclamo. */
         public List<Estado> siguientes() {
             return switch (this) {
                 case REGISTRADO -> List.of(ASIGNADO, RECHAZADO);
                 case ASIGNADO -> List.of(EN_ATENCION, RECHAZADO);
-                case EN_ATENCION -> List.of(RESUELTO, RECHAZADO);
-                case RESUELTO -> List.of(CERRADO);
+                case EN_ATENCION -> List.of(RESUELTO, EN_REVISION, RECHAZADO);
+                case RESUELTO -> List.of(EN_REVISION);
+                case EN_REVISION -> List.of(CERRADO, EN_ATENCION, RECHAZADO);
                 case RECHAZADO -> List.of(IMPUGNADO, CERRADO);
                 case IMPUGNADO -> List.of(ASIGNADO);
                 case CERRADO -> List.of();
@@ -54,14 +56,14 @@ public final class Dominio {
 
         public boolean puedePasarA(Estado destino) { return siguientes().contains(destino); }
 
-        /** Un ticket esta abierto mientras no este cerrado. */
+        /** Un reclamo esta abierto mientras no este cerrado. */
         public boolean abierto() { return this != CERRADO; }
     }
 
-    /* ---------------- prioridad del ticket ---------------- */
+    /* ---------------- prioridad del reclamo ---------------- */
 
     /**
-     * Prioridad del ticket: cuanto corre el reloj. Antes se llamaba
+     * Prioridad del reclamo: cuanto corre el reloj. Antes se llamaba
      * "criticidad" y se confundia con la criticidad de una accion.
      */
     public enum Prioridad {
@@ -92,7 +94,7 @@ public final class Dominio {
      */
     public enum Instancia {
         PRIMERA("Primera", 15, "Área responsable"),
-        SEGUNDA("Segunda", 10, "Área especializada"),
+        SEGUNDA("Segunda", 10, "Área Especializada"),
         TERCERA("Tercera", 0, "Gerencia de PostVenta");
 
         private final String etiqueta;
@@ -120,6 +122,42 @@ public final class Dominio {
         }
 
         public boolean admiteImpugnacion() { return diasImpugnacion > 0; }
+    }
+
+    /* ---------------- eventos del reclamo ---------------- */
+
+    /**
+     * Estado de un evento del reclamo (Inspeccion, Solucion, Seguimiento).
+     * El reclamo avanza porque sus eventos se programan y se completan.
+     */
+    public enum EstadoEvento {
+        PROGRAMADO("Programado"), EN_CURSO("En curso"),
+        COMPLETADO("Completado"), ANULADO("Anulado");
+
+        private final String etiqueta;
+        EstadoEvento(String etiqueta) { this.etiqueta = etiqueta; }
+        public String etiqueta() { return etiqueta; }
+        @Override public String toString() { return etiqueta; }
+
+        public boolean pendiente() { return this == PROGRAMADO || this == EN_CURSO; }
+    }
+
+    /* ---------------- control de calidad ---------------- */
+
+    /** En que punto de la revision esta un reclamo En revision. */
+    public enum Revision {
+        APROBADO("Aprobado"),
+        OBSERVADO("Observado"),
+        MUESTRA("Muestra al azar"),
+        RECHAZO_PROPUESTO("Rechazo propuesto");
+
+        private final String etiqueta;
+        Revision(String etiqueta) { this.etiqueta = etiqueta; }
+        public String etiqueta() { return etiqueta; }
+        @Override public String toString() { return etiqueta; }
+
+        /** Todo lo que no salio aprobado espera al supervisor. */
+        public boolean esperaSupervisor() { return this != APROBADO; }
     }
 
     /* ---------------- objeto del reclamo ---------------- */

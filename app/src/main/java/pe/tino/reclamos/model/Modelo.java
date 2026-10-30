@@ -55,11 +55,19 @@ public final class Modelo {
         @Override public String toString() { return id + " - " + bien + " " + marca; }
     }
 
+    /**
+     * Una compra o contratacion del cliente: el sustento de su reclamo. Para
+     * un producto, {@code clave} es el bien (Telefono Movil) y {@code codigo}
+     * el del Catalogo de Producto; para un servicio, ambos son su nombre.
+     */
+    public record Compra(String documento, boolean esProducto, String codigo, String objeto,
+                         String clave, String comprobante, LocalDate fecha, double monto) {}
+
     public record Problema(String tipo, String descripcion) {
         @Override public String toString() { return descripcion; }
     }
 
-    public record Reclamo(String id, LocalDate fechaEmision, Cliente cliente, String nroCompra,
+    public record ReclamoPrototipo(String id, LocalDate fechaEmision, Cliente cliente, String nroCompra,
                           Producto producto, Problema problema, Canal canal,
                           EstadoReclamo estado, String area, String especialista,
                           LocalDate fechaAtencion, LocalTime horaAtencion, String detalle) {}

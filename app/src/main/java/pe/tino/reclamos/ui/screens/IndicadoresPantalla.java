@@ -1,10 +1,11 @@
 package pe.tino.reclamos.ui.screens;
 
-import pe.tino.reclamos.model.Ticket;
+import pe.tino.reclamos.model.Reclamo;
 import pe.tino.reclamos.repo.Dominio.TipoObjeto;
 import pe.tino.reclamos.repo.Estadisticas;
+import pe.tino.reclamos.repo.Calidad;
 import pe.tino.reclamos.repo.Prototipo;
-import pe.tino.reclamos.repo.Tickets;
+import pe.tino.reclamos.repo.Reclamos;
 import pe.tino.reclamos.ui.Navegacion;
 import pe.tino.reclamos.ui.components.Grafico;
 import pe.tino.reclamos.ui.components.Grafico.Punto;
@@ -30,7 +31,7 @@ import java.util.function.Predicate;
 
 /**
  * Consulta de Indicadores: los once indicadores del prototipo, calculados
- * sobre los tickets de la sesion.
+ * sobre los reclamos de la sesion.
  *
  * Es una consulta gerencial, y el libro le pide informacion estadistica e
  * historica que muestre tendencia y se pueda proyectar. Por eso Detalle
@@ -57,7 +58,7 @@ public class IndicadoresPantalla extends Pantalla {
 
     public IndicadoresPantalla() {
         super("Consulta de Indicadores",
-                "Indicadores de gestión calculados sobre los tickets registrados.");
+                "Indicadores de gestión calculados sobre los reclamos registrados.");
 
         Prototipo.INDICADORES.forEach(modelo::addElement);
         lista.setFont(Tema.cuerpo());
@@ -101,17 +102,17 @@ public class IndicadoresPantalla extends Pantalla {
         contenido().add(derecha, BorderLayout.CENTER);
 
         calcular();
-        Tickets.alCambiar(t -> calcular());
+        Reclamos.alCambiar(t -> calcular());
     }
 
     private void calcular() {
-        List<Ticket> tickets = Tickets.todos();
-        base.setText("Calculado sobre los " + tickets.size()
-                + " tickets registrados en la sesión.");
+        List<Reclamo> reclamos = Reclamos.todos();
+        base.setText("Calculado sobre los " + reclamos.size()
+                + " reclamos registrados en la sesión.");
 
         detalle.limpiar();
         for (String indicador : Prototipo.INDICADORES) {
-            detalle.agregar(indicador, resultado(indicador, tickets));
+            detalle.agregar(indicador, resultado(indicador, reclamos));
         }
         graficar();
     }
@@ -121,38 +122,38 @@ public class IndicadoresPantalla extends Pantalla {
     private void graficar() {
         String indicador = lista.getSelectedValue();
         if (indicador == null) return;
-        List<Ticket> tickets = Tickets.todos();
+        List<Reclamo> reclamos = Reclamos.todos();
 
         gGrafico.setBorder(BorderFactory.createTitledBorder(
                 BorderFactory.createLineBorder(Tema.BORDE), " Detalle: " + indicador + " ",
                 0, 0, Tema.fuerte(), Tema.TEXTO));
-        lectura.setText(resultado(indicador, tickets));
+        lectura.setText(resultado(indicador, reclamos));
 
         switch (indicador) {
-            case "Tiempo promedio de solución por reclamo" -> tendenciaTiempo(tickets);
-            case "% de reclamos en un mes" -> tendenciaReclamos(tickets);
+            case "Tiempo promedio de solución por reclamo" -> tendenciaTiempo(reclamos);
+            case "% de reclamos en un mes" -> tendenciaReclamos(reclamos);
             case "Tipo de bienes más reclamados" ->
-                    grafico.barras(conteoOrdenado(bienes(tickets), Ticket::objeto), "tickets");
+                    grafico.barras(conteoOrdenado(bienes(reclamos), Reclamo::objeto), "reclamos");
             case "Áreas con mayor demanda de reclamo" ->
-                    grafico.barras(conteoOrdenado(conArea(tickets), Ticket::area), "tickets");
+                    grafico.barras(conteoOrdenado(conArea(reclamos), Reclamo::area), "reclamos");
             case "Número de reclamos por clase de producto" ->
-                    grafico.barras(conteoOrdenado(tickets, t -> t.tipoObjeto().etiqueta()), "tickets");
+                    grafico.barras(conteoOrdenado(reclamos, t -> t.tipoObjeto().etiqueta()), "reclamos");
             case "% de reclamos críticos" ->
-                    grafico.barras(conteoOrdenado(tickets, t -> "Prioridad " + t.prioridad().etiqueta()),
-                            "tickets");
+                    grafico.barras(conteoOrdenado(reclamos, t -> "Prioridad " + t.prioridad().etiqueta()),
+                            "reclamos");
             case "Porcentaje de reclamos solucionados fuera de plazo" ->
-                    grafico.barras(conteoOrdenado(tickets,
-                            t -> t.vencido() ? "Fuera de plazo" : "Dentro del plazo"), "tickets");
+                    grafico.barras(conteoOrdenado(reclamos,
+                            t -> t.vencido() ? "Fuera de plazo" : "Dentro del plazo"), "reclamos");
             case "Número de rotación de especialistas por reclamo" ->
-                    grafico.barras(conteoOrdenado(tickets,
+                    grafico.barras(conteoOrdenado(reclamos,
                             t -> asignaciones(t) + (asignaciones(t) == 1 ? " asignación" : " asignaciones")),
-                            "tickets");
+                            "reclamos");
             default -> grafico.vacio(SIN_DATO);
         }
     }
 
     /** Reclamos por mes: historico cerrado, proyeccion y lo que va del mes. */
-    private void tendenciaReclamos(List<Ticket> tickets) {
+    private void tendenciaReclamos(List<Reclamo> reclamos) {
         List<Estadisticas.Mes> historico = Estadisticas.historico();
         List<Punto> meses = new ArrayList<>();
         List<Double> serie = new ArrayList<>();
@@ -163,7 +164,7 @@ public class IndicadoresPantalla extends Pantalla {
         }
 
         YearMonth actual = YearMonth.now();
-        long delMes = tickets.stream().filter(t -> YearMonth.from(t.apertura()).equals(actual)).count();
+        long delMes = reclamos.stream().filter(t -> YearMonth.from(t.apertura()).equals(actual)).count();
         double proyectado = Estadisticas.proyectar(serie);
 
         grafico.tendencia(meses,
@@ -175,7 +176,7 @@ public class IndicadoresPantalla extends Pantalla {
     }
 
     /** Horas promedio hasta la solucion por mes. */
-    private void tendenciaTiempo(List<Ticket> tickets) {
+    private void tendenciaTiempo(List<Reclamo> reclamos) {
         List<Punto> meses = new ArrayList<>();
         List<Double> serie = new ArrayList<>();
         for (Estadisticas.Mes m : Estadisticas.historico()) {
@@ -185,12 +186,12 @@ public class IndicadoresPantalla extends Pantalla {
         }
 
         YearMonth actual = YearMonth.now();
-        List<Ticket> cerrados = tickets.stream()
+        List<Reclamo> cerrados = reclamos.stream()
                 .filter(t -> !t.estado().abierto() && YearMonth.from(t.apertura()).equals(actual))
                 .toList();
         Punto enCurso = cerrados.isEmpty() ? null
                 : new Punto(mes(actual), horasPromedio(cerrados), nombreMes(actual)
-                        + String.format(" en curso: %.1f horas sobre %d tickets cerrados",
+                        + String.format(" en curso: %.1f horas sobre %d reclamos cerrados",
                         horasPromedio(cerrados), cerrados.size()));
         double proyectado = Estadisticas.proyectar(serie);
 
@@ -202,13 +203,13 @@ public class IndicadoresPantalla extends Pantalla {
     }
 
     /** Conteo por categoria, de la mas frecuente a la menos. */
-    private static List<Punto> conteoOrdenado(List<Ticket> tickets, Function<Ticket, String> clave) {
+    private static List<Punto> conteoOrdenado(List<Reclamo> reclamos, Function<Reclamo, String> clave) {
         Map<String, Integer> conteo = new LinkedHashMap<>();
-        tickets.forEach(t -> conteo.merge(clave.apply(t), 1, Integer::sum));
-        int total = tickets.size();
+        reclamos.forEach(t -> conteo.merge(clave.apply(t), 1, Integer::sum));
+        int total = reclamos.size();
         return conteo.entrySet().stream()
                 .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
-                .map(e -> new Punto(e.getKey(), e.getValue(), String.format("%s: %d de %d tickets (%.1f %%)",
+                .map(e -> new Punto(e.getKey(), e.getValue(), String.format("%s: %d de %d reclamos (%.1f %%)",
                         e.getKey(), e.getValue(), total, e.getValue() * 100.0 / total)))
                 .toList();
     }
@@ -225,34 +226,55 @@ public class IndicadoresPantalla extends Pantalla {
 
     /* ---------------- resultado en texto ---------------- */
 
-    private static String resultado(String indicador, List<Ticket> tickets) {
-        if (tickets.isEmpty()) return "Sin tickets registrados";
+    private static String resultado(String indicador, List<Reclamo> reclamos) {
+        if (reclamos.isEmpty()) return "Sin reclamos registrados";
 
         return switch (indicador) {
-            case "Tiempo promedio de solución por reclamo" -> tiempoPromedio(tickets);
-            case "Tipo de bienes más reclamados" -> masFrecuente(bienes(tickets), Ticket::objeto);
-            case "Áreas con mayor demanda de reclamo" -> masFrecuente(conArea(tickets), Ticket::area);
+            case "Tiempo promedio de solución por reclamo" -> tiempoPromedio(reclamos);
+            case "Tipo de bienes más reclamados" -> masFrecuente(bienes(reclamos), Reclamo::objeto);
+            case "Áreas con mayor demanda de reclamo" -> masFrecuente(conArea(reclamos), Reclamo::area);
             case "Número de reclamos por clase de producto" ->
-                    conteo(tickets, t -> t.tipoObjeto().etiqueta());
-            case "% de reclamos en un mes" -> porcentajeDelMes(tickets);
+                    conteo(reclamos, t -> t.tipoObjeto().etiqueta());
+            case "% de reclamos en un mes" -> porcentajeDelMes(reclamos);
             case "% de reclamos críticos" ->
-                    porcentaje(tickets, t -> t.prioridad().etiqueta().equals("Alta"),
+                    porcentaje(reclamos, t -> t.prioridad().etiqueta().equals("Alta"),
                             "de prioridad alta");
             case "Porcentaje de reclamos solucionados fuera de plazo" ->
-                    porcentaje(tickets, Ticket::vencido, "fuera del plazo comprometido");
-            case "Número de rotación de especialistas por reclamo" -> rotacion(tickets);
+                    porcentaje(reclamos, IndicadoresPantalla::fueraDePlazo, "fuera del plazo comprometido");
+            case "Número de rotación de especialistas por reclamo" -> rotacion(reclamos);
+            case "Nivel de satisfacción del cliente" -> satisfaccion(reclamos);
+            case "% devueltos por calidad" -> devueltos();
             default -> SIN_DATO;
         };
     }
 
-    private static String tiempoPromedio(List<Ticket> tickets) {
-        List<Ticket> cerrados = tickets.stream().filter(t -> !t.estado().abierto()).toList();
-        if (cerrados.isEmpty()) return "Todavía no hay tickets cerrados";
-        return String.format("%.1f horas  (sobre %d tickets cerrados)",
+    /** Resuelto despues del limite, o abierto y ya vencido. */
+    private static boolean fueraDePlazo(Reclamo t) {
+        if (t.resolucion() != null) return t.resolucion().isAfter(t.limiteAtencion());
+        return t.vencido();
+    }
+
+    /** Sale de las notas que el cliente da al confirmar su conformidad. */
+    private static String satisfaccion(List<Reclamo> reclamos) {
+        long respuestas = reclamos.stream().filter(t -> t.nota() > 0).count();
+        if (respuestas == 0) return "Todavía ningún cliente respondió la conformidad";
+        return String.format("%.1f de 5  (sobre %d respuestas)", Calidad.satisfaccion(), respuestas);
+    }
+
+    private static String devueltos() {
+        double p = Calidad.porcentajeDevueltos();
+        if (p < 0) return "Todavía ningún reclamo pasó por control de calidad";
+        return String.format("%.1f %% de los reclamos revisados volvió a atención", p);
+    }
+
+    private static String tiempoPromedio(List<Reclamo> reclamos) {
+        List<Reclamo> cerrados = reclamos.stream().filter(t -> !t.estado().abierto()).toList();
+        if (cerrados.isEmpty()) return "Todavía no hay reclamos cerrados";
+        return String.format("%.1f horas  (sobre %d reclamos cerrados)",
                 horasPromedio(cerrados), cerrados.size());
     }
 
-    private static double horasPromedio(List<Ticket> cerrados) {
+    private static double horasPromedio(List<Reclamo> cerrados) {
         return cerrados.stream()
                 .mapToLong(t -> ChronoUnit.HOURS.between(t.apertura(),
                         t.bitacora().get(t.bitacora().size() - 1).momento()))
@@ -260,62 +282,62 @@ public class IndicadoresPantalla extends Pantalla {
     }
 
     /** Los bienes son productos: un servicio no es un bien. */
-    private static List<Ticket> bienes(List<Ticket> tickets) {
-        return tickets.stream().filter(t -> t.tipoObjeto() == TipoObjeto.PRODUCTO).toList();
+    private static List<Reclamo> bienes(List<Reclamo> reclamos) {
+        return reclamos.stream().filter(t -> t.tipoObjeto() == TipoObjeto.PRODUCTO).toList();
     }
 
-    /** La demanda de un area se mide con los tickets que ya tienen area. */
-    private static List<Ticket> conArea(List<Ticket> tickets) {
-        return tickets.stream().filter(t -> !t.area().equals("Sin asignar")).toList();
+    /** La demanda de un area se mide con los reclamos que ya tienen area. */
+    private static List<Reclamo> conArea(List<Reclamo> reclamos) {
+        return reclamos.stream().filter(t -> !t.area().equals("Sin asignar")).toList();
     }
 
     /** El valor mas frecuente; si varios empatan, los nombra a todos. */
-    private static String masFrecuente(List<Ticket> tickets, Function<Ticket, String> clave) {
-        if (tickets.isEmpty()) return "Sin tickets que cumplan el criterio";
+    private static String masFrecuente(List<Reclamo> reclamos, Function<Reclamo, String> clave) {
+        if (reclamos.isEmpty()) return "Sin reclamos que cumplan el criterio";
         Map<String, Integer> conteo = new LinkedHashMap<>();
-        tickets.forEach(t -> conteo.merge(clave.apply(t), 1, Integer::sum));
+        reclamos.forEach(t -> conteo.merge(clave.apply(t), 1, Integer::sum));
         int maximo = Collections.max(conteo.values());
         List<String> primeros = conteo.entrySet().stream()
                 .filter(e -> e.getValue() == maximo)
                 .map(Map.Entry::getKey)
                 .toList();
-        String cantidad = maximo + (maximo == 1 ? " ticket" : " tickets");
+        String cantidad = maximo + (maximo == 1 ? " reclamo" : " reclamos");
         if (primeros.size() == 1) return primeros.get(0) + "  (" + cantidad + ")";
         return "Empate: " + String.join(", ", primeros) + "  (" + cantidad + " cada uno)";
     }
 
-    private static String conteo(List<Ticket> tickets, Function<Ticket, String> clave) {
+    private static String conteo(List<Reclamo> reclamos, Function<Reclamo, String> clave) {
         Map<String, Integer> conteo = new LinkedHashMap<>();
-        tickets.forEach(t -> conteo.merge(clave.apply(t), 1, Integer::sum));
+        reclamos.forEach(t -> conteo.merge(clave.apply(t), 1, Integer::sum));
         StringBuilder sb = new StringBuilder();
         conteo.forEach((k, v) -> sb.append(sb.isEmpty() ? "" : "; ").append(k).append(": ").append(v));
         return sb.toString();
     }
 
-    private static String porcentaje(List<Ticket> tickets, Predicate<Ticket> criterio, String que) {
-        long n = tickets.stream().filter(criterio).count();
+    private static String porcentaje(List<Reclamo> reclamos, Predicate<Reclamo> criterio, String que) {
+        long n = reclamos.stream().filter(criterio).count();
         return String.format("%.1f %%  (%d de %d %s)",
-                n * 100.0 / tickets.size(), n, tickets.size(), que);
+                n * 100.0 / reclamos.size(), n, reclamos.size(), que);
     }
 
-    private static String porcentajeDelMes(List<Ticket> tickets) {
+    private static String porcentajeDelMes(List<Reclamo> reclamos) {
         LocalDateTime hoy = LocalDateTime.now();
-        long n = tickets.stream()
+        long n = reclamos.stream()
                 .filter(t -> t.apertura().getMonth() == hoy.getMonth()
                           && t.apertura().getYear() == hoy.getYear())
                 .count();
-        return String.format("%.1f %%  (%d de %d tickets del mes)",
-                n * 100.0 / tickets.size(), n, tickets.size());
+        return String.format("%.1f %%  (%d de %d reclamos del mes)",
+                n * 100.0 / reclamos.size(), n, reclamos.size());
     }
 
-    private static long asignaciones(Ticket t) {
+    private static long asignaciones(Reclamo t) {
         return t.bitacora().stream().filter(e -> e.accion().equals("Asignación")).count();
     }
 
-    /** Cuantas veces cambio de responsable un ticket, en promedio. */
-    private static String rotacion(List<Ticket> tickets) {
-        double promedio = tickets.stream().mapToLong(IndicadoresPantalla::asignaciones)
+    /** Cuantas veces cambio de responsable un reclamo, en promedio. */
+    private static String rotacion(List<Reclamo> reclamos) {
+        double promedio = reclamos.stream().mapToLong(IndicadoresPantalla::asignaciones)
                 .average().orElse(0);
-        return String.format("%.2f asignaciones por ticket", promedio);
+        return String.format("%.2f asignaciones por reclamo", promedio);
     }
 }

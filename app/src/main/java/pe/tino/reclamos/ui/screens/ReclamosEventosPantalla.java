@@ -1,7 +1,10 @@
 package pe.tino.reclamos.ui.screens;
 
 import pe.tino.reclamos.repo.Prototipo;
-import pe.tino.reclamos.ui.components.*;
+import pe.tino.reclamos.ui.components.Tabla;
+import pe.tino.reclamos.ui.components.Ui;
+import pe.tino.reclamos.ui.components.Grupo;
+import pe.tino.reclamos.ui.screens.TablaCatalogo.Campo;
 import pe.tino.reclamos.ui.theme.Tema;
 
 import javax.swing.*;
@@ -11,130 +14,46 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Catalogo de Reclamos y Eventos General, como en la captura: dos pestanias,
- * Reclamo y Eventos. Cada una con su busqueda, sus resultados y su bloque
- * para agregar valores.
+ * Catalogo de Reclamos y Eventos: el unico catalogo de tipos de problema, con
+ * su naturaleza (reclamo o queja), y los eventos por los que pasan.
+ *
+ * Antes tenia una columna "Nivel" que duplicaba la prioridad y listas de
+ * instancias y eventos habilitados que nada leia; se quitaron.
  */
 public class ReclamosEventosPantalla extends Pantalla {
 
-    private final Tabla reclamos = new Tabla(new String[]{
-            "Tipo de Problema", "Instancia", "Criticidad", "Estado"});
-    private final Tabla eventos = new Tabla(new String[]{"Evento", "Estado"});
-
     public ReclamosEventosPantalla() {
-        super("Catálogo de Reclamos y Eventos General",
-                "Tipos de reclamo y eventos del protocolo, con su estado.");
+        super("Catálogo de Reclamos y Eventos",
+                "Los tipos de reclamo que acepta el sistema y los eventos por los que pasan.");
 
         JTabbedPane pestanias = new JTabbedPane();
         pestanias.setFont(Tema.cuerpo());
-        pestanias.addTab("Reclamo", panelReclamo());
-        pestanias.addTab("Eventos", panelEventos());
-
+        pestanias.addTab("Tipos de reclamo", new TablaCatalogo(this, "Tipos de reclamo",
+                List.of(Campo.libre("Tipo de problema"),
+                        Campo.lista("Naturaleza", Prototipo.NATURALEZAS),
+                        Campo.lista("Estado", Prototipo.ESTADO)),
+                Prototipo.tipos(), new int[]{240, 180, 160}));
+        pestanias.addTab("Eventos", eventos());
         contenido().add(pestanias, BorderLayout.CENTER);
     }
 
-    /* ---------------- pestania Reclamo ---------------- */
+    private JComponent eventos() {
+        Map<String, StringBuilder> usos = new LinkedHashMap<>();
+        for (String[] e : Prototipo.eventosDeProtocolo()) {
+            usos.computeIfAbsent(e[2], k -> new StringBuilder()).append(usos.get(e[2]).isEmpty() ? "" : ", ").append(e[0]);
+        }
+        Tabla t = new Tabla(new String[]{"Evento", "Lo usa"});
+        usos.forEach((evento, protocolos) -> t.agregar(evento, protocolos.toString()));
+        t.agregar(Prototipo.EVENTO_SEGUIMIENTO, "Control de calidad");
+        t.anchos(260, 320);
 
-    private JComponent panelReclamo() {
-        Map<String, List<String>> filtros = new LinkedHashMap<>();
-        filtros.put("Estado", Prototipo.ESTADO);
-        PanelBusqueda busqueda = new PanelBusqueda(1, filtros);
-        busqueda.setPreferredSize(Ui.dim(250, 100));
-
-        reclamos.anchos(180, 120, 120, 140);
-        Prototipo.reclamos().forEach(f -> reclamos.agregar((Object[]) f));
-        busqueda.alBuscar(() -> filtrar(reclamos, Prototipo.reclamos(), 3, busqueda.valor("Estado")));
-
-        JTabbedPane agregar = new JTabbedPane();
-        agregar.setFont(Tema.cuerpo());
-        agregar.addTab("Tipo Problema", new PanelHabilitacion(this, "Tipos de Problema",
-                "Tipo Problema", "Quitar", Prototipo.TIPO_PROBLEMA, Prototipo.TIPO_PROBLEMA));
-        agregar.addTab("Instancia", new PanelHabilitacion(this, "Instancias",
-                "Instancia", "Quitar", Prototipo.INSTANCIA, Prototipo.INSTANCIA));
-        agregar.addTab("Criticidad", new PanelHabilitacion(this, "Criticidades",
-                "Criticidad", "Quitar", Prototipo.CRITICIDAD, Prototipo.CRITICIDAD));
-
-        Grupo grupoAgregar = new Grupo("Agregar");
-        grupoAgregar.add(agregar, BorderLayout.CENTER);
-
-        JPanel arriba = Ui.panel(new BorderLayout(Tema.ESP_MD, 0));
-        arriba.add(busqueda, BorderLayout.WEST);
-        arriba.add(resultados("Resultados de Búsqueda", reclamos), BorderLayout.CENTER);
-        arriba.setPreferredSize(Ui.dim(100, 200));
-
-        JPanel p = Ui.panel(new BorderLayout(0, Tema.ESP_MD));
+        Grupo g = Grupo.ajustado("Eventos y protocolos que los usan");
+        g.add(t.enScroll(), BorderLayout.CENTER);
+        g.add(Ui.suave("Los eventos se ordenan y se definen paso a paso en el Catálogo de Protocolos."),
+                BorderLayout.SOUTH);
+        JPanel p = Ui.panel(new BorderLayout());
         p.setBorder(Ui.relleno(Tema.ESP_MD));
-        p.add(arriba, BorderLayout.NORTH);
-        p.add(grupoAgregar, BorderLayout.CENTER);
+        p.add(g, BorderLayout.CENTER);
         return p;
-    }
-
-    /* ---------------- pestania Eventos ---------------- */
-
-    private JComponent panelEventos() {
-        Map<String, List<String>> filtros = new LinkedHashMap<>();
-        filtros.put("Tipo Problema", Prototipo.TIPO_PROBLEMA);
-        filtros.put("Instancia", Prototipo.INSTANCIA);
-        filtros.put("Criticidad", Prototipo.CRITICIDAD);
-        PanelBusqueda busqueda = new PanelBusqueda(1, filtros);
-        busqueda.setPreferredSize(Ui.dim(280, 100));
-
-        eventos.anchos(320, 180);
-        Prototipo.eventos().forEach(f -> eventos.agregar((Object[]) f));
-        busqueda.alBuscar(() -> {
-            eventos.limpiar();
-            Prototipo.eventos().forEach(f -> eventos.agregar((Object[]) f));
-        });
-
-        Grupo grupoAgregar = new Grupo("Agregar");
-        grupoAgregar.add(new PanelHabilitacion(this, "Eventos", "Evento", "Deshabilitar",
-                Prototipo.EVENTOS_EXISTENTES, Prototipo.EVENTOS_HABILITADOS), BorderLayout.CENTER);
-
-        JPanel arriba = Ui.panel(new BorderLayout(Tema.ESP_MD, 0));
-        arriba.add(busqueda, BorderLayout.WEST);
-        arriba.add(resultados("Resultados de Búsqueda", eventos), BorderLayout.CENTER);
-        arriba.setPreferredSize(Ui.dim(100, 200));
-
-        JPanel p = Ui.panel(new BorderLayout(0, Tema.ESP_MD));
-        p.setBorder(Ui.relleno(Tema.ESP_MD));
-        p.add(arriba, BorderLayout.NORTH);
-        p.add(grupoAgregar, BorderLayout.CENTER);
-        return p;
-    }
-
-    /* ---------------- piezas comunes ---------------- */
-
-    /** Tabla de resultados con los botones Habilitar y Deshabilitar al costado. */
-    private JComponent resultados(String titulo, Tabla tabla) {
-        JButton habilitar = Ui.boton("Habilitar");
-        habilitar.addActionListener(e -> cambiarEstado(tabla, "Habilitado"));
-        JButton deshabilitar = Ui.boton("Deshabilitar");
-        deshabilitar.addActionListener(e -> cambiarEstado(tabla, "Deshabilitado"));
-
-        JPanel botones = Ui.panel(new GridBagLayout());
-        JPanel columna = Ui.panel(new GridLayout(2, 1, 0, Tema.ESP_SM));
-        columna.add(habilitar);
-        columna.add(deshabilitar);
-        botones.add(columna);
-        botones.setBorder(Ui.relleno(0, 0, 0, Tema.ESP_MD));
-
-        Grupo g = new Grupo(titulo);
-        g.add(tabla.enScroll(), BorderLayout.CENTER);
-        g.add(botones, BorderLayout.EAST);
-        return g;
-    }
-
-    /** La columna de estado es siempre la ultima de la tabla. */
-    private void cambiarEstado(Tabla tabla, String estado) {
-        int fila = tabla.filaModelo();
-        if (fila < 0) { avisar("Seleccione una fila de los resultados."); return; }
-        tabla.modelo().setValueAt(estado, fila, tabla.getColumnCount() - 1);
-    }
-
-    private static void filtrar(Tabla tabla, List<String[]> datos, int columna, String valor) {
-        tabla.limpiar();
-        datos.stream()
-                .filter(f -> valor == null || valor.isBlank() || valor.equals(f[columna]))
-                .forEach(f -> tabla.agregar((Object[]) f));
     }
 }

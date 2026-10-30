@@ -33,6 +33,21 @@ Las pruebas:
 mvn test
 ```
 
+## Versión web
+
+La misma lógica (validación, asignación, cita y control de calidad) también
+se sirve como página web, con HTML, CSS y JavaScript y un servidor Java sin
+dependencias extra:
+
+```bash
+cd app
+mvn compile exec:java -Dmain.class=pe.tino.reclamos.web.ServidorWeb
+```
+
+Luego abrir http://127.0.0.1:8080 (con `localhost` algunos navegadores van por IPv6 y no llegan). Las páginas están en
+`src/main/resources/web/` y la API en `pe.tino.reclamos.web.ServidorWeb`.
+Por ahora los datos viven en memoria, igual que en la versión de escritorio.
+
 ## Abrirlo en IntelliJ IDEA
 
 `File → Open` y seleccionar la carpeta `app`. IntelliJ reconoce el `pom.xml` y
@@ -57,7 +72,8 @@ mapa y se vuelve con **Volver** o **Mapa**.
   MANT-PARAM   ÁREA     CLIENTE   └ ESTADISTICAS └ CONTINGENCIA
   ├ Parámetro General
   ├ Catálogo de Reclamo        ÁREA    ├ DATA ENTRY
-  ├ Catálogo de Producto               └ REPORTES
+  ├ Catálogo de Producto               ├ REPORTES
+  │                                    └ REVISIÓN
   ├ Catálogo de Problemas
   ├ Catálogo de Cliente        CLIENTE ├ DATA ENTRY
   ├ Catálogo de Protocolos             └ REPORTES
@@ -108,6 +124,45 @@ Estado de Reclamo implementa los tres casos que describe el informe: reclamo
 rechazado dentro del plazo de impugnación (con formulario para enviar a otra
 instancia), rechazado fuera del plazo (advertencia) y reclamo pendiente.
 
+## Flujo del reclamo
+
+El sistema es automático: ninguna decisión del flujo depende de que una
+persona la elija a mano. Une el modelo del entregable 2 (maestra de
+reclamos, parque de tickets, movimientos) con las reglas de este proyecto
+(validación, prioridad, motor de reglas, control de calidad).
+
+```
+Reclamo ──► Protocolo ──► Eventos ──► Pasos
+el caso      uno por tipo   Inspección,   acción, tiempo,
+             de reclamo     Solución...   operario, crítico
+                               │
+                               ├─ toma Tickets del parque (turnos de 10 min del operario)
+                               └─ cada paso ejecutado = Movimiento de Solución
+                                  (hora estimada y hora real)
+```
+
+1. **Registro y validación.** Nada viene preseleccionado; el cliente solo ve
+   lo que compró. Se revisa la compra (salvo Atención), los duplicados y la
+   garantía. El motor de reglas sugiere la solución con los datos reales.
+2. **Protocolo.** El tipo de problema da el protocolo (PR-FUNC, PR-ENTR...),
+   el área y la prioridad según el tipo de cliente.
+3. **Ticket.** El batch genera el parque de tickets de cada operario (lunes a
+   sábado de 9:00 a 18:00, sin feriados). Cada evento toma los tickets libres
+   y seguidos que necesita, del operario de menor carga, antes del límite de
+   atención. Si nadie llega a tiempo, igual se agenda y queda marcado
+   *Sin capacidad dentro del plazo*.
+4. **Atención.** El operario ejecuta los pasos uno por uno; cada paso queda
+   como Movimiento de Solución. Al completar un evento, el siguiente toma sus
+   tickets solo. El reclamo lleva pasos completados sobre el total.
+5. **Control de calidad.** Revisión automática (pasos críticos, plazo,
+   solución sugerida); el supervisor (S01) revisa observados, una muestra al
+   azar y los rechazos; el cliente confirma si quedó solucionado.
+
+Recorrido de demo: Alexander (DNI 72119474) reclama "La cámara no funciona"
+del Samsung Galaxy A54 → se asigna solo a E01 → E01 inspecciona y resuelve →
+S01 o la revisión automática aprueba → Alexander confirma en Estado de
+Reclamo → Cerrado.
+
 ## Criterios que sigue el código
 
 - **Nada inventado.** Todos los datos salen del Excel o del informe. En
@@ -132,6 +187,8 @@ pe.tino.reclamos
 ├── repo/         Datos: catálogos sembrados desde el Excel y el informe
 │                 Prototipo: los datos que muestran las capturas del informe
 │                 Estado: lo que cambia durante la sesión, con oyentes
+│                 Reclamos, Validacion, Asignacion, ParqueTickets, Atencion,
+│                 Calidad: el flujo del reclamo, sin depender de la interfaz
 └── ui/
     ├── theme/    Tema: colores, tipografía y espaciado
     ├── components/  Grupo, Tabla, Formulario, PanelAncho, PanelBusqueda,

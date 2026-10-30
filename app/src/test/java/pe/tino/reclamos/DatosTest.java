@@ -2,6 +2,7 @@ package pe.tino.reclamos;
 
 import org.junit.jupiter.api.Test;
 import pe.tino.reclamos.repo.Datos;
+import pe.tino.reclamos.repo.Prototipo;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -24,9 +25,9 @@ class DatosTest {
 
     @Test
     void cadaTipoDeProblemaTieneAlMenosUnProblema() {
-        assertFalse(Datos.tiposDeProblema().isEmpty());
-        for (String tipo : Datos.tiposDeProblema()) {
-            assertFalse(Datos.problemasDe(tipo).isEmpty(), "sin problemas: " + tipo);
+        assertFalse(Prototipo.tiposDeProblema().isEmpty());
+        for (String tipo : Prototipo.tiposDeProblema()) {
+            assertFalse(Prototipo.problemasDe(tipo).isEmpty(), "sin problemas: " + tipo);
         }
     }
 
@@ -38,28 +39,21 @@ class DatosTest {
     }
 
     @Test
-    void elCatalogoDeBienesUsaTiposConocidos() {
-        Datos.catalogoBienes().forEach(f -> {
-            assertEquals(3, f.length);
-            assertTrue(Datos.TIPOS_BIEN.contains(f[0]), "tipo de bien desconocido: " + f[0]);
-            assertTrue(Datos.TIPOS_PROBLEMA_BIEN.contains(f[1]),
-                    "tipo de problema desconocido: " + f[1]);
-        });
-    }
-
-    @Test
     void cadaIndicadorDelPrototipoEstaListado() {
         assertEquals(11, Datos.INDICADORES.size());
         Datos.INDICADORES.forEach(i -> assertFalse(i.isBlank()));
     }
 
     @Test
-    void elCatalogoDeReclamosSoloUsaEstadosConocidos() {
-        Datos.catalogoReclamos().forEach(f -> {
+    void hayUnSoloCatalogoDeTiposDeProblemaYCadaUnoTieneNaturaleza() {
+        Prototipo.tipos().forEach(f -> {
             assertEquals(3, f.length);
-            assertTrue(f[2].equals("Habilitado") || f[2].equals("Deshabilitado"),
-                    "estado desconocido: " + f[2]);
+            assertTrue(Prototipo.NATURALEZAS.contains(f[1]), "naturaleza desconocida: " + f[1]);
+            assertTrue(f[2].equals("Habilitado") || f[2].equals("Deshabilitado"), "estado desconocido: " + f[2]);
         });
+        // todo problema cuelga de un tipo del catalogo
+        Prototipo.problemas().forEach(f -> assertTrue(
+                Prototipo.tipos().stream().anyMatch(t -> t[0].equals(f[0])), "tipo inexistente: " + f[0]));
     }
 
     @Test

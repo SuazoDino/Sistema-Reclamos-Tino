@@ -20,8 +20,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class EstadoTest {
 
-    private static Reclamo nuevoReclamo(String id) {
-        return new Reclamo(id, LocalDate.now(), Datos.CLIENTES.get(0), "COMP099",
+    private static ReclamoPrototipo nuevoReclamo(String id) {
+        return new ReclamoPrototipo(id, LocalDate.now(), Datos.CLIENTES.get(0), "COMP099",
                 Datos.PRODUCTOS.get(0), new Problema("Funcionamiento", "No enciende"),
                 Canal.WEB, EstadoReclamo.EN_COLA, "PostVenta", "Sin asignar",
                 null, null, "reclamo de prueba");
@@ -48,10 +48,10 @@ class EstadoTest {
 
     @Test @Order(3)
     void reemplazarActualizaSinDuplicar() {
-        Reclamo original = Estado.reclamos().get(0);
+        ReclamoPrototipo original = Estado.reclamos().get(0);
         int antes = Estado.reclamos().size();
 
-        Estado.reemplazar(original, new Reclamo(original.id(), original.fechaEmision(),
+        Estado.reemplazar(original, new ReclamoPrototipo(original.id(), original.fechaEmision(),
                 original.cliente(), original.nroCompra(), original.producto(), original.problema(),
                 original.canal(), EstadoReclamo.ATENDIDO, "Ventas", "E02",
                 LocalDate.now(), null, "atendido"));
