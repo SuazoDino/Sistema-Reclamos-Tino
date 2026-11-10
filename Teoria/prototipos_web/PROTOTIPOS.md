@@ -104,8 +104,8 @@ Cada pantalla con su Entrada, Función y Salida, en el mismo formato del entrega
 ## Online · Operativo · Cliente
 
 ### Data Entry · Formulario de Reclamo — `16_..._1_inicio`, `16_..._2_lleno`, `16_..._3_fecha_fija_de_atencion`, `16_..._4_validacion`
-- **Entrada:** DNI/RUC, canal, local, producto o servicio comprado, tipo de problema, problema, detalle (qué pasó) y pedido del consumidor.
-- **Función:** validar campos, compra, duplicados y garantía; clasificar como reclamo o queja; asignar área, especialista y fecha fija de atención.
+- **Entrada:** DNI/RUC, canal, local, producto o servicio comprado, tipo de problema, problema, detalle (qué pasó) y pedido del consumidor. Al escribir el DNI/RUC el sistema muestra las compras del cliente, que lee de la Tabla de Compras (la llena el proceso batch Carga de Compras desde el sistema de ventas).
+- **Función:** validar campos, compra, duplicados y garantía (fecha del comprobante + plazo del producto); pasar el caso por el motor de reglas y guardar la solución sugerida; clasificar como reclamo o queja; asignar área, especialista y fecha fija de atención.
 - **Salida:** número de reclamo y el mensaje "Su reclamo será atendido el [día] a las [hora] por [área]".
 
 ### Reportes · Estado de Reclamo — `17_cliente_estado_de_reclamo.png`

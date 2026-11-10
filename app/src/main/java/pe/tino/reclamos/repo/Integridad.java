@@ -152,7 +152,9 @@ public final class Integridad {
     }
 
     private static void revisarArea(String area, String quien, List<String> fallas) {
-        if (!Datos.catalogo("areas").habilitados().contains(area)) {
+        if (Prototipo.AREA_CALIDAD.equals(area)) {
+            fallas.add(quien + " no puede atenderse en " + area + ": esa área solo revisa");
+        } else if (!Datos.catalogo("areas").habilitados().contains(area)) {
             fallas.add(quien + " se atiende en " + area + ", que no está habilitada");
         } else if (Prototipo.empleadosDe(area).stream().noneMatch(e -> Prototipo.habilitado(e.id()))) {
             fallas.add(quien + " se atiende en " + area + ", que se quedaría sin especialistas habilitados");

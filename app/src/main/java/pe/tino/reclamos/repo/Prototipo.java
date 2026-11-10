@@ -120,6 +120,13 @@ public final class Prototipo {
 
     /** De menor a mayor: un operario puede hacer los pasos de su nivel y de los de abajo. */
     public static final List<String> TIPO_OPERARIO = List.of("Asistente", "Técnico", "Especialista");
+    /** Los tipos de empleado: los operarios y el supervisor de calidad, que revisa y no atiende eventos. */
+    public static final List<String> TIPO_EMPLEADO = List.of("Asistente", "Técnico", "Especialista", "Supervisor");
+
+    /** Supervisores de calidad habilitados: sin ninguno, nadie revisaria los rechazos. */
+    public static long supervisoresHabilitados() {
+        return EMPLEADOS.values().stream().filter(e -> e.esSupervisor() && habilitado(e.id())).count();
+    }
     public static final List<String> CRITICIDAD_ACCION = List.of("No Crítico", "Crítico");
 
     /**

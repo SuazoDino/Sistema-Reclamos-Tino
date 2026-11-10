@@ -32,10 +32,10 @@ public final class Datos {
                 "Áreas de la empresa que pueden recibir la asignación de un reclamo.",
                 new String[]{"Producción", "Ventas", "Operaciones", "PostVenta", "Logística",
                         "Área Técnica de Reparación e Inspección", "Área Especializada",
-                        "Gerencia de PostVenta"},
+                        "Gerencia de PostVenta", "Control de Calidad"},
                 new String[]{"PostVenta", "Ventas", "Logística",
                         "Área Técnica de Reparación e Inspección", "Área Especializada", "Operaciones",
-                        "Gerencia de PostVenta"});
+                        "Gerencia de PostVenta", "Control de Calidad"});
 
         cat("clientes", "Categorización de cliente",
                 "Segmentos de cliente reconocidos por el sistema.",

@@ -122,7 +122,10 @@ public final class Catalogos {
             if (i != Instancia.PRIMERA && i.resuelve().equals(area)) usos.add("la " + i.etiqueta().toLowerCase() + " instancia");
         }
         long empleados = Prototipo.empleadosDe(area).size();
-        if (empleados > 0) usos.add(empleados + (empleados == 1 ? " especialista" : " especialistas"));
+        if (Prototipo.AREA_CALIDAD.equals(area)) {
+            usos.add("la revisión de calidad");
+            if (empleados > 0) usos.add(empleados + (empleados == 1 ? " supervisor" : " supervisores"));
+        } else if (empleados > 0) usos.add(empleados + (empleados == 1 ? " especialista" : " especialistas"));
         return usos.isEmpty() ? "-" : String.join(", ", usos);
     }
 

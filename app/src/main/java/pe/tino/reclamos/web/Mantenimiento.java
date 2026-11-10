@@ -170,16 +170,20 @@ final class Mantenimiento {
         });
         EDITORES.put("empleados", () -> new Editor() {
             public List<String[]> filas() {
-                return Prototipo.EMPLEADOS.values().stream().filter(e -> !e.esSupervisor())
+                return Prototipo.EMPLEADOS.values().stream()
                         .map(e -> new String[]{e.id(), e.tipo(), e.area(),
                                 Prototipo.habilitado(e.id()) ? "Habilitado" : "Deshabilitado"}).toList();
             }
             public void agregar(List<String> v) {
                 if (v.size() != 4 || v.stream().anyMatch(String::isBlank)) throw new IllegalArgumentException("Complete todos los campos.");
                 String id = v.get(0).trim().toUpperCase();
-                if (!id.matches("E\\d{2}")) throw new IllegalArgumentException("El código tiene el formato E01.");
-                dominio(v.get(1), Prototipo.TIPO_OPERARIO, "Tipo de operario");
+                dominio(v.get(1), Prototipo.TIPO_EMPLEADO, "Tipo de empleado");
                 dominio(v.get(2), Datos.catalogo("areas").habilitados(), "Área");
+                boolean supervisor = "Supervisor".equals(v.get(1));
+                if (supervisor && !id.matches("S\\d{2}")) throw new IllegalArgumentException("El código de un supervisor tiene el formato S01.");
+                if (!supervisor && !id.matches("E\\d{2}")) throw new IllegalArgumentException("El código tiene el formato E01.");
+                if (supervisor != Prototipo.AREA_CALIDAD.equals(v.get(2))) throw new IllegalArgumentException(
+                        "El supervisor va en " + Prototipo.AREA_CALIDAD + ", y solo el supervisor va en esa área.");
                 dominio(v.get(3), ESTADOS, "Estado");
                 if (Prototipo.EMPLEADOS.containsKey(id)) throw new IllegalArgumentException("El código " + id + " ya existe.");
                 Prototipo.EMPLEADOS.put(id, new Empleado(id, v.get(1), v.get(2)));
@@ -230,7 +234,7 @@ final class Mantenimiento {
             Map.entry("area-por-tipo", "Área por tipo de problema"), Map.entry("pasos", "Pasos de protocolo"),
             Map.entry("garantias", "Garantías"), Map.entry("tiempos", "Tiempos de atención"),
             Map.entry("prioridad", "Regla de prioridad"), Map.entry("productos", "Productos"),
-            Map.entry("areas", "Áreas"), Map.entry("empleados", "Especialistas"),
+            Map.entry("areas", "Áreas"), Map.entry("empleados", "Empleados"),
             Map.entry("reglas", "Asignación de reglas"), Map.entry("condiciones", "Condiciones del motor"));
 
     /**
@@ -446,13 +450,15 @@ final class Mantenimiento {
                         nota(vivo(alta(estado(tabla("Áreas", List.of("Área", "Estado", "La usa"), null), 1),
                                 campo("Área")), "areas"),
                                 "Un área que está en uso no se puede deshabilitar: dejaría reclamos sin quién los atienda."),
-                        nota(vivo(alta(filtros(estado(tabla("Especialistas por área",
-                                List.of("Código", "Tipo de operario", "Área", "Estado"), null), 3), 2),
-                                campo("Código"), campo("Tipo de operario", Prototipo.TIPO_OPERARIO),
+                        nota(vivo(alta(filtros(estado(tabla("Empleados por área",
+                                List.of("Código", "Tipo de empleado", "Área", "Estado"), null), 3), 2),
+                                campo("Código"), campo("Tipo de empleado", Prototipo.TIPO_EMPLEADO),
                                 campo("Área", areas), campo("Estado", ESTADOS)), "empleados"),
-                                "Un especialista deshabilitado (vacaciones, descanso médico) deja de recibir reclamos. "
+                                "Un empleado deshabilitado (vacaciones, descanso médico) deja de recibir reclamos. "
                                         + "El tipo de operario decide qué eventos puede atender: "
-                                        + "Asistente < Técnico < Especialista.")),
+                                        + "Asistente < Técnico < Especialista. El Supervisor (código S01, área "
+                                        + Prototipo.AREA_CALIDAD + ") no atiende eventos: revisa los rechazos, "
+                                        + "los observados y la muestra de calidad. Siempre debe quedar uno habilitado.")),
                 seccion("Generalidades del sistema",
                         mapa("tipo", "parametros", "titulo", "Parámetros del sistema",
                                 "columnas", List.of("Parámetro", "Valor", "Unidad", "Qué cambia en el sistema"),

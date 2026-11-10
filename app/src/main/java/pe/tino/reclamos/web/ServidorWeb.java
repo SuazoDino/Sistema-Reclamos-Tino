@@ -309,6 +309,7 @@ public final class ServidorWeb {
     private static Object revision(String id) {
         Empleado e = empleado(id);
         if (!e.esSupervisor()) throw new IllegalArgumentException("Solo un supervisor de calidad puede revisar (pruebe con S01).");
+        if (!Prototipo.habilitado(e.id())) throw new IllegalArgumentException(e.id() + " está deshabilitado.");
         return mapa("muestraCada", Calidad.muestraCada(),
                 "reclamos", Calidad.paraSupervisor().stream().map(ServidorWeb::reclamo).toList());
     }
@@ -379,7 +380,9 @@ public final class ServidorWeb {
     }
 
     private static void supervisor(String id) {
-        if (!empleado(id).esSupervisor()) throw new IllegalArgumentException("Solo un supervisor puede revisar.");
+        Empleado e = empleado(id);
+        if (!e.esSupervisor()) throw new IllegalArgumentException("Solo un supervisor puede revisar.");
+        if (!Prototipo.habilitado(e.id())) throw new IllegalArgumentException(e.id() + " está deshabilitado.");
     }
 
     /* ---------------- parque de tickets ---------------- */

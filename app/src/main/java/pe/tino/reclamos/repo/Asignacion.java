@@ -111,6 +111,12 @@ public final class Asignacion {
      * las reparta a mano.
      */
     public static String cambiarEstado(String id, boolean habilitar, String usuario) {
+        Prototipo.Empleado emp = Prototipo.EMPLEADOS.get(id);
+        if (!habilitar && emp != null && emp.esSupervisor() && Prototipo.habilitado(id)
+                && Prototipo.supervisoresHabilitados() <= 1) {
+            throw new IllegalArgumentException("No se puede deshabilitar a " + id
+                    + ": es el único supervisor habilitado y nadie revisaría los rechazos.");
+        }
         String detalle = Integridad.aplicar(usuario, "Parámetro General",
                 (habilitar ? "Habilitar" : "Deshabilitar") + " especialista " + id, () -> {
                     Prototipo.habilitar(id, habilitar);
