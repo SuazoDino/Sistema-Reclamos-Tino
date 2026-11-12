@@ -89,13 +89,13 @@ EVENTO: GRABA PASO(RC, NumPaso, FecPaso, FecFinPaso)
 Todo lo decide el sistema: el cliente solo llena el formulario.
 
 ```
-EVENTO: REGISTRA RECLAMO(Documento, Canal, Local, Objeto, Problema, Detalle, Pedido)
-  OPERACIÓN.- VALIDA-COMPRA(Documento, Objeto)
-     MÉTODO.- LEE-COMPRAS(Documento)                    → Tabla de Compras, por índice alterno
+EVENTO: REGISTRA RECLAMO(Documento, Canal, Local, CodCompra, Problema, Detalle, Pedido)
+  OPERACIÓN.- VALIDA-COMPRA(Documento, CodCompra)
+     MÉTODO.- LEE-COMPRAS(Documento)                    → Tabla de Compras, por índice alterno: lo que compró el cliente
      MÉTODO.- CHK-GARANTIA(FecComprobante, Plazo)       → plazo del Catálogo de Productos (memoria)
-  OPERACIÓN.- VALIDA-DUPLICADO(Documento, Objeto, Problema)
+  OPERACIÓN.- VALIDA-DUPLICADO(Documento, CodCompra, Problema)
      MÉTODO.- LEE-CONSULTA(Documento)                   → un reclamo abierto igual no se repite
-  OPERACIÓN.- LEE-CLIENTE(Documento)                    → si no existe, se da de alta en la Maestra Cliente
+  OPERACIÓN.- LEE-CLIENTE(Documento)                    → por la clave alterna Documento; si no existe, alta en la Maestra Cliente
   OPERACIÓN.- EVALUA-REGLAS(Problema, Compra, TipoCliente)
      MÉTODO.- MOTOR(CondicionInicial)                   → solución sugerida (Catálogo de Reglas, memoria)
   OPERACIÓN.- CONSIGUE(CodReclamo)                      → RC-aaaa-nnnn
@@ -107,7 +107,7 @@ EVENTO: REGISTRA RECLAMO(Documento, Canal, Local, Objeto, Problema, Detalle, Ped
   SALIDA.- "Su reclamo será atendido el [día] a las [hora] por [área]"
 ```
 
-- La prioridad (Catálogo de Reclamo × tipo de cliente) y el límite de atención (SLA, parámetro de módulo) se calculan en memoria y se graban en la maestra.
+- La prioridad (Catálogo de Reclamo × tipo de cliente) y el límite de atención (horas del Catálogo de Cliente según la prioridad) se calculan en memoria y se graban en la maestra.
 - Si no hay turno disponible, la transacción se deshace entera y no queda un reclamo sin cita.
 
 ## 2. Programar Evento (rutina interna)
@@ -116,7 +116,7 @@ La usan el registro, el fin de un evento y la impugnación. Así la fecha y el r
 
 ```
 EVENTO: PROGRAMA EVENTO(RC, Evento, Protocolo)
-  OPERACIÓN.- ELIGE-OPERARIO(Area, TipoOperario)
+  OPERACIÓN.- ELIGE-OPERARIO(Area, TipoEmpleado)
      MÉTODO.- LEE-OPERARIOS(Area)                       → habilitados, menor CargaActual
   OPERACIÓN.- BUSCA-TICKETS(CodOperario, Desde, Duracion)
      MÉTODO.- LEE-PARQUE(CodOperario + FecInicio)       → primeros tickets libres, por índice alterno
@@ -127,7 +127,7 @@ EVENTO: PROGRAMA EVENTO(RC, Evento, Protocolo)
   OPERACIÓN.- ACT-MAE-OPERARIO(CargaActual + 1)
 ```
 
-- La duración de la cita es la suma de los tiempos de los pasos del evento (Catálogo de Protocolos, memoria).
+- La duración de la cita es la suma de los tiempos de los pasos del evento (Catálogo de Pasos, memoria).
 - El PRR se consigue antes de tomar los tickets porque el ticket guarda `NroMovReclamo`: así el ticket apunta al movimiento que lo tomó.
 
 ## 3. Data Entry Área — Atender Reclamo (pantalla 14)
@@ -220,12 +220,12 @@ El libro pide "procesar pocas tablas" en las transacciones muy usadas. Los catá
 | Transacción | Tablas en disco que lee o graba |
 |---|---|
 | Registrar Reclamo | Compras, Maestra Cliente, Maestra Reclamos, Mov. Reclamos, Parque de Ticket, Maestra Operarios, Consulta Reclamos Cliente |
-| Graba paso | Maestra Reclamos, Mov. Soluciones, Consulta Reclamos Cliente |
-| Cambio de estado / revisión | Maestra Reclamos, Mov. Reclamos, Consulta Reclamos Cliente |
+| Graba paso | Maestra Reclamos, Mov. Soluciones, Maestra Cliente (para el Documento), Consulta Reclamos Cliente |
+| Cambio de estado / revisión | Maestra Reclamos, Mov. Reclamos, Maestra Cliente (para el Documento), Consulta Reclamos Cliente |
 | Consulta Estado de Reclamo | Consulta Reclamos Cliente (1 acceso) |
 | Operación de configuración | El catálogo que cambia, Diario de Operaciones |
 
-La transacción más usada (graba paso) toca solo 3 tablas. El registro es la que más tablas toca, pero ocurre una sola vez por reclamo.
+La transacción más usada (graba paso) toca 4 tablas, y de la Maestra Cliente solo lee (por `CodCliente`, 1 acceso) el `Documento`, que es la clave de la Consulta Reclamos Cliente. El registro es la que más tablas toca, pero ocurre una sola vez por reclamo.
 
 ## Diferencias con el entregable 2
 

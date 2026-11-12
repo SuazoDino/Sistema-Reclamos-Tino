@@ -4,7 +4,7 @@
 
 Del entregable 2, que es la base del proyecto:
 
-- **Un catálogo por pantalla de catálogo.** El entregable 2 diseña el Catálogo de Reclamo, el de Protocolos y el de Problemas: cada uno corresponde a una pantalla de Mantenimiento de Parámetros. Aquí se sigue la misma idea, con las pantallas que tiene este prototipo.
+- **Un catálogo por pantalla de catálogo.** Toda pantalla "Catálogo de …" de Mantenimiento de Parámetros tiene su tabla (salvo Políticas, cuyos datos son columnas de Productos). El entregable 2 diseña el Catálogo de Reclamo, el de Protocolos y el de Problemas: cada uno corresponde a una pantalla de Mantenimiento de Parámetros. Aquí se sigue la misma idea, con las pantallas que tiene este prototipo.
 
 Del libro del profesor:
 
@@ -12,31 +12,34 @@ Del libro del profesor:
 - **Un dominio fijo no necesita tabla.** En la integridad de dominio (pp. 179–183), los valores fijos de una columna se controlan con `check` o `create domain`. Alta/Media/Baja, los estados del reclamo o las instancias no los configura la gerencia: son dominios.
 - **Una FK necesita su entidad.** La clave foránea es "un atributo que siendo almacenado en una entidad, también es almacenado en otra, pero en esta última tiene la categoría de clave" (3.1.1.4, p. 37). Si una maestra o un catálogo guarda `CodArea`, `CodLocal` o `CodBien` como FK, tiene que existir la tabla donde ese código es clave.
 - **Parámetro de módulo no es tabla.** El libro define parámetro como "variable que permanece fija, para definir escenarios posibles del comportamiento del módulo", junto a la Entrada, la Función y la Salida del módulo (p. 12). La jornada, los plazos, los SLA o los feriados son parámetros de los módulos que los usan, no entidades con clave. Residen en memoria (p. 170).
-- **Relación 1 a n como arreglo** (p. 47): la relación se guarda como vector dentro del registro principal, con su número de elementos en el mismo registro. Así no hacen falta tablas de relación.
+- **Relación 1 a n como arreglo** (pp. 40, 47): la relación se guarda como atributo múltiple (vector) dentro del registro principal, con su número de elementos en el mismo registro.
+- **Cuándo vector y cuándo fila propia.** Vector solo cuando cada elemento es una **lista de códigos** que ninguna otra tabla referencia (los bienes a los que aplica un problema, los tipos que admite un servicio, las prioridades por tipo de cliente). Fila propia cuando el elemento tiene **datos propios y otra tabla lo apunta**: los pasos del protocolo (Catálogo de Pasos), que el Movimiento de Soluciones referencia.
 - **Memoria residente** (p. 170) y **organización indexada**, con el IC de la terna online elegido por menor residuo. Las tablas con vector de largo variable dan su longitud como `(MAX, MODA)` (pp. 79, 90–91).
 
-## Resultado: 9 catálogos
+## Resultado: 11 catálogos
 
 | # | Catálogo | Pantalla del prototipo | Equivalente en el entregable 2 |
 |---|---|---|---|
 | 1 | Catálogo de Reclamo | 03 Catálogo de reclamos y eventos | Catálogo Reclamo |
 | 2 | Catálogo de Problemas | 06 Catálogo de problemas | Catálogo Problemas |
-| 3 | Catálogo de Protocolos | 08 Catálogo de protocolos | Catálogo Protocolos |
-| 4 | Catálogo de Productos | 04 Catálogo de producto + 10 Catálogo de políticas | (el entregable usaba `CodProducto` como FK) |
-| 5 | Catálogo de Servicios | 05 Catálogo de servicios | — (el entregable no tenía servicios) |
-| 6 | Catálogo de Reglas | 09 Catálogo de reglas | — (tenía la pantalla, sin tabla) |
-| 7 | Catálogo de Áreas | 02 Parámetro general | — (el entregable guardaba el área como texto en Operarios) |
-| 8 | Catálogo de Locales | 11 Parámetros de atención | — |
-| 9 | Catálogo de Clasificación | 04 Catálogo de producto (pestaña Clasificación) | — |
+| 3 | Catálogo de Protocolos | 08 Catálogo de protocolos (lista Protocolos) | Catálogo Protocolos |
+| 4 | Catálogo de Pasos | 08 Catálogo de protocolos (lista Pasos del evento) | (iba dentro de Catálogo Protocolos) |
+| 5 | Catálogo de Productos | 04 Catálogo de producto + 10 Catálogo de políticas | (el entregable usaba `CodProducto` como FK) |
+| 6 | Catálogo de Servicios | 05 Catálogo de servicios | — (el entregable no tenía servicios) |
+| 7 | Catálogo de Reglas | 09 Catálogo de reglas | — (tenía la pantalla, sin tabla) |
+| 8 | Catálogo de Áreas | 02 Parámetro general | — (el entregable guardaba el área como texto en Operarios) |
+| 9 | Catálogo de Locales | 11 Parámetros de atención | — |
+| 10 | Catálogo de Clasificación | 04 Catálogo de producto (pestaña Clasificación) | — |
+| 11 | Catálogo de Cliente | 07 Catálogo de cliente | Catálogo de Clientes (pantalla) |
 
 Las otras pantallas no necesitan tabla propia:
 
 | Pantalla / lista | Dónde queda |
 |---|---|
-| 07 Catálogo de cliente (tipos y su plazo) | Tipo de cliente: dominio `check`. Plazos (SLA): parámetro de módulo |
 | 10 Catálogo de políticas (garantías) | Columnas de garantía Legal y Comercial del Catálogo de Productos |
 | Jornada, plazo legal, muestra de calidad, garantía por defecto (02) | Parámetros de módulo |
-| SLA, feriados, días de impugnación y área de cada instancia (11) | Parámetros de módulo |
+| Feriados, días de impugnación y área de cada instancia (11) | Parámetros de módulo |
+| Tiempos de atención por tipo de cliente (11) | Columnas del Catálogo de Cliente (los mismos de la pantalla 07) |
 | Canales (11) | Dominio `check` |
 | Área por tipo, regla de prioridad, regla por tipo (09 y 11) | Columnas del Catálogo de Reclamo |
 | Estados, instancias, variables del motor (solo consulta) | Dominios `check` |
@@ -47,7 +50,6 @@ Las otras pantallas no necesitan tabla propia:
 
 | Dominio | Valores |
 |---|---|
-| Tipo de cliente | 1 Nuevo, 2 Ordinario, 3 Vip, 4 SuperVip |
 | Tipo de empleado | 1 Asistente, 2 Técnico, 3 Especialista, 4 Supervisor |
 | Estado del reclamo | Registrado, Asignado, En atención, En revisión, Resuelto, Rechazado, Impugnado, Cerrado… |
 | Instancia | 1 Primera, 2 Segunda, 3 Tercera |
@@ -75,9 +77,10 @@ El tipo de problema (Funcionamiento, Entrega, Cobranza, Atención) con todo lo q
 | Nombre | Catálogo de Reclamo |
 |---|---|
 | Organización | indexada |
-| Longitud Registro | (37, 37) |
+| Longitud Registro | (41, 41) |
 | IC | 512 |
-| Capacidad | (10, 19*12*5) |
+| Clave | (2, 0) |
+| Capacidad | (10, 19*24*11) |
 
 | Columnas | Data Type | Length | PK | FK |
 |---|---|---|---|---|
@@ -85,14 +88,14 @@ El tipo de problema (Funcionamiento, Entrega, Cobranza, Atención) con todo lo q
 | TipoProblema | char | 20 | | |
 | CodNaturaleza | int | 1 | | |
 | CodArea | int | 2 | | X |
-| CodProtocolo | int | 3 | | X |
+| CodProtocolo | char | 7 | | X |
 | CodCondicionInicial | char | 4 | | X |
 | PrioridadNuevo | int | 1 | | |
 | PrioridadOrdinario | int | 1 | | |
 | PrioridadVip | int | 1 | | |
 | PrioridadSuperVip | int | 1 | | |
 | Flg_Activo | int | 1 | | |
-| | | **37** | | |
+| | | **41** | | |
 
 - `CodArea`: área responsable (Catálogo de Áreas).
 - `CodCondicionInicial`: condición donde arranca el motor de reglas. Vacía si el tipo no pasa por el motor.
@@ -105,7 +108,8 @@ El tipo de problema (Funcionamiento, Entrega, Cobranza, Atención) con todo lo q
 | Organización | indexada |
 | Longitud Registro | (71, 51) |
 | IC | 1536 |
-| Capacidad | (60, 19*12*5) |
+| Clave | (3, 0) |
+| Capacidad | (60, 19*8*28) |
 
 | Columnas | Data Type | Length | PK | FK |
 |---|---|---|---|---|
@@ -121,44 +125,69 @@ El tipo de problema (Funcionamiento, Entrega, Cobranza, Atención) con todo lo q
 
 ## 3. Catálogo de Protocolos
 
-Un registro por protocolo, con sus pasos en un arreglo (libro, p. 47). Así `CodProtocolo` es la clave y las tablas que lo usan como FK (Catálogo de Reclamo, Maestra Reclamos, Movimiento de Reclamos) apuntan a una clave de verdad: "en esta última tiene la categoría de clave" (3.1.1.4, p. 37).
+Un registro por protocolo. Es la lista "Protocolos" de la pantalla 08. Hay uno por tipo de problema; el Catálogo de Reclamo dice qué protocolo usa cada tipo.
 
 | Nombre | Catálogo de Protocolos |
 |---|---|
 | Organización | indexada |
-| Longitud Registro | (532, 124) |
+| Longitud Registro | (38, 38) |
 | IC | 512 |
-| Capacidad | (10, 19*12*5) |
+| Clave | (7, 0) |
+| Capacidad | (10, 19*24*12) |
 
 | Columnas | Data Type | Length | PK | FK |
 |---|---|---|---|---|
-| CodProtocolo | int | 3 | X | |
-| Protocolo | char | 17 | | |
-| NroPasos | int | 2 | | |
-| Pasos: vector de 1 a 10 (depende de NroPasos) | | 51 c/u | | |
-| · CodEvento | int | 2 | | |
-| · OrdenEvento | int | 1 | | |
-| · NumPaso | int | 2 | | |
-| · Accion | char | 40 | | |
-| · TiempoMaxMin | int | 4 | | |
-| · CodTipoOperario | int | 1 | | |
-| · Flg_Critico | int | 1 | | |
-| | | **(532, 124)** | | |
+| CodProtocolo | char | 7 | X | |
+| Protocolo | char | 30 | | |
+| Flg_Activo | int | 1 | | |
+| | | **38** | | |
 
-- `Protocolo`: nombre del protocolo; hay uno por tipo de problema (Funcionamiento, Entrega, Cobranza, Atención).
-- Cada elemento del vector es un paso: a qué evento pertenece (`CodEvento`, dominio), en qué orden va ese evento dentro del protocolo (`OrdenEvento`), el número de paso dentro del evento (`NumPaso`), la acción, su tiempo máximo en minutos, el tipo de operario mínimo y si es crítico.
-- Un paso se identifica por protocolo + evento + `NumPaso`, que es justo lo que guarda el Movimiento de Soluciones (el protocolo y el evento los saca de su `NroMovReclamo`).
-- Longitud de registro (MAX, MODA) = (532, 124): parte fija de 22 bytes y 51 por paso. MAX = 22 + 10 × 51; MODA = 22 + 2 × 51, porque lo típico son 2 pasos (hoy: Funcionamiento 4, Entrega 2, Cobranza 2, Atención 1). Como en el ejemplo del libro (p. 91), el registro máximo puede ser mayor que el IC; el IC se elige con la moda.
-- La duración de cada cita (suma de los tiempos de los pasos de un evento) y el operario mínimo de cada evento se calculan, no se guardan.
+- `CodProtocolo`: `PR-FUNC`, `PR-ENTR`, `PR-COBR`, `PR-ATEN`, igual que en el prototipo. Es la clave a la que apuntan como FK el Catálogo de Pasos, el Catálogo de Reclamo, la Maestra Reclamos y el Movimiento de Reclamos.
 
-## 4. Catálogo de Productos
+## 4. Catálogo de Pasos
+
+Un registro por paso del protocolo. Es la lista "Pasos del evento" de la pantalla 08. Cada paso tiene sus propios datos (acción, tiempo, tipo de empleado, criticidad), por eso es una fila y no un elemento de un vector.
+
+| Nombre | Catálogo de Pasos |
+|---|---|
+| Organización | indexada |
+| Longitud Registro | (65, 65) |
+| IC | 1024 |
+| Clave | (4, 0) |
+| Clave alterna | CodProtocolo + CodEvento + NumPaso (11, 4) |
+| Capacidad | (50, 19*12*15) |
+
+| Columnas | Data Type | Length | PK | FK |
+|---|---|---|---|---|
+| CodPasoProtocolo | int | 4 | X | |
+| CodProtocolo | char | 7 | | X |
+| CodEvento | int | 2 | | |
+| NumPaso | int | 2 | | |
+| OrdenEvento | int | 1 | | |
+| Accion | char | 43 | | |
+| TiempoMaxMin | int | 4 | | |
+| CodTipoEmpleado | int | 1 | | |
+| Flg_Critico | int | 1 | | |
+| | | **65** | | |
+
+- `CodPasoProtocolo`: correlativo, la clave primaria (una sola columna).
+- `CodProtocolo`: FK al Catálogo de Protocolos. `CodEvento`: dominio (1 Inspección, 2 Solución, 3 Seguimiento). `NumPaso`: número del paso dentro del evento.
+- **Clave alterna** `CodProtocolo + CodEvento + NumPaso` `(11, 4)`: es la búsqueda que hacen los procesos. Con ella se leen en orden todos los pasos de un protocolo o de un evento, y el Movimiento de Soluciones encuentra la acción de un paso (el protocolo y el evento los saca de su `NroMovReclamo`, y guarda `NumPaso`).
+- `OrdenEvento`: en qué orden se atiende el evento dentro del protocolo; es la columna Orden de la pantalla "Eventos del protocolo" y le dice a PROGRAMA EVENTO cuál sigue.
+- `CodTipoEmpleado`: el tipo de empleado mínimo que pide el paso; mismo dominio y mismo nombre que en la Maestra Operarios.
+- `Accion` es de 43: la acción más larga de hoy mide 38 ("Aplicar la solución y probar el equipo") y con 43 el residuo del IC es 0.
+- La duración de cada cita (suma de los `TiempoMaxMin` de los pasos de un evento) y el operario mínimo de cada evento (el mayor `CodTipoEmpleado` de sus pasos) se calculan, no se guardan.
+- Capacidad: hoy hay 9 pasos (Funcionamiento 4, Entrega 2, Cobranza 2, Atención 1); se estiman 50.
+
+## 5. Catálogo de Productos
 
 | Nombre | Catálogo de Productos |
 |---|---|
 | Organización | indexada |
 | Longitud Registro | (51, 51) |
 | IC | 1536 |
-| Capacidad | (5000, 19*12*5) |
+| Clave | (7, 0) |
+| Capacidad | (5000, 19*8*28) |
 
 | Columnas | Data Type | Length | PK | FK |
 |---|---|---|---|---|
@@ -176,14 +205,15 @@ Un registro por protocolo, con sus pasos en un arreglo (libro, p. 47). Así `Cod
 - Garantías (pantalla 10, Catálogo de Políticas): plazo en días y si está habilitada, para la Legal y la Comercial. Vale la mayor habilitada; si ninguna lo está, la garantía por defecto.
 - Sin `Stock` (lo lleva el almacén) y sin `Estado` (quien ya compró debe poder reclamar mientras tenga garantía).
 
-## 5. Catálogo de Servicios
+## 6. Catálogo de Servicios
 
 | Nombre | Catálogo de Servicios |
 |---|---|
 | Organización | indexada |
 | Longitud Registro | (40, 36) |
 | IC | 512 |
-| Capacidad | (20, 19*12*5) |
+| Clave | (3, 0) |
+| Capacidad | (20, 19*24*13) |
 
 | Columnas | Data Type | Length | PK | FK |
 |---|---|---|---|---|
@@ -199,7 +229,7 @@ Un registro por protocolo, con sus pasos en un arreglo (libro, p. 47). Así `Cod
 - Longitud de registro (MAX, MODA) = (40, 36): lo típico son 2 tipos admitidos.
 - El servicio sí lleva estado: uno que ya no se ofrece deja de aparecer en el formulario.
 
-## 6. Catálogo de Reglas
+## 7. Catálogo de Reglas
 
 La cadena de condiciones del motor de reglas.
 
@@ -208,7 +238,8 @@ La cadena de condiciones del motor de reglas.
 | Organización | indexada |
 | Longitud Registro | (94, 94) |
 | IC | 512 |
-| Capacidad | (30, 19*12*5) |
+| Clave | (4, 0) |
+| Capacidad | (30, 19*24*5) |
 
 | Columnas | Data Type | Length | PK | FK |
 |---|---|---|---|---|
@@ -225,14 +256,15 @@ La cadena de condiciones del motor de reglas.
 
 - `TipoSalidaV` / `TipoSalidaF`: 1 = ir a otra condición, 2 = aplicar una acción. El destino es el código de otra condición (FK a esta misma tabla) o el de una acción (dominio).
 
-## 7. Catálogo de Áreas
+## 8. Catálogo de Áreas
 
 | Nombre | Catálogo de Áreas |
 |---|---|
 | Organización | indexada |
 | Longitud Registro | (43, 43) |
 | IC | 512 |
-| Capacidad | (15, 19*12*5) |
+| Clave | (2, 0) |
+| Capacidad | (15, 19*24*11) |
 
 | Columnas | Data Type | Length | PK | FK |
 |---|---|---|---|---|
@@ -243,26 +275,27 @@ La cadena de condiciones del motor de reglas.
 
 - La usan como FK la Maestra Operarios y el Catálogo de Reclamo. Un área en uso no se puede deshabilitar. "Control de Calidad" es el área de los supervisores.
 
-## 8. Catálogo de Locales
+## 9. Catálogo de Locales
 
 | Nombre | Catálogo de Locales |
 |---|---|
 | Organización | indexada |
-| Longitud Registro | (74, 74) |
+| Longitud Registro | (64, 64) |
 | IC | 1024 |
-| Capacidad | (20, 19*12*5) |
+| Clave | (3, 0) |
+| Capacidad | (20, 19*12*15) |
 
 | Columnas | Data Type | Length | PK | FK |
 |---|---|---|---|---|
 | CodLocal | int | 3 | X | |
 | Local | char | 30 | | |
-| Direccion | char | 40 | | |
+| Direccion | char | 30 | | |
 | Flg_Activo | int | 1 | | |
-| | | **74** | | |
+| | | **64** | | |
 
 - La usa como FK la Maestra Reclamos (local donde se registró un reclamo presencial).
 
-## 9. Catálogo de Clasificación
+## 10. Catálogo de Clasificación
 
 Los cuatro niveles (Segmento › Familia › Clase › Bien) en una sola tabla: cada fila apunta a su nivel superior.
 
@@ -271,7 +304,8 @@ Los cuatro niveles (Segmento › Familia › Clase › Bien) en una sola tabla: 
 | Organización | indexada |
 | Longitud Registro | (69, 69) |
 | IC | 512 |
-| Capacidad | (200, 19*12*5) |
+| Clave | (4, 0) |
+| Capacidad | (200, 19*24*7) |
 
 | Columnas | Data Type | Length | PK | FK |
 |---|---|---|---|---|
@@ -286,6 +320,34 @@ Los cuatro niveles (Segmento › Familia › Clase › Bien) en una sola tabla: 
 
 ---
 
+## 11. Catálogo de Cliente
+
+Los tipos de cliente y su plazo de atención por prioridad: es la pantalla 07 "Catálogo de Cliente" de Mantenimiento de Parámetros.
+
+| Nombre | Catálogo de Cliente |
+|---|---|
+| Organización | indexada |
+| Longitud Registro | (30, 30) |
+| IC | 512 |
+| Clave | (2, 0) |
+| Capacidad | (10, 19*24*15) |
+
+| Columnas | Data Type | Length | PK | FK |
+|---|---|---|---|---|
+| CodTipoCliente | int | 2 | X | |
+| TipoCliente | char | 15 | | |
+| HorasAlta | int | 4 | | |
+| HorasMedia | int | 4 | | |
+| HorasBaja | int | 4 | | |
+| Flg_Activo | int | 1 | | |
+| | | **30** | | |
+
+- `CodTipoCliente`: 1 Nuevo, 2 Ordinario, 3 Vip, 4 SuperVip. Es FK en la Maestra Cliente.
+- `HorasAlta`, `HorasMedia`, `HorasBaja`: el plazo de atención (SLA) del tipo de cliente según la prioridad del reclamo, en horas (por ejemplo, Vip: 8, 48 y 120). Con él y la prioridad se calcula `FecLimiteAtencion` al registrar el reclamo.
+- Las "consideraciones para categorizar al cliente" (valor medio de compras, iteración de compras) son parámetros del batch de categorización (BAT-03), no de esta tabla.
+
+---
+
 ## Parámetros de módulo (no son tablas)
 
 Según el libro (p. 12), cada módulo tiene Entrada, Función, Salida y **Parámetro**. Estos valores son parámetros de los módulos que los usan: la gerencia los cambia en Parámetro General (02) y Parámetros de Atención (11), y residen en memoria (p. 170).
@@ -296,7 +358,6 @@ Según el libro (p. 12), cada módulo tiene Entrada, Función, Salida y **Parám
 | Plazo legal de respuesta | 15 días hábiles | Cálculo del límite de atención |
 | Muestra de calidad | 1 de cada 10 | Revisión de calidad |
 | Garantía por defecto | 365 días | Validación de garantía |
-| SLA por tipo de cliente y prioridad | 12 valores en horas | Cálculo del límite de atención |
 | Días de impugnación y área de cada instancia | por instancia | Impugnación |
 | Feriados | lista de fechas | Asignación, generación del parque de tickets |
 | Horario de cada canal | por canal | Registro del reclamo |
@@ -309,22 +370,24 @@ Si la tabla entera cabe en un IC de 512 (`N × (RL + 3) + 4 ≤ 512`), se usa 51
 
 | Catálogo | RL | N | ¿Cabe en 512? | r con 512 / 1024 / 1536 | IC elegido |
 |---|---|---|---|---|---|
-| Reclamo | 37 | 10 | Sí (404) | — | **512** |
+| Reclamo | 41 | 10 | Sí (444) | — | **512** (11 RL) |
 | Problemas | 51 (moda) | 60 | No | 22 / 48 / **20** | **1536** (28 RL) |
-| Protocolos | 124 (moda) | 10 | No | **0** / 4 / 8 | **512** (4 RL) |
+| Protocolos | 38 | 10 | Sí (414) | — | **512** (12 RL) |
+| Pasos | 65 | 50 | No (3404) | 32 / **0** / 36 | **1024** (15 RL) |
 | Productos | 51 | 5000 | No | 22 / 48 / **20** | **1536** (28 RL) |
 | Servicios | 36 (moda) | 20 | No | **1** / 6 / 11 | **512** (13 RL) |
 | Reglas | 94 | 30 | No | **23** / 50 / 77 | **512** (5 RL) |
 | Áreas | 43 | 15 | No (694) | **2** / 8 / 14 | **512** (11 RL) |
-| Locales | 74 | 20 | No | 46 / **19** / 69 | **1024** (13 RL) |
+| Locales | 64 | 20 | No | 39 / **15** / 58 | **1024** (15 RL) |
 | Clasificación | 69 | 200 | No | **4** / 12 / 20 | **512** (7 RL) |
+| Cliente | 30 | 10 | Sí (334) | — | **512** (15 RL) |
 
 ---
 
 ## Diferencias con el entregable 2
 
 - Se mantienen sus tres catálogos: Reclamo, Problemas y Protocolos.
-- El Catálogo de Protocolos pasa de una fila por paso a **una fila por protocolo con sus pasos en un arreglo**. Con una fila por paso, `CodProtocolo` no era clave de ninguna tabla y no podía ser FK en las demás.
+- El Catálogo de Protocolos del entregable 2 (una fila por paso, sin una clave propia del protocolo) se divide en dos: **Catálogo de Protocolos** (un registro por protocolo, clave `CodProtocolo`) y **Catálogo de Pasos** (un registro por paso, clave `CodPasoProtocolo`). Así cada tabla tiene una sola columna como PK y `CodProtocolo` es FK a una clave de verdad.
 - Se agregan Productos, Servicios y Reglas porque este prototipo tiene esas pantallas y sus datos necesitan dónde guardarse.
 - Se agregan Áreas, Locales y Clasificación porque otras tablas las usan como FK (libro 3.1.1.4). El entregable 2 guardaba el área como texto en Operarios.
 - Lo demás de las pantallas 02 y 11 son parámetros de módulo (libro p. 12), no tablas.
@@ -334,4 +397,4 @@ Si la tabla entera cabe en un IC de 512 (`N × (RL + 3) + 4 ≤ 512`), se usa 51
 
 - La regla "si toda la tabla cabe en un IC de 512, se usa 512" sale del criterio de economía del libro, no está escrita en él.
 - Las N y las MODAS son estimaciones.
-- Se mantuvo la notación del AC `19*12*5`.
+- El AC se calcula como en el resto del diseño (ver «Cálculo del AC» en `TABLAS_MAESTRAS.md`).

@@ -11,7 +11,7 @@ Igual que en el entregable 2, cada histórico tiene la **misma estructura que su
 
 ## Cuándo pasa un reclamo al histórico
 
-Lo hace el batch **BAT-05 Depuración de reclamos cerrados**: los reclamos cerrados hace más de un año salen de la Maestra Reclamos y sus movimientos salen de las tablas relativas. Se mueven **cuando el reclamo se cierra, no cada día**, porque mientras está abierto la cadena simple necesita todos sus movimientos en la tabla relativa. Al liberar esas posiciones, las tablas online no crecen sin límite.
+Lo hace el batch **BAT-05 Depuración de reclamos cerrados**: los reclamos cerrados hace más de un año salen de la Maestra Reclamos y sus movimientos salen de las tablas relativas. Se mueven **cuando el reclamo se cierra, no cada día**, porque mientras está abierto la cadena simple necesita todos sus movimientos en la tabla relativa. `NroMov` es un correlativo que nunca se reutiliza (`ADD-PRR(+1)`), así que sigue siendo único en el histórico y sirve como su clave. Las posiciones que deja libres la depuración se recuperan en la reorganización periódica de la tabla (libro, p. 93: "después de este periodo deberá ser sometido a una reorganización periódica").
 
 Son tres históricos: uno por cada tabla que se depura.
 
@@ -24,45 +24,43 @@ Los reclamos cerrados que salen de la Maestra Reclamos.
 | Nombre | H_Reclamos |
 |---|---|
 | Organización | secuencial |
-| Longitud Registro | (350, 190) |
+| Longitud Registro | (340, 180) |
 | IC | 4096 |
-| Capacidad | (600000, 19*12*5) |
+| Capacidad | (600000, 19*3*22) |
 
 | Columnas | Data Type | Length | PK | FK |
 |---|---|---|---|---|
 | CodReclamo | char | 12 | X | |
 | FecApertura | int | 12 | | |
 | CodCliente | char | 8 | | X |
-| TipoObjeto | int | 1 | | |
-| CodObjeto | char | 7 | | X |
+| CodCompra | int | 7 | | X |
 | CodProblema | int | 3 | | X |
 | CodCanal | int | 1 | | |
 | CodLocal | int | 3 | | X |
-| Comprobante | char | 13 | | |
 | CodInstancia | int | 1 | | |
 | CodPrioridad | int | 1 | | |
 | CodEstado | int | 2 | | |
 | CodOperario | char | 3 | | X |
-| CodProtocolo | int | 3 | | X |
+| CodProtocolo | char | 7 | | X |
 | FecLimiteAtencion | int | 12 | | |
 | TotalPasos | int | 3 | | |
 | PasosCompletados | int | 3 | | |
 | Detalle | varchar | 150 | | |
 | Pedido | varchar | 100 | | |
 | FecCierre | int | 12 | | |
-| | | **350** | | |
+| | | **340** | | |
 
 - La misma estructura que la Maestra Reclamos, sin `PtrUltMov` ni `PtrUltPaso` y con `FecCierre`.
-- MODA = 190, con el mismo supuesto de la maestra (detalle de ~60 caracteres y pedido de ~30).
+- MODA = 180, con el mismo supuesto de la maestra (detalle de ~60 caracteres y pedido de ~30).
 
 ## 2. Histórica de Movimientos de Reclamos
 
 | Nombre | H_MovimientoReclamos |
 |---|---|
 | Organización | secuencial |
-| Longitud Registro | 152 |
-| IC | 3584 |
-| Capacidad | (3600000, 19*12*5) |
+| Longitud Registro | (156, 156) |
+| IC | 3072 |
+| Capacidad | (3600000, 19*4*19) |
 
 | Columnas | Data Type | Length | PK | FK |
 |---|---|---|---|---|
@@ -73,14 +71,14 @@ Los reclamos cerrados que salen de la Maestra Reclamos.
 | CodInstancia | int | 1 | | |
 | CodOperario | char | 3 | | X |
 | CodEvento | int | 2 | | |
-| CodProtocolo | int | 3 | | X |
+| CodProtocolo | char | 7 | | X |
 | FecMov | int | 12 | | |
 | FecInicioEstimado | int | 12 | | |
 | FecFinEstimado | int | 12 | | |
 | CodResultado | int | 1 | | |
 | Nota | int | 2 | | |
 | Observacion | char | 80 | | |
-| | | **152** | | |
+| | | **156** | | |
 
 - La misma estructura que el Movimiento de Reclamos, sin `PtrMovAnterior`.
 
@@ -89,9 +87,9 @@ Los reclamos cerrados que salen de la Maestra Reclamos.
 | Nombre | H_MovimientoSoluciones |
 |---|---|
 | Organización | secuencial |
-| Longitud Registro | 74 |
+| Longitud Registro | (74, 74) |
 | IC | 4096 |
-| Capacidad | (4500000, 19*12*5) |
+| Capacidad | (4500000, 19*3*53) |
 
 | Columnas | Data Type | Length | PK | FK |
 |---|---|---|---|---|
@@ -115,15 +113,15 @@ Terna batch: `#RL = (IC − 4) / (RL + 3)`, `r = (IC − 4) − #RL·(RL + 3)`. 
 
 | Tabla | RL | r con 3072 / 3584 / 4096 | IC elegido |
 |---|---|---|---|
-| H_Reclamos | 190 (moda) | 173 / 106 / **39** | **4096** (21 RL) |
-| H_MovimientoReclamos | 152 | 123 / **15** / 62 | **3584** (23 RL) |
+| H_Reclamos | 180 (moda) | 140 / 103 / **66** | **4096** (22 RL) |
+| H_MovimientoReclamos | 156 | **47** / 82 / 117 | **3072** (19 RL) |
 | H_MovimientoSoluciones | 74 | 65 / 38 / **11** | **4096** (53 RL) |
 
 ## Diferencias con el entregable 2
 
 - El entregable 2 tenía dos históricos (de los dos movimientos). Aquí se agrega **H_Reclamos** porque el batch BAT-05 saca de la maestra los reclamos cerrados, y deben quedar guardados en algún lado.
 - Sin punteros, porque en un archivo secuencial no significan nada.
-- IC calculado en la terna batch (el entregable usaba 4096 sin cálculo; en dos de las tres tablas el cálculo también da 4096).
+- IC calculado en la terna batch (el entregable usaba 4096 sin cálculo).
 
 ## Pendiente de confirmar con el profesor
 

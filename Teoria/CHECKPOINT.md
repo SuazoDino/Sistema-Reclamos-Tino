@@ -25,9 +25,10 @@ Son tablas pequeñas (una fila por job y paso) que el proceso **lee y actualiza 
 | Nombre | Checkpoint |
 |---|---|
 | Organización | indexada |
-| Longitud Registro | 73 |
+| Longitud Registro | (73, 73) |
 | IC | 1536 |
-| Capacidad | (20, 19*12*5) |
+| Clave | (8, 0) |
+| Capacidad | (20, 19*8*20) |
 
 | Columnas | Data Type | Length | PK | FK |
 |---|---|---|---|---|
@@ -54,9 +55,10 @@ Son tablas pequeñas (una fila por job y paso) que el proceso **lee y actualiza 
 | Nombre | Archivos_Checkpoint |
 |---|---|
 | Organización | indexada |
-| Longitud Registro | 25 |
+| Longitud Registro | (25, 25) |
 | IC | 512 |
-| Capacidad | (10, 19*12*5) |
+| Clave | (8, 0) |
+| Capacidad | (10, 19*24*18) |
 
 | Columnas | Data Type | Length | PK | FK |
 |---|---|---|---|---|

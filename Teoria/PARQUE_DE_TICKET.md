@@ -18,7 +18,9 @@ Los turnos de atención de cada operario. Un ticket es un turno, no un reclamo. 
 | Organización | indexada |
 | Longitud Registro | (32, 32) |
 | IC | 1024 |
-| Capacidad | (500000, 19*12*5) |
+| Clave | (8, 0) |
+| Clave alterna | CodOperario + FecInicio (15, 8) |
+| Capacidad | (500000, 19*12*29) |
 
 | Columnas | Data Type | Length | PK | FK |
 |---|---|---|---|---|

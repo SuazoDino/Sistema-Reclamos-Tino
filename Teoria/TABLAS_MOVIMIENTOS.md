@@ -60,9 +60,9 @@ Parque de Ticket ── NroMovReclamo ──► el movimiento "Programación" de
 | Nombre | Movimiento de Reclamos |
 |---|---|
 | Organización | relativa |
-| Longitud Registro | (160, 160) |
+| Longitud Registro | (164, 164) |
 | IC | 512 |
-| Capacidad | (3600000, 19*12*5) |
+| Capacidad | (3600000, 19*24*3) |
 
 | Columnas | Data Type | Length | PK | FK |
 |---|---|---|---|---|
@@ -73,7 +73,7 @@ Parque de Ticket ── NroMovReclamo ──► el movimiento "Programación" de
 | CodInstancia | int | 1 | | |
 | CodOperario | char | 3 | | X |
 | CodEvento | int | 2 | | |
-| CodProtocolo | int | 3 | | X |
+| CodProtocolo | char | 7 | | X |
 | FecMov | int | 12 | | |
 | FecInicioEstimado | int | 12 | | |
 | FecFinEstimado | int | 12 | | |
@@ -81,7 +81,7 @@ Parque de Ticket ── NroMovReclamo ──► el movimiento "Programación" de
 | Nota | int | 2 | | |
 | Observacion | char | 80 | | |
 | PtrMovAnterior | int | 8 | | |
-| | | **160** | | |
+| | | **164** | | |
 
 - `CodTipoMov`: Registro, Programación de evento, Cambio de estado, Impugnación, Revisión, Conformidad, Cierre.
 - `CodEstado`: estado en que queda el reclamo después del movimiento.
@@ -104,7 +104,7 @@ Cada paso del protocolo ejecutado, con la hora estimada y la real. Con él se mi
 | Organización | relativa |
 | Longitud Registro | (82, 82) |
 | IC | 1024 |
-| Capacidad | (4500000, 19*12*5) |
+| Capacidad | (4500000, 19*12*12) |
 
 | Columnas | Data Type | Length | PK | FK |
 |---|---|---|---|---|
@@ -120,7 +120,7 @@ Cada paso del protocolo ejecutado, con la hora estimada y la real. Con él se mi
 | | | **82** | | |
 
 - `NroMovReclamo`: la Programación del evento al que pertenece el paso. De ahí salen el reclamo, el evento y el protocolo, así que no se repiten.
-- El operario sale del ticket. La acción sale del Catálogo de Protocolos (protocolo + evento + `NumPaso`).
+- El operario sale del ticket. La acción sale del Catálogo de Pasos, por su clave alterna (protocolo + evento + `NumPaso`).
 - Capacidad: unos 3 pasos por evento × 2.5 eventos por reclamo × 600000 reclamos.
 
 ---
@@ -131,10 +131,10 @@ Fórmula: `#RL = (IC − 4) / (RL + 3)` (parte entera), `r = (IC − 4) − #RL�
 
 | Tabla | RL | IC = 512 / 1024 / 1536 | IC elegido |
 |---|---|---|---|
-| Mov. Reclamos | 160 | r = **19** / 42 / 65 | **512** (3 RL) |
+| Mov. Reclamos | 164 | r = **7** / 18 / 29 | **512** (3 RL) |
 | Mov. Soluciones | 82 | r = 83 / **0** / 2 | **1024** (12 RL) |
 
-`Observacion` es de 80 y no de 100 por este cálculo: con 100 el registro mide 180 bytes y el menor residuo de la terna sube a 68 bytes por IC.
+`Observacion` es de 80 y no de 100 por este cálculo: con 100 el registro mide 184 bytes y el menor residuo de la terna sube a 36 bytes por IC.
 
 ---
 
@@ -152,4 +152,4 @@ Fórmula: `#RL = (IC − 4) / (RL + 3)` (parte entera), `r = (IC − 4) − #RL�
 ## Pendiente de confirmar con el profesor
 
 - Las N de capacidad son estimaciones: unos 6 movimientos y 7.5 pasos por reclamo, sobre 600000 reclamos.
-- Se mantuvo la notación del AC `19*12*5`.
+- El AC se calcula como en el resto del diseño (ver «Cálculo del AC» en `TABLAS_MAESTRAS.md`).

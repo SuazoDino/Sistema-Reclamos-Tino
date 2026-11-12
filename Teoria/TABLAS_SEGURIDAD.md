@@ -27,7 +27,8 @@ Cada perfil con las pantallas que puede abrir y los permisos que tiene.
 | Organización | indexada |
 | Longitud Registro | (53, 53) |
 | IC | 512 |
-| Capacidad | (10, 19*12*5) |
+| Clave | (2, 0) |
+| Capacidad | (10, 19*24*9) |
 
 | Columnas | Data Type | Length | PK | FK |
 |---|---|---|---|---|
@@ -51,7 +52,7 @@ La bitácora del módulo de Auditoría. Registra **todo cambio a la configuraci�
 | Organización | secuencial |
 | Longitud Registro | (548, 252) |
 | IC | 3072 |
-| Capacidad | (20000, 19*12*5) |
+| Capacidad | (20000, 19*4*12) |
 
 | Columnas | Data Type | Length | PK | FK |
 |---|---|---|---|---|
@@ -101,4 +102,4 @@ Terna online para las indexadas y terna batch para la secuencial. `#RL = (IC −
 
 - Si las tablas de Seguridad se evalúan en esta entrega o solo las del núcleo del negocio.
 - **Inicio de sesión (identificar y autenticar, p. 177):** queda para una etapa posterior. Cuando se haga, se agregará una Tabla de Usuarios (código, perfil, clave cifrada) y `Usuario` pasará a ser FK a ella. Mientras tanto, la Tabla de Perfiles define qué pantallas corresponden a cada perfil.
-- Se mantuvo la notación del AC `19*12*5`.
+- El AC se calcula como en el resto del diseño (ver «Cálculo del AC» en `TABLAS_MAESTRAS.md`).

@@ -20,7 +20,7 @@
 - El cliente escribe su **DNI/RUC**, pero la Maestra Cliente está indexada por `CodCliente`.
 - Por cada reclamo hay que leer la Maestra Reclamos.
 - La **fecha programada** (la cita) no está en la maestra: está en el movimiento *Programación de evento*, así que hay que retroceder por la cadena simple de cada reclamo.
-- El nombre del producto o servicio está en otro catálogo.
+- El producto o servicio reclamado está en la Tabla de Compras (por `CodCompra`), y su nombre en otro catálogo.
 
 **Accesos a disco para un cliente típico (2 reclamos):**
 
@@ -28,8 +28,9 @@
 |---|---|---|
 | Ubicar al cliente por DNI/RUC | 1 | 1 (es la clave) |
 | Leer cada reclamo en la Maestra Reclamos | 2 | 0 |
+| Leer la compra de cada reclamo en la Tabla de Compras | 2 | 0 |
 | Recorrer la cadena hasta la Programación (unos 3 movimientos por reclamo) | 6 | 0 |
-| **Total** | **9** | **1** |
+| **Total** | **11** | **1** |
 
 La Consulta de Reclamos (pantalla 12) no es crítica: la usa poca gente y cada vez abre un solo reclamo. Se resuelve con la Maestra Reclamos y su cadena, sin redundancia.
 
@@ -81,7 +82,7 @@ Un registro por cliente, con la clave que escribe el cliente (`Documento`) y un 
 ### Cómo se mantiene al día
 
 - La consulta debe mostrar el estado **real**: un cliente que acaba de recibir su cita no puede ver un dato de ayer. Por eso, a diferencia de lo que el libro recomienda en general ("generalmente son generadas en procesos nocturnos de lotes", p. 49), el elemento del vector **se actualiza en línea**, en la misma transacción que actualiza la Maestra Reclamos (registro, programación de evento, paso completado, cambio de estado).
-- Le cuesta 1 escritura más a esas transacciones, pero ahorra 8 lecturas a cada consulta, y la consulta se hace muchas más veces que las transacciones.
+- Le cuesta 1 escritura más a esas transacciones, pero ahorra 10 lecturas a cada consulta, y la consulta se hace muchas más veces que las transacciones.
 - La regeneración completa desde la Maestra Reclamos queda como proceso batch de control (se verá en la entrega del módulo batch).
 
 ## Cálculo del IC
@@ -147,4 +148,4 @@ Comprobación con la fórmula general:
 
 - Si acepta que la tabla suplementaria se actualice en línea (para que el cliente vea su estado real) en lugar de solo en el batch nocturno.
 - N = 400000 clientes con reclamos es una estimación.
-- Aquí el AC se calcula para un IC de 1536 (`19*8*7`); en las demás tablas se mantuvo la notación `19*12*5` del entregable 2.
+- El AC se calcula igual en todas las tablas (ver «Cálculo del AC» en `TABLAS_MAESTRAS.md`).
